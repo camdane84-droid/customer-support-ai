@@ -3,23 +3,26 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { getConversations } from '@/lib/api/conversations';
+import { useAuth } from '@/lib/context/AuthContext';
 import type { Conversation } from '@/lib/api/supabase';
 import { MessageSquare, Clock, TrendingUp } from 'lucide-react';
 
 export default function DashboardPage() {
+  const { business } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // For now, we'll hardcode the business ID from your test data
-  const TEMP_BUSINESS_ID = '53224ed3-5629-41fa-b8f3-9ecf399f73cf';
-
   useEffect(() => {
-    loadData();
-  }, []);
+    if (business) {
+      loadData();
+    }
+  }, [business]);
 
   async function loadData() {
+    if (!business) return;
+
     try {
-      const convos = await getConversations(TEMP_BUSINESS_ID);
+      const convos = await getConversations(business.id);
       setConversations(convos);
     } catch (error) {
       console.error('Failed to load data:', error);
@@ -28,7 +31,7 @@ export default function DashboardPage() {
     }
   }
 
-  if (loading) {
+  if (loading || !business) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-full">
@@ -48,7 +51,7 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Welcome back! Here's what's happening with your customer support.
+            Welcome back to {business.name}! Here's what's happening with your customer support.
           </p>
         </div>
 

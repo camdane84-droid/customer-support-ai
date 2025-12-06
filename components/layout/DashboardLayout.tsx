@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import { Menu, X, MessageSquare, BookOpen, Settings, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { signOut } from '@/lib/auth';
+import { useAuth } from '@/lib/context/AuthContext';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -15,6 +17,17 @@ const navigation = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+  const { user, business } = useAuth();
+  const router = useRouter();
+
+  async function handleLogout() {
+    try {
+      await signOut();
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  }
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -74,15 +87,32 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </nav>
 
         {/* User section at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-              <span className="text-sm font-medium text-gray-700">U</span>
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3 flex-1 min-w-0">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-sm font-medium text-white">
+                  {business?.name?.charAt(0).toUpperCase() || 'U'}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {business?.name || 'User'}
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  {user?.email || ''}
+                </p>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">User Name</p>
-              <p className="text-xs text-gray-500 truncate">user@example.com</p>
-            </div>
+            <button
+              onClick={handleLogout}
+              className="text-gray-400 hover:text-gray-600 p-2"
+              title="Logout"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
