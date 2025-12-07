@@ -19,10 +19,14 @@ export default function SignupPage() {
     setError('');
     setLoading(true);
 
+    console.log('Attempting signup with:', { email, businessName });
+
     try {
       await signUp(email, password, businessName);
+      console.log('✅ Signup successful, redirecting...');
       router.push('/dashboard');
     } catch (err: any) {
+      console.error('❌ Signup error:', err);
       setError(err.message || 'Failed to sign up');
     } finally {
       setLoading(false);

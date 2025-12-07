@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import { Mail, Instagram, Phone, Search } from 'lucide-react';
 import type { Conversation } from '@/lib/api/supabase';
 import { formatDistanceToNow } from 'date-fns';
@@ -13,6 +16,19 @@ export default function ConversationList({
   selectedConversation,
   onSelectConversation,
 }: ConversationListProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filter conversations based on search
+  const filteredConversations = conversations.filter((convo) => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      convo.customer_name.toLowerCase().includes(query) ||
+      convo.customer_email?.toLowerCase().includes(query) ||
+      convo.channel.toLowerCase().includes(query)
+    );
+  });
+
   const getChannelIcon = (channel: string) => {
     switch (channel) {
       case 'email':
@@ -45,7 +61,7 @@ export default function ConversationList({
       <div className="p-4 border-b border-gray-200 bg-white">
         <h2 className="text-lg font-semibold text-gray-900">Inbox</h2>
         <p className="text-sm text-gray-500 mt-1">
-          {conversations.length} {conversations.length === 1 ? 'conversation' : 'conversations'}
+          {filteredConversations.length} {filteredConversations.length === 1 ? 'conversation' : 'conversations'}
         </p>
       </div>
 
@@ -55,21 +71,45 @@ export default function ConversationList({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search conversations..."
             className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="mt-2 text-xs text-blue-600 hover:text-blue-700"
+          >
+            Clear search
+          </button>
+        )}
       </div>
 
       {/* Conversation List */}
       <div className="flex-1 overflow-y-auto bg-gray-50">
-        {conversations.length === 0 ? (
+        {filteredConversations.length === 0 ? (
           <div className="p-6 text-center text-gray-500 text-sm">
-            <p>No conversations yet</p>
-            <p className="text-xs mt-2">New messages will appear here</p>
+            {searchQuery ? (
+              <>
+                <p>No conversations match "{searchQuery}"</p>
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="mt-2 text-blue-600 hover:text-blue-700 underline"
+                >
+                  Clear search
+                </button>
+              </>
+            ) : (
+              <>
+                <p>No conversations yet</p>
+                <p className="text-xs mt-2">New messages will appear here</p>
+              </>
+            )}
           </div>
         ) : (
-          conversations.map((conversation) => {
+          filteredConversations.map((conversation) => {
             const isSelected = selectedConversation?.id === conversation.id;
             return (
               <button

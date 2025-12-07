@@ -1,22 +1,28 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import LoadingScreen from '@/components/LoadingScreen';
+import DashboardSkeleton from '@/components/inbox/DashboardSkeleton';
 import { getConversations } from '@/lib/api/conversations';
 import { useAuth } from '@/lib/context/AuthContext';
 import type { Conversation } from '@/lib/api/supabase';
-import { MessageSquare, Clock, TrendingUp } from 'lucide-react';
+import { MessageSquare, Clock, TrendingUp, Zap } from 'lucide-react';
 
 export default function DashboardPage() {
-  const { business } = useAuth();
+  const { business, loading: authLoading } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (business) {
       loadData();
+    } else if (!authLoading) {
+      // Auth is done loading but no business - stop showing loading screen
+      setLoading(false);
     }
-  }, [business]);
+  }, [business, authLoading]);
 
   async function loadData() {
     if (!business) return;
@@ -31,11 +37,34 @@ export default function DashboardPage() {
     }
   }
 
-  if (loading || !business) {
+  if (authLoading) {
+    return <LoadingScreen message="Loading your dashboard..." />;
+  }
+
+  if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-full">
-          <div className="text-gray-500">Loading...</div>
+        <DashboardSkeleton />
+      </DashboardLayout>
+    );
+  }
+
+  if (!business) {
+    return (
+      <DashboardLayout>
+        <div className="p-6 flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">No Business Found</h2>
+            <p className="text-gray-600 mb-4">
+              We couldn't find your business account. Please contact support.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Refresh Page
+            </button>
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -54,6 +83,28 @@ export default function DashboardPage() {
             Welcome back to {business.name}! Here's what's happening with your customer support.
           </p>
         </div>
+
+        {/* Welcome Banner for New Users */}
+        {totalConversations === 0 && (
+          <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
+            <h2 className="text-2xl font-bold mb-2">Welcome to {business.name}! 🎉</h2>
+            <p className="mb-4">Get started by testing your inbox with simulated messages.</p>
+            <div className="flex space-x-3">
+              <Link
+                href="/test-email"
+                className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium"
+              >
+                Test Email Feature
+              </Link>
+              <Link
+                href="/dashboard/inbox"
+                className="px-4 py-2 bg-blue-600 border-2 border-white text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              >
+                Go to Inbox
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -85,6 +136,45 @@ export default function DashboardPage() {
               </div>
               <TrendingUp className="w-10 h-10 text-purple-500" />
             </div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Link
+              href="/dashboard/inbox"
+              className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <MessageSquare className="w-8 h-8 text-blue-600" />
+              <div>
+                <p className="font-medium text-gray-900">View Inbox</p>
+                <p className="text-sm text-gray-500">{openConversations} open</p>
+              </div>
+            </Link>
+
+            <Link
+              href="/dashboard/analytics"
+              className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <TrendingUp className="w-8 h-8 text-purple-600" />
+              <div>
+                <p className="font-medium text-gray-900">View Analytics</p>
+                <p className="text-sm text-gray-500">Track performance</p>
+              </div>
+            </Link>
+
+            <Link
+              href="/test-email"
+              className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <Zap className="w-8 h-8 text-orange-600" />
+              <div>
+                <p className="font-medium text-gray-900">Test Features</p>
+                <p className="text-sm text-gray-500">Simulate emails</p>
+              </div>
+            </Link>
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, MessageSquare, BookOpen, Settings, LayoutDashboard } from 'lucide-react';
+import { Menu, X, MessageSquare, BookOpen, Settings, LayoutDashboard, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from '@/lib/auth';
@@ -10,8 +10,10 @@ import { useAuth } from '@/lib/context/AuthContext';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Inbox', href: '/dashboard/inbox', icon: MessageSquare },
+  { name: 'Analytics', href: '/dashboard/analytics', icon: TrendingUp },
   { name: 'Knowledge Base', href: '/dashboard/knowledge', icon: BookOpen },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+  { name: '🧪 Test Email', href: '/test-email', icon: MessageSquare },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

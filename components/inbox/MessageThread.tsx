@@ -3,9 +3,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, Loader2 } from 'lucide-react';
 import type { Conversation, Message } from '@/lib/api/supabase';
-import { getConversationMessages, createMessage } from '@/lib/api/conversations';
+import { getConversationMessages, createMessage, retryFailedMessage } from '@/lib/api/conversations';
 import { supabase } from '@/lib/api/supabase';
 import { formatDistanceToNow } from 'date-fns';
+import AISuggestion from './AISuggestion';
+import CannedResponsePicker from './CannedResponsePicker';
+import MessageStatusBadge from './MessageStatusBadge';
+import Toast from '@/components/ui/Toast';
 
 interface MessageThreadProps {
   conversation: Conversation;
@@ -17,12 +21,16 @@ export default function MessageThread({ conversation, businessId }: MessageThrea
   const [loading, setLoading] = useState(true);
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
+  const [retryingMessageId, setRetryingMessageId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info' | 'warning'; message: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  console.log('[MessageThread] Rendered with businessId:', businessId);
 
   useEffect(() => {
     loadMessages();
 
-    // Subscribe to new messages in this conversation
+    // Subscribe to new messages and message updates in this conversation
     const channel = supabase
       .channel(`messages:${conversation.id}`)
       .on(
@@ -36,6 +44,21 @@ export default function MessageThread({ conversation, businessId }: MessageThrea
         (payload) => {
           const newMessage = payload.new as Message;
           setMessages((prev) => [...prev, newMessage]);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=eq.${conversation.id}`,
+        },
+        (payload) => {
+          const updatedMessage = payload.new as Message;
+          setMessages((prev) =>
+            prev.map((msg) => (msg.id === updatedMessage.id ? updatedMessage : msg))
+          );
         }
       )
       .subscribe();
@@ -87,6 +110,39 @@ export default function MessageThread({ conversation, businessId }: MessageThrea
       alert('Failed to send message. Please try again.');
     } finally {
       setSending(false);
+    }
+  }
+
+  async function handleRetryMessage(messageId: string) {
+    try {
+      setRetryingMessageId(messageId);
+      await retryFailedMessage(messageId);
+      setToast({ type: 'success', message: 'Message sent successfully!' });
+      // Status will update via realtime subscription
+    } catch (error: any) {
+      console.error('Failed to retry message:', error);
+
+      // Show more helpful error message
+      const errorMessage = error.message || 'Failed to retry message';
+
+      if (errorMessage.includes('Email service not configured')) {
+        setToast({
+          type: 'warning',
+          message: 'Email service not configured. Please contact your administrator to set up SendGrid.',
+        });
+      } else if (errorMessage.includes('not found')) {
+        setToast({
+          type: 'error',
+          message: 'Message information not found. Please refresh the page and try again.',
+        });
+      } else {
+        setToast({
+          type: 'error',
+          message: `Failed to retry message: ${errorMessage}`,
+        });
+      }
+    } finally {
+      setRetryingMessageId(null);
     }
   }
 
@@ -147,9 +203,33 @@ export default function MessageThread({ conversation, businessId }: MessageThrea
                     {message.sender_name || (isCustomer ? 'Customer' : 'You')}
                   </p>
                   <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
-                  <p className={`text-xs mt-2 ${isCustomer ? 'text-gray-500' : 'text-blue-100'}`}>
-                    {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
-                  </p>
+                  <div className={`flex items-center justify-between mt-2 ${isCustomer ? 'text-gray-500' : 'text-blue-100'}`}>
+                    <p className="text-xs">
+                      {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
+                    </p>
+                    {!isCustomer && message.status && (
+                      <MessageStatusBadge
+                        status={message.status}
+                        errorMessage={message.error_message}
+                      />
+                    )}
+                  </div>
+                  {!isCustomer && message.status === 'failed' && (
+                    <button
+                      onClick={() => handleRetryMessage(message.id)}
+                      disabled={retryingMessageId === message.id}
+                      className="mt-2 text-xs text-blue-200 hover:text-white underline disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                    >
+                      {retryingMessageId === message.id ? (
+                        <>
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                          <span>Retrying...</span>
+                        </>
+                      ) : (
+                        <span>Retry</span>
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
             );
@@ -158,42 +238,69 @@ export default function MessageThread({ conversation, businessId }: MessageThrea
         <div ref={messagesEndRef} />
       </div>
 
+      {/* AI Suggestion */}
+      <AISuggestion
+        conversationId={conversation.id}
+        businessId={businessId}
+        onUseSuggestion={(suggestion) => setReplyText(suggestion)}
+      />
+
       {/* Reply Box */}
       <div className="border-t border-gray-200 bg-white p-4">
-        <form onSubmit={handleSendMessage} className="flex space-x-3">
-          <textarea
-            value={replyText}
-            onChange={(e) => setReplyText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSendMessage(e);
-              }
-            }}
-            placeholder="Type your reply... (Press Enter to send, Shift+Enter for new line)"
-            rows={3}
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
-            disabled={sending}
-          />
-          <button
-            type="submit"
-            disabled={!replyText.trim() || sending}
-            className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center space-x-2 h-fit"
-          >
-            {sending ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <>
-                <Send className="w-5 h-5" />
-                <span className="hidden sm:inline">Send</span>
-              </>
-            )}
-          </button>
+        <form onSubmit={handleSendMessage} className="space-y-3">
+          <div className="flex space-x-3">
+            <textarea
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage(e);
+                }
+              }}
+              placeholder="Type your reply... (Press Enter to send, Shift+Enter for new line)"
+              rows={3}
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
+              disabled={sending}
+            />
+            <button
+              type="submit"
+              disabled={!replyText.trim() || sending}
+              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center space-x-2 h-fit"
+            >
+              {sending ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  <Send className="w-5 h-5" />
+                  <span className="hidden sm:inline">Send</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Quick Reply Button */}
+          <div className="relative">
+            <CannedResponsePicker
+              businessId={businessId}
+              onSelect={(content) => setReplyText(content)}
+            />
+          </div>
+
+          <p className="text-xs text-gray-500">
+            💡 Tip: Press Enter to send, Shift+Enter for new line
+          </p>
         </form>
-        <p className="text-xs text-gray-500 mt-2">
-          💡 Tip: Press Enter to send, Shift+Enter for new line
-        </p>
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }

@@ -5,7 +5,17 @@
       "Bash(npm install)",
       "Bash(mkdir:*)",
       "Bash(npm install:*)",
-      "Bash(gh:*)"
+      "Bash(gh:*)",
+      "WebSearch",
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebFetch(domain:docs.claude.com)",
+      "Bash(vercel --prod:*)",
+      "Bash(npm run dev:*)",
+      "Bash(node update-business-email.js:*)",
+      "Bash(taskkill:*)",
+      "Bash(cat:*)",
+      "Bash(node check-business.js:*)",
+      "Bash(psql:*)"
     ],
     "deny": [],
     "ask": []

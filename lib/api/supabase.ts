@@ -47,6 +47,10 @@ export type Message = {
   is_ai_suggested: boolean;
   metadata: Record<string, any> | null;
   created_at: string;
+  status?: string;
+  sent_at?: string | null;
+  failed_at?: string | null;
+  error_message?: string | null;
 };
 
 export type KnowledgeBase = {
