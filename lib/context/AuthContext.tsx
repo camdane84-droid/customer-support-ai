@@ -1,9 +1,8 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/api/supabase';
-import { getCurrentUser, getCurrentBusiness } from '@/lib/auth';
 import type { User } from '@supabase/supabase-js';
 import type { Business } from '@/lib/api/supabase';
 
@@ -11,134 +10,249 @@ interface AuthContextType {
   user: User | null;
   business: Business | null;
   loading: boolean;
+  refreshBusiness: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   business: null,
   loading: true,
+  refreshBusiness: async () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [business, setBusiness] = useState<Business | null>(null);
   const [loading, setLoading] = useState(true);
+  const initializingRef = useRef(false);
   const router = useRouter();
 
-  useEffect(() => {
-    // Check active session
-    checkUser();
+  // Fetch business for a user email - with retry logic
+  const fetchBusiness = useCallback(async (email: string, retries = 3): Promise<Business | null> => {
+    console.log('📡 Fetching business for:', email);
 
-    // Fallback timeout to prevent infinite loading
-    const loadingTimeout = setTimeout(() => {
-      if (loading) {
-        console.warn('⚠️ Auth loading timeout - forcing loading to false');
-        setLoading(false);
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const { data, error } = await supabase
+          .from('businesses')
+          .select('*')
+          .eq('email', email)
+          .maybeSingle();
+
+        if (error) {
+          console.error(`❌ Attempt ${attempt} - Error fetching business:`, error);
+
+          // If it's an RLS or permission error, wait and retry
+          if (error.code === 'PGRST301' || error.message?.includes('permission')) {
+            if (attempt < retries) {
+              console.log(`⏳ Waiting before retry ${attempt + 1}...`);
+              await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+              continue;
+            }
+          }
+
+          // For other errors, don't retry
+          return null;
+        }
+
+        if (data) {
+          console.log('🏢 Business found:', data.name);
+          return data;
+        } else {
+          console.log('🏢 No business found for email');
+          return null;
+        }
+      } catch (err) {
+        console.error(`❌ Attempt ${attempt} - Exception:`, err);
+        if (attempt < retries) {
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        }
       }
-    }, 5000); // 5 second timeout
+    }
+
+    return null;
+  }, []);
+
+  // Create business for user - with duplicate handling
+  const createBusiness = useCallback(async (email: string, businessName?: string): Promise<Business | null> => {
+    const name = businessName || `${email.split('@')[0]}'s Business`;
+    console.log('📝 Creating business:', name, 'for:', email);
+
+    try {
+      const { data, error } = await supabase
+        .from('businesses')
+        .insert({
+          email: email,
+          name: name,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        // Check if it's a duplicate - if so, fetch the existing one
+        if (error.code === '23505') {
+          console.log('⚠️ Business already exists, fetching...');
+          return fetchBusiness(email);
+        }
+        console.error('❌ Failed to create business:', error);
+        return null;
+      }
+
+      console.log('✅ Business created:', data.name);
+      return data;
+    } catch (err) {
+      console.error('❌ Exception creating business:', err);
+      return null;
+    }
+  }, [fetchBusiness]);
+
+  // Load user and business
+  const loadUserAndBusiness = useCallback(async (currentUser: User) => {
+    console.log('🔄 Loading business for user:', currentUser.email);
+
+    if (!currentUser.email) {
+      console.error('❌ User has no email');
+      setBusiness(null);
+      return;
+    }
+
+    // Small delay to allow session to propagate (helps with RLS)
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // First try to fetch existing business
+    let biz = await fetchBusiness(currentUser.email);
+
+    // If no business exists, create one
+    if (!biz) {
+      console.log('📝 No business found, creating one...');
+      const businessName = currentUser.user_metadata?.business_name;
+      biz = await createBusiness(currentUser.email, businessName);
+
+      // If creation failed, try fetching one more time (race condition)
+      if (!biz) {
+        console.log('🔄 Creation may have raced, trying fetch again...');
+        await new Promise(resolve => setTimeout(resolve, 500));
+        biz = await fetchBusiness(currentUser.email);
+      }
+    }
+
+    if (biz) {
+      console.log('✅ Setting business:', biz.name);
+      setBusiness(biz);
+    } else {
+      console.error('❌ Could not fetch or create business');
+      setBusiness(null);
+    }
+  }, [fetchBusiness, createBusiness]);
+
+  // Refresh business (can be called manually)
+  const refreshBusiness = useCallback(async () => {
+    if (user?.email) {
+      await loadUserAndBusiness(user);
+    }
+  }, [user, loadUserAndBusiness]);
+
+  // Initialize auth state
+  useEffect(() => {
+    // Prevent double initialization in strict mode
+    if (initializingRef.current) return;
+    initializingRef.current = true;
+
+    let mounted = true;
+
+    const initializeAuth = async () => {
+      console.log('🔍 Initializing auth...');
+
+      try {
+        // Get current session
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (error) {
+          console.error('❌ Error getting session:', error);
+          if (mounted) {
+            setUser(null);
+            setBusiness(null);
+            setLoading(false);
+          }
+          return;
+        }
+
+        if (session?.user) {
+          console.log('👤 Found session for:', session.user.email);
+          if (mounted) {
+            setUser(session.user);
+            await loadUserAndBusiness(session.user);
+          }
+        } else {
+          console.log('❌ No active session');
+          if (mounted) {
+            setUser(null);
+            setBusiness(null);
+          }
+        }
+      } catch (error) {
+        console.error('❌ Auth initialization error:', error);
+        if (mounted) {
+          setUser(null);
+          setBusiness(null);
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    initializeAuth();
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('🔐 Auth event:', event, 'User:', session?.user?.email);
 
-      if (session?.user) {
+      if (!mounted) return;
+
+      // Handle sign in
+      if (event === 'SIGNED_IN' && session?.user) {
         setUser(session.user);
-
-        // Load business
-        try {
-          console.log('📡 Auth state change: Fetching business for:', session.user.email);
-          const biz = await getCurrentBusiness(session.user.email!);
-          console.log('🏢 Business result:', biz ? `Found: ${biz.name}` : 'Not found');
-
-          // If no business exists, create one now
-          if (!biz && session.user.email) {
-            console.log('📝 No business found, creating one...');
-            await createBusinessForUser(session.user.email, session.user.user_metadata?.business_name);
-            // Reload business
-            const newBiz = await getCurrentBusiness(session.user.email);
-            console.log('🏢 New business created:', newBiz?.name);
-            setBusiness(newBiz);
-          } else {
-            console.log('✅ Setting business from auth state:', biz?.name);
-            setBusiness(biz);
-          }
-        } catch (error: any) {
-          console.error('❌ Failed to load business:', {
-            message: error?.message,
-            code: error?.code,
-            details: error?.details,
-            hint: error?.hint,
-            fullError: error
-          });
-          setBusiness(null);
-        }
-      } else {
-        console.log('❌ No session/user in auth state change');
+        await loadUserAndBusiness(session.user);
+        setLoading(false);
+      }
+      // Handle sign out
+      else if (event === 'SIGNED_OUT') {
         setUser(null);
         setBusiness(null);
+        setLoading(false);
       }
-      setLoading(false);
+      // Handle token refresh - just update user, don't reload business
+      else if (event === 'TOKEN_REFRESHED' && session?.user) {
+        setUser(session.user);
+      }
+      // Initial session is handled by initializeAuth
+      else if (event === 'INITIAL_SESSION') {
+        // Already handled above
+      }
     });
 
     return () => {
-      clearTimeout(loadingTimeout);
+      mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [loadUserAndBusiness]);
 
-  async function checkUser() {
-    console.log('🔍 Checking user...');
-    try {
-      const currentUser = await getCurrentUser();
-      console.log('👤 Current user:', currentUser?.email);
-
-      if (currentUser) {
-        setUser(currentUser);
-
-        try {
-          console.log('📡 Fetching business for:', currentUser.email);
-          const biz = await getCurrentBusiness(currentUser.email!);
-          console.log('🏢 Business result:', biz ? `Found: ${biz.name}` : 'Not found');
-
-          // If no business exists, create one
-          if (!biz && currentUser.email) {
-            console.log('📝 Creating business for existing user...');
-            await createBusinessForUser(currentUser.email, currentUser.user_metadata?.business_name);
-            const newBiz = await getCurrentBusiness(currentUser.email);
-            console.log('🏢 New business created:', newBiz?.name);
-            setBusiness(newBiz);
-          } else {
-            console.log('✅ Setting business:', biz?.name);
-            setBusiness(biz);
-          }
-        } catch (bizError: any) {
-          console.error('❌ Error fetching/creating business:', {
-            message: bizError?.message,
-            code: bizError?.code,
-            details: bizError?.details,
-            hint: bizError?.hint,
-            fullError: bizError
-          });
-          // Set business to null but don't block loading
-          setBusiness(null);
-        }
-      } else {
-        console.log('❌ No user found');
-        setUser(null);
-        setBusiness(null);
+  // Timeout fallback to prevent infinite loading
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.warn('⚠️ Auth loading timeout - forcing complete');
+        setLoading(false);
       }
-    } catch (error: any) {
-      console.error('❌ Error checking user:', error?.message || error);
-      setUser(null);
-      setBusiness(null);
-    } finally {
-      console.log('✅ Setting loading to false');
-      setLoading(false);
-    }
-  }
+    }, 10000); // 10 second timeout
+
+    return () => clearTimeout(timeout);
+  }, [loading]);
 
   return (
-    <AuthContext.Provider value={{ user, business, loading }}>
+    <AuthContext.Provider value={{ user, business, loading, refreshBusiness }}>
       {children}
     </AuthContext.Provider>
   );
@@ -146,23 +260,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   return useContext(AuthContext);
-}
-
-// Helper function to create business if it doesn't exist
-async function createBusinessForUser(email: string, businessName?: string) {
-  const name = businessName || email.split('@')[0] + "'s Business";
-
-  const { error } = await supabase
-    .from('businesses')
-    .insert({
-      email: email,
-      name: name,
-    });
-
-  if (error && error.code !== '23505') { // 23505 = unique constraint violation (already exists)
-    console.error('Failed to create business:', error);
-    throw error;
-  }
-
-  console.log('✅ Business created:', name);
 }

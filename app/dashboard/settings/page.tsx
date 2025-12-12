@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/lib/context/AuthContext';
 import { supabase } from '@/lib/api/supabase';
-import { Save, Building, Clock } from 'lucide-react';
+import { Save, Building, Clock, Share2, Mail, MessageCircle, Instagram, Facebook, CheckCircle } from 'lucide-react';
 
 export default function SettingsPage() {
   const { business } = useAuth();
@@ -69,6 +69,48 @@ export default function SettingsPage() {
           <p className="text-sm text-gray-500 mt-1">
             Manage your business information and preferences
           </p>
+        </div>
+
+        {/* Social Media Connections */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center space-x-2 mb-4">
+            <Share2 className="w-5 h-5 text-gray-500" />
+            <h2 className="text-lg font-semibold text-gray-900">Connected Accounts</h2>
+          </div>
+          <p className="text-sm text-gray-600 mb-6">
+            Connect your social media accounts to receive messages in your Relay inbox
+          </p>
+
+          <div className="space-y-4">
+            {/* Email Connection (Always Active) */}
+            <ConnectionCard
+              platform="email"
+              icon={Mail}
+              name="Email"
+              description={business.email}
+              isConnected={true}
+              canDisconnect={false}
+              color="blue"
+            />
+
+            {/* Instagram Connection */}
+            <InstagramConnection businessId={business.id} />
+
+            {/* Facebook Connection - COMING SOON */}
+            {/* <FacebookConnection businessId={business.id} /> */}
+
+            {/* WhatsApp (Coming Soon) */}
+            <ConnectionCard
+              platform="whatsapp"
+              icon={MessageCircle}
+              name="WhatsApp"
+              description="Coming soon"
+              isConnected={false}
+              canDisconnect={false}
+              color="green"
+              disabled={true}
+            />
+          </div>
         </div>
 
         {/* Business Info */}
@@ -166,3 +208,226 @@ export default function SettingsPage() {
     </DashboardLayout>
   );
 }
+
+// Connection Card Component
+function ConnectionCard({
+  platform,
+  icon: Icon,
+  name,
+  description,
+  isConnected,
+  canDisconnect,
+  color,
+  onConnect,
+  onDisconnect,
+  disabled = false,
+}: {
+  platform: string;
+  icon: any;
+  name: string;
+  description: string;
+  isConnected: boolean;
+  canDisconnect: boolean;
+  color: 'blue' | 'pink' | 'green';
+  onConnect?: () => void;
+  onDisconnect?: () => void;
+  disabled?: boolean;
+}) {
+  const colors = {
+    blue: 'text-blue-500 bg-blue-50',
+    pink: 'text-pink-500 bg-pink-50',
+    green: 'text-green-500 bg-green-50',
+  };
+
+  return (
+    <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+      <div className="flex items-center space-x-4">
+        <div className={`p-3 rounded-lg ${colors[color]}`}>
+          <Icon className="w-6 h-6" />
+        </div>
+        <div>
+          <p className="font-medium text-gray-900">{name}</p>
+          <p className="text-sm text-gray-500">{description}</p>
+        </div>
+      </div>
+
+      {disabled ? (
+        <span className="px-4 py-2 text-sm text-gray-400 bg-gray-100 rounded-lg">
+          Coming Soon
+        </span>
+      ) : isConnected ? (
+        <div className="flex items-center space-x-3">
+          <span className="flex items-center space-x-2 text-green-600 text-sm font-medium">
+            <CheckCircle className="w-4 h-4" />
+            <span>Connected</span>
+          </span>
+          {canDisconnect && (
+            <button
+              onClick={onDisconnect}
+              className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              Disconnect
+            </button>
+          )}
+        </div>
+      ) : (
+        <button
+          onClick={onConnect}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+        >
+          Connect
+        </button>
+      )}
+    </div>
+  );
+}
+
+// Instagram Connection Component
+function InstagramConnection({ businessId }: { businessId: string }) {
+  const [connection, setConnection] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadConnection();
+  }, []);
+
+  async function loadConnection() {
+    try {
+      const { data, error } = await supabase
+        .from('social_connections')
+        .select('*')
+        .eq('business_id', businessId)
+        .eq('platform', 'instagram')
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error loading Instagram connection:', error);
+      }
+
+      setConnection(data);
+    } catch (error) {
+      console.error('Failed to load Instagram connection:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleConnect() {
+    const metaAppId = process.env.NEXT_PUBLIC_META_APP_ID;
+
+    console.log('🔍 Debug Info:');
+    console.log('Meta App ID:', metaAppId);
+
+    if (!metaAppId) {
+      alert('Meta App ID not configured! Check your .env.local file.');
+      return;
+    }
+
+    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/instagram/callback`;
+
+    // Use Facebook OAuth for Instagram Business/Messaging
+    const authUrl =
+      `https://www.facebook.com/v21.0/dialog/oauth?` +
+      `client_id=${metaAppId}&` +
+      `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+      `scope=business_management,pages_show_list,pages_read_engagement,pages_messaging,pages_manage_metadata,instagram_basic,instagram_manage_messages&` +
+      `response_type=code&` +
+      `state=${businessId}`;
+
+    console.log('🔗 Full OAuth URL:', authUrl);
+    console.log('Using Meta App ID:', metaAppId);
+    window.location.href = authUrl;
+  }
+
+  async function handleDisconnect() {
+    if (!confirm('Disconnect Instagram? You will stop receiving Instagram messages.')) return;
+
+    await supabase
+      .from('social_connections')
+      .update({ is_active: false })
+      .eq('id', connection.id);
+
+    setConnection(null);
+  }
+
+  // Always show the card, even while loading
+  return (
+    <ConnectionCard
+      platform="instagram"
+      icon={Instagram}
+      name="Instagram"
+      description={connection ? `@${connection.platform_username}` : 'Receive Instagram DMs'}
+      isConnected={!!connection}
+      canDisconnect={true}
+      color="pink"
+      onConnect={handleConnect}
+      onDisconnect={handleDisconnect}
+    />
+  );
+}
+
+// Facebook Connection Component - COMING SOON
+/*
+function FacebookConnection({ businessId }: { businessId: string }) {
+  const [connection, setConnection] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadConnection();
+  }, []);
+
+  async function loadConnection() {
+    const { data } = await supabase
+      .from('social_connections')
+      .select('*')
+      .eq('business_id', businessId)
+      .eq('platform', 'facebook')
+      .eq('is_active', true)
+      .single();
+
+    setConnection(data);
+    setLoading(false);
+  }
+
+  function handleConnect() {
+    const redirectUri = `${window.location.origin}/api/auth/facebook/callback`;
+    const authUrl =
+      `https://www.facebook.com/v21.0/dialog/oauth?` +
+      `client_id=${process.env.NEXT_PUBLIC_META_APP_ID}&` +
+      `redirect_uri=${redirectUri}&` +
+      `scope=pages_messaging,pages_manage_metadata,pages_read_engagement&` +
+      `response_type=code&` +
+      `state=${businessId}`;
+
+    window.location.href = authUrl;
+  }
+
+  async function handleDisconnect() {
+    if (!confirm('Disconnect Facebook? You will stop receiving Facebook messages.')) return;
+
+    await supabase
+      .from('social_connections')
+      .update({ is_active: false })
+      .eq('id', connection.id);
+
+    setConnection(null);
+  }
+
+  if (loading) return null;
+
+  return (
+    <ConnectionCard
+      platform="facebook"
+      icon={Facebook}
+      name="Facebook Messenger"
+      description={connection ? connection.platform_username : 'Receive Facebook messages'}
+      isConnected={!!connection}
+      canDisconnect={true}
+      color="blue"
+      onConnect={handleConnect}
+      onDisconnect={handleDisconnect}
+    />
+  );
+}
+*/

@@ -160,9 +160,22 @@ async function handleInstagramSend(message: Message, businessId: string) {
     throw new Error('Missing Instagram ID');
   }
 
-  // Send via Instagram API
+  // Get Instagram connection with access token
+  const { data: connection } = await supabaseServer
+    .from('social_connections')
+    .select('access_token, platform_user_id')
+    .eq('business_id', businessId)
+    .eq('platform', 'instagram')
+    .eq('is_active', true)
+    .single();
+
+  if (!connection?.access_token) {
+    throw new Error('Instagram not connected or access token missing');
+  }
+
+  // Send via Instagram Messaging API (using Instagram user ID, not /me)
   const response = await fetch(
-    `https://graph.instagram.com/v21.0/me/messages`,
+    `https://graph.facebook.com/v21.0/${connection.platform_user_id}/messages`,
     {
       method: 'POST',
       headers: {
@@ -171,13 +184,17 @@ async function handleInstagramSend(message: Message, businessId: string) {
       body: JSON.stringify({
         recipient: { id: conversation.customer_instagram_id },
         message: { text: message.content },
-        access_token: process.env.META_ACCESS_TOKEN,
+        access_token: connection.access_token, // Use stored page access token
       }),
     }
   );
 
   if (!response.ok) {
     const error = await response.json();
+    console.error('Instagram API error:', error);
     throw new Error(error.error?.message || 'Failed to send Instagram message');
   }
+
+  const result = await response.json();
+  console.log('✅ Instagram message sent:', result);
 }

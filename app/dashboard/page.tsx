@@ -2,24 +2,26 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import LoadingScreen from '@/components/LoadingScreen';
 import DashboardSkeleton from '@/components/inbox/DashboardSkeleton';
 import { getConversations } from '@/lib/api/conversations';
 import { useAuth } from '@/lib/context/AuthContext';
 import type { Conversation } from '@/lib/api/supabase';
-import { MessageSquare, Clock, TrendingUp, Zap } from 'lucide-react';
+import { MessageSquare, Clock, TrendingUp, Zap, ArrowRight, Mail, Instagram, Phone } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 export default function DashboardPage() {
   const { business, loading: authLoading } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     if (business) {
       loadData();
     } else if (!authLoading) {
-      // Auth is done loading but no business - stop showing loading screen
       setLoading(false);
     }
   }, [business, authLoading]);
@@ -29,13 +31,41 @@ export default function DashboardPage() {
 
     try {
       const convos = await getConversations(business.id);
-      setConversations(convos);
+      // Sort by most recent
+      const sorted = convos.sort((a, b) =>
+        new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
+      );
+      setConversations(sorted);
     } catch (error) {
       console.error('Failed to load data:', error);
     } finally {
       setLoading(false);
     }
   }
+
+  // Navigate to inbox with specific conversation selected
+  function handleConversationClick(conversation: Conversation) {
+    sessionStorage.setItem('selectedConversationId', conversation.id);
+    router.push('/dashboard/inbox');
+  }
+
+  const getChannelIcon = (channel: string) => {
+    switch (channel) {
+      case 'email': return <Mail className="w-3.5 h-3.5" />;
+      case 'instagram': return <Instagram className="w-3.5 h-3.5" />;
+      case 'sms': return <Phone className="w-3.5 h-3.5" />;
+      default: return <Mail className="w-3.5 h-3.5" />;
+    }
+  };
+
+  const getChannelColor = (channel: string) => {
+    switch (channel) {
+      case 'email': return 'bg-blue-100 text-blue-600';
+      case 'instagram': return 'bg-pink-100 text-pink-600';
+      case 'sms': return 'bg-green-100 text-green-600';
+      default: return 'bg-slate-100 text-slate-600';
+    }
+  };
 
   if (authLoading) {
     return <LoadingScreen message="Loading your dashboard..." />;
@@ -178,10 +208,19 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Recent Conversations */}
+        {/* Recent Conversations - NOW CLICKABLE */}
         <div className="bg-white rounded-lg border border-gray-200">
-          <div className="px-6 py-4 border-b border-gray-200">
+          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900">Recent Conversations</h2>
+            {conversations.length > 0 && (
+              <Link
+                href="/dashboard/inbox"
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+              >
+                View all
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            )}
           </div>
           <div className="divide-y divide-gray-200">
             {conversations.length === 0 ? (
@@ -189,8 +228,12 @@ export default function DashboardPage() {
                 No conversations yet
               </div>
             ) : (
-              conversations.map((convo) => (
-                <div key={convo.id} className="p-6 hover:bg-gray-50 cursor-pointer">
+              conversations.slice(0, 5).map((convo) => (
+                <button
+                  key={convo.id}
+                  onClick={() => handleConversationClick(convo)}
+                  className="w-full p-6 hover:bg-gray-50 transition-colors text-left group cursor-pointer"
+                >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-4">
                       <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
@@ -199,27 +242,40 @@ export default function DashboardPage() {
                         </span>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {convo.customer_name}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium text-gray-900">
+                            {convo.customer_name}
+                          </p>
+                          <span className={`inline-flex items-center justify-center w-5 h-5 rounded ${getChannelColor(convo.channel)}`}>
+                            {getChannelIcon(convo.channel)}
+                          </span>
+                          {convo.unread_count > 0 && (
+                            <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-blue-600 text-white text-xs font-medium rounded-full">
+                              {convo.unread_count}
+                            </span>
+                          )}
+                        </div>
                         <p className="text-xs text-gray-500 mt-1">
-                          via {convo.channel}
+                          {convo.customer_email || convo.customer_phone || `via ${convo.channel}`}
                         </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <span className={`
-                        inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                        ${convo.status === 'open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}
-                      `}>
-                        {convo.status}
-                      </span>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {new Date(convo.last_message_at).toLocaleTimeString()}
-                      </p>
+                    <div className="text-right flex items-center gap-3">
+                      <div>
+                        <span className={`
+                          inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                          ${convo.status === 'open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}
+                        `}>
+                          {convo.status}
+                        </span>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {formatDistanceToNow(new Date(convo.last_message_at), { addSuffix: true })}
+                        </p>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors" />
                     </div>
                   </div>
-                </div>
+                </button>
               ))
             )}
           </div>

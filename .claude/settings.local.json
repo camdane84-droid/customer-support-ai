@@ -15,7 +15,11 @@
       "Bash(taskkill:*)",
       "Bash(cat:*)",
       "Bash(node check-business.js:*)",
-      "Bash(psql:*)"
+      "Bash(psql:*)",
+      "Bash(tasklist:*)",
+      "Bash(node setup-social-connections.js:*)",
+      "Bash(findstr:*)",
+      "Bash(netstat:*)"
     ],
     "deny": [],
     "ask": []
