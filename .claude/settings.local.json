@@ -19,7 +19,19 @@
       "Bash(tasklist:*)",
       "Bash(node setup-social-connections.js:*)",
       "Bash(findstr:*)",
-      "Bash(netstat:*)"
+      "Bash(netstat:*)",
+      "Bash(node scripts/update-instagram-token.js:*)",
+      "Bash(node scripts/test-instagram-token.js:*)",
+      "Bash(node -e:*)",
+      "Bash(node scripts/find-ig-account.js:*)",
+      "Bash(node scripts/check-token-access.js:*)",
+      "Bash(node scripts/update-ig-config.js:*)",
+      "Bash(node scripts/check-app-status.js:*)",
+      "Bash(node scripts/check-db-connection.js:*)",
+      "Bash(node scripts/check-db-token-perms.js:*)",
+      "Bash(node scripts/diagnose-app-access.js:*)",
+      "Bash(node scripts/check-app-capabilities.js:*)",
+      "Bash(node scripts/refresh-instagram-names.js:*)"
     ],
     "deny": [],
     "ask": []

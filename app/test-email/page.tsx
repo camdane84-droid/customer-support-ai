@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/lib/context/AuthContext';
 
 export default function TestEmailPage() {
@@ -210,12 +211,12 @@ export default function TestEmailPage() {
 
         {/* Navigation */}
         <div className="mt-6 text-center">
-          <a
+          <Link
             href="/dashboard/inbox"
             className="inline-flex items-center px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
           >
             Go to Inbox →
-          </a>
+          </Link>
         </div>
       </div>
     </div>

@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import LoadingScreen from '@/components/LoadingScreen';
 import DashboardSkeleton from '@/components/inbox/DashboardSkeleton';
 import { getConversations } from '@/lib/api/conversations';
+import { supabase } from '@/lib/api/supabase';
 import { useAuth } from '@/lib/context/AuthContext';
 import type { Conversation } from '@/lib/api/supabase';
 import { MessageSquare, Clock, TrendingUp, Zap, ArrowRight, Mail, Instagram, Phone } from 'lucide-react';
@@ -18,15 +19,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    if (business) {
-      loadData();
-    } else if (!authLoading) {
-      setLoading(false);
-    }
-  }, [business, authLoading]);
-
-  async function loadData() {
+  // Define loadData before useEffect that uses it
+  const loadData = useCallback(async () => {
     if (!business) return;
 
     try {
@@ -41,12 +35,139 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
+  }, [business]);
+
+  useEffect(() => {
+    if (business) {
+      loadData();
+
+      // Set up polling for live updates
+      const pollInterval = setInterval(() => {
+        // Only poll if tab is visible
+        if (!document.hidden) {
+          console.log('🔄 Dashboard: Polling for updates...');
+          loadData();
+        }
+      }, 5000); // Poll every 5 seconds
+
+      // Return cleanup function
+      return () => {
+        clearInterval(pollInterval);
+        console.log('🔌 Dashboard: Stopped polling');
+      };
+    } else if (!authLoading) {
+      setLoading(false);
+    }
+  }, [business, authLoading, loadData]);
+
+  function setupRealtimeSubscription() {
+    if (!business) return;
+
+    console.log('🔌 Dashboard: Setting up realtime subscription for business:', business.id);
+
+    const channel = supabase
+      .channel(`dashboard-${business.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'conversations',
+          filter: `business_id=eq.${business.id}`,
+        },
+        (payload) => {
+          console.log('🔄 Dashboard: Conversation changed via realtime:', payload.eventType);
+          handleConversationUpdate(payload);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `business_id=eq.${business.id}`,
+        },
+        (payload) => {
+          console.log('💬 Dashboard: New message received via realtime');
+          handleNewMessage(payload);
+        }
+      )
+      .subscribe((status, err) => {
+        console.log('📡 Dashboard subscription status:', status);
+        if (err) {
+          console.error('❌ Dashboard subscription error:', err);
+        }
+        if (status === 'SUBSCRIBED') {
+          console.log('✅ Dashboard successfully subscribed to realtime updates');
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('❌ Channel error - realtime may not be enabled on Supabase');
+        } else if (status === 'TIMED_OUT') {
+          console.error('❌ Dashboard subscription timed out');
+        }
+      });
+
+    return () => {
+      console.log('🔌 Cleaning up dashboard subscription');
+      supabase.removeChannel(channel);
+    };
+  }
+
+  function handleConversationUpdate(payload: any) {
+    const { eventType, new: newRecord, old: oldRecord } = payload;
+
+    setConversations(prev => {
+      let updated = [...prev];
+
+      if (eventType === 'INSERT') {
+        updated = [newRecord as Conversation, ...prev];
+      } else if (eventType === 'UPDATE') {
+        updated = prev.map(c => c.id === newRecord.id ? newRecord as Conversation : c);
+      } else if (eventType === 'DELETE') {
+        updated = prev.filter(c => c.id !== oldRecord.id);
+      }
+
+      return updated.sort((a, b) =>
+        new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
+      );
+    });
+  }
+
+  function handleNewMessage(payload: any) {
+    const message = payload.new;
+    const conversationId = message.conversation_id;
+
+    // Reload the specific conversation to get updated info
+    supabase
+      .from('conversations')
+      .select('*')
+      .eq('id', conversationId)
+      .single()
+      .then(({ data: updatedConversation }) => {
+        if (updatedConversation) {
+          setConversations(prev => {
+            const exists = prev.some(c => c.id === conversationId);
+
+            if (exists) {
+              return prev
+                .map(c => c.id === conversationId ? updatedConversation as Conversation : c)
+                .sort((a, b) =>
+                  new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
+                );
+            } else {
+              return [updatedConversation as Conversation, ...prev].sort((a, b) =>
+                new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
+              );
+            }
+          });
+        }
+      });
   }
 
   // Navigate to inbox with specific conversation selected
   function handleConversationClick(conversation: Conversation) {
-    sessionStorage.setItem('selectedConversationId', conversation.id);
-    router.push('/dashboard/inbox');
+    console.log('📍 Dashboard: Clicked conversation:', conversation.customer_name, 'ID:', conversation.id);
+    router.push(`/dashboard/inbox?conversation=${conversation.id}`);
   }
 
   const getChannelIcon = (channel: string) => {

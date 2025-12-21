@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, MessageSquare, BookOpen, Settings, LayoutDashboard, TrendingUp, TestTube } from 'lucide-react';
+import { Menu, X, MessageSquare, BookOpen, Settings, LayoutDashboard, TrendingUp, TestTube, Archive } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from '@/lib/auth';
@@ -10,6 +10,7 @@ import { useAuth } from '@/lib/context/AuthContext';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Inbox', href: '/dashboard/inbox', icon: MessageSquare },
+  { name: 'Archives', href: '/dashboard/archives', icon: Archive },
   { name: 'Analytics', href: '/dashboard/analytics', icon: TrendingUp },
   { name: 'Knowledge Base', href: '/dashboard/knowledge', icon: BookOpen },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },

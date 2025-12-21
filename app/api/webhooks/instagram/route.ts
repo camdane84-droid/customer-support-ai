@@ -66,6 +66,8 @@ export async function POST(request: NextRequest) {
 
 async function handleInstagramMessage(event: any) {
   try {
+    console.log('📦 Full webhook event:', JSON.stringify(event, null, 2));
+
     const senderId = event.sender.id;
     const recipientId = event.recipient.id; // Your Instagram account ID
     const timestamp = event.timestamp;
@@ -91,36 +93,65 @@ async function handleInstagramMessage(event: any) {
         return;
       }
 
+      // Fetch sender's Instagram username
+      const senderInstagramId = senderId;
+      let senderUsername = senderInstagramId; // Default to ID if fetch fails
+
+      try {
+        // Fetch sender's Instagram username
+        const userResponse = await fetch(
+          `https://graph.instagram.com/${senderInstagramId}?fields=username&access_token=${process.env.META_ACCESS_TOKEN}`
+        );
+
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          senderUsername = userData.username || senderInstagramId;
+        }
+      } catch (error) {
+        console.log('Could not fetch Instagram username, using ID');
+      }
+
       // Find or create conversation
       let conversationId;
       const { data: existingConv } = await supabaseAdmin
         .from('conversations')
         .select('id')
         .eq('business_id', connection.business_id)
-        .eq('customer_instagram_id', senderId)
+        .eq('customer_instagram_id', senderInstagramId)
         .eq('channel', 'instagram')
         .single();
 
       if (existingConv) {
         conversationId = existingConv.id;
 
+        // Get current unread count
+        const { data: currentConvo } = await supabaseAdmin
+          .from('conversations')
+          .select('unread_count')
+          .eq('id', conversationId)
+          .single();
+
+        const currentUnreadCount = currentConvo?.unread_count || 0;
+
         // Update conversation
         await supabaseAdmin
           .from('conversations')
           .update({
             last_message_at: new Date(timestamp).toISOString(),
-            unread_count: supabaseAdmin.rpc('increment', { x: 1 }), // Increment unread count
+            unread_count: currentUnreadCount + 1,
             status: 'open',
           })
           .eq('id', conversationId);
+
+        console.log('📝 Updated conversation:', conversationId, 'Unread count:', currentUnreadCount + 1);
       } else {
-        // Create new conversation
+        // Create new conversation with username
         const { data: newConv } = await supabaseAdmin
           .from('conversations')
           .insert({
             business_id: connection.business_id,
-            customer_instagram_id: senderId,
-            customer_name: senderId, // We'll fetch the real name later
+            customer_name: `@${senderUsername}`, // Use @ prefix
+            customer_instagram_id: senderInstagramId,
             channel: 'instagram',
             status: 'open',
             unread_count: 1,

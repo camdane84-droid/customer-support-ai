@@ -154,18 +154,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Initialize auth state
   useEffect(() => {
+    console.log('🔄 [AUTH] useEffect triggered. initializingRef:', initializingRef.current);
+
     // Prevent double initialization in strict mode
-    if (initializingRef.current) return;
+    if (initializingRef.current) {
+      console.log('⏭️ [AUTH] Already initializing, skipping');
+      return;
+    }
     initializingRef.current = true;
 
     let mounted = true;
 
     const initializeAuth = async () => {
-      console.log('🔍 Initializing auth...');
+      console.log('🔍 [AUTH] Starting initialization...');
 
       try {
+        console.log('📡 [AUTH] Fetching session from Supabase...');
         // Get current session
         const { data: { session }, error } = await supabase.auth.getSession();
+        console.log('📡 [AUTH] Session fetch complete:', { hasSession: !!session, error: !!error });
 
         if (error) {
           console.error('❌ Error getting session:', error);
@@ -178,31 +185,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (session?.user) {
-          console.log('👤 Found session for:', session.user.email);
+          console.log('👤 [AUTH] Found session for:', session.user.email);
           if (mounted) {
+            console.log('🔧 [AUTH] Setting user and loading business...');
             setUser(session.user);
             await loadUserAndBusiness(session.user);
           }
         } else {
-          console.log('❌ No active session');
+          console.log('❌ [AUTH] No active session');
           if (mounted) {
             setUser(null);
             setBusiness(null);
           }
         }
       } catch (error) {
-        console.error('❌ Auth initialization error:', error);
+        console.error('❌ [AUTH] Auth initialization error:', error);
         if (mounted) {
           setUser(null);
           setBusiness(null);
         }
       } finally {
         if (mounted) {
+          console.log('✅ [AUTH] Setting loading=false');
           setLoading(false);
         }
       }
     };
 
+    console.log('🚀 [AUTH] Calling initializeAuth()...');
     initializeAuth();
 
     // Listen for auth changes

@@ -33,15 +33,39 @@ export async function POST(request: NextRequest) {
     }
 
     // Find or create conversation
-    let { data: conversation } = await supabaseServer
+    let conversationId;
+    const { data: existingConv } = await supabaseServer
       .from('conversations')
-      .select('*')
+      .select('id')
       .eq('business_id', business.id)
       .eq('customer_email', senderEmail)
       .eq('channel', 'email')
       .single();
 
-    if (!conversation) {
+    if (existingConv) {
+      conversationId = existingConv.id;
+
+      // Get current unread count
+      const { data: currentConvo } = await supabaseServer
+        .from('conversations')
+        .select('unread_count')
+        .eq('id', conversationId)
+        .single();
+
+      const currentUnreadCount = currentConvo?.unread_count || 0;
+
+      // Update existing conversation with new message timestamp and increment unread count
+      await supabaseServer
+        .from('conversations')
+        .update({
+          last_message_at: new Date().toISOString(),
+          unread_count: currentUnreadCount + 1,
+          status: 'open',
+        })
+        .eq('id', conversationId);
+
+      console.log('📝 Updated existing conversation:', conversationId, 'Unread count:', currentUnreadCount + 1);
+    } else {
       console.log('📝 Creating new conversation for:', senderEmail);
       const { data: newConvo, error: convoError } = await supabaseServer
         .from('conversations')
@@ -51,18 +75,25 @@ export async function POST(request: NextRequest) {
           customer_email: senderEmail,
           channel: 'email',
           status: 'open',
+          unread_count: 1,
+          last_message_at: new Date().toISOString(),
         })
-        .select()
+        .select('id')
         .single();
 
       if (convoError) throw convoError;
-      conversation = newConvo;
+      conversationId = newConvo?.id;
+    }
+
+    if (!conversationId) {
+      console.log('❌ Failed to create/find conversation');
+      throw new Error('Failed to create/find conversation');
     }
 
     // Create message
     const content = text || html || subject;
     await supabaseServer.from('messages').insert({
-      conversation_id: conversation.id,
+      conversation_id: conversationId,
       business_id: business.id,
       sender_type: 'customer',
       sender_name: senderName,

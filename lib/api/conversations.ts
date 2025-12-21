@@ -4,45 +4,24 @@ export async function getConversations(businessId: string): Promise<Conversation
   console.log('📞 Fetching conversations for business:', businessId);
 
   try {
-    // Increase timeout to 30 seconds and get the query result directly
-    const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('Request timeout after 30 seconds')), 30000)
-    );
+    const response = await fetch(`/api/conversations?businessId=${businessId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-    const fetchPromise = (async () => {
-      const result = await supabase
-        .from('conversations')
-        .select('*')
-        .eq('business_id', businessId)
-        .order('last_message_at', { ascending: false });
-
-      return result;
-    })();
-
-    const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
-
-    if (error) {
-      console.error('❌ Error fetching conversations:', {
-        businessId,
-        message: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint,
-        fullError: error
-      });
-
-      // Return empty array instead of throwing to prevent app crash
-      console.warn('⚠️ Returning empty conversations array due to error');
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('❌ API error fetching conversations:', errorData);
       return [];
     }
 
-    console.log('✅ Fetched', data?.length || 0, 'conversations');
-    return data || [];
+    const { conversations } = await response.json();
+    console.log('✅ Fetched', conversations?.length || 0, 'conversations');
+    return conversations || [];
   } catch (error: any) {
     console.error('❌ Failed to fetch conversations:', error?.message || error);
-
-    // Return empty array instead of throwing to prevent app crash
-    console.warn('⚠️ Returning empty conversations array due to exception');
     return [];
   }
 }
@@ -51,45 +30,24 @@ export async function getConversationMessages(conversationId: string): Promise<M
   console.log('💬 Fetching messages for conversation:', conversationId);
 
   try {
-    // Increase timeout to 30 seconds
-    const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('Request timeout after 30 seconds')), 30000)
-    );
+    const response = await fetch(`/api/conversations/${conversationId}/messages`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-    const fetchPromise = (async () => {
-      const result = await supabase
-        .from('messages')
-        .select('*')
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true });
-
-      return result;
-    })();
-
-    const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
-
-    if (error) {
-      console.error('❌ Error fetching messages:', {
-        conversationId,
-        message: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint,
-        fullError: error
-      });
-
-      // Return empty array instead of throwing to prevent app crash
-      console.warn('⚠️ Returning empty messages array due to error');
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('❌ API error fetching messages:', errorData);
       return [];
     }
 
-    console.log('✅ Fetched', data?.length || 0, 'messages');
-    return data || [];
+    const { messages } = await response.json();
+    console.log('✅ Fetched', messages?.length || 0, 'messages');
+    return messages || [];
   } catch (error: any) {
     console.error('❌ Failed to fetch messages:', error?.message || error);
-
-    // Return empty array instead of throwing to prevent app crash
-    console.warn('⚠️ Returning empty messages array due to exception');
     return [];
   }
 }

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import LoadingScreen from '@/components/LoadingScreen';
 import ConversationListSkeleton from '@/components/inbox/ConversationListSkeleton';
@@ -14,12 +15,14 @@ import type { Conversation } from '@/lib/api/supabase';
 
 export default function InboxPage() {
   const { business, user, loading: authLoading } = useAuth();
+  const searchParams = useSearchParams();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const hasLoadedRef = useRef(false);
 
-  console.log('📊 Inbox Page State:', {
+  console.log('🔍 [INBOX] Component render:', {
     authLoading,
     hasUser: !!user,
     hasBusiness: !!business,
@@ -28,19 +31,149 @@ export default function InboxPage() {
     conversationsCount: conversations.length,
     loading,
     error,
+    hasLoadedRef: hasLoadedRef.current,
   });
 
-  useEffect(() => {
-    console.log('🔄 Auth changed:', { user: !!user, business: !!business, authLoading });
+  // Define loadConversations before useEffect that uses it
+  const loadConversations = useCallback(async (showLoading = true) => {
+    console.log('🔄 [INBOX] loadConversations called:', { showLoading, hasBusiness: !!business, businessId: business?.id });
 
-    if (!authLoading && business) {
-      console.log('✅ Auth ready, loading conversations for business:', business.id);
+    if (!business) {
+      console.log('⏭️ [INBOX] No business, skipping load and setting loading=false');
+      setLoading(false);
+      return;
+    }
+
+    console.log('📥 [INBOX] Loading conversations for business:', business.id);
+    if (showLoading) {
+      console.log('⏳ [INBOX] Setting loading=true');
+      setLoading(true);
+    }
+    setError(null);
+
+    try {
+      console.log('🌐 [INBOX] Fetching conversations from API...');
+      const convos = await getConversations(business.id);
+      console.log('✅ [INBOX] Loaded conversations:', convos.length);
+
+      const sortedConvos = convos.sort((a, b) =>
+        new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
+      );
+
+      setConversations(sortedConvos);
+
+      // Update selected conversation with fresh data (always, even during polling)
+      setSelectedConversation(currentSelected => {
+        // During initial load, handle auto-selection
+        if (showLoading && sortedConvos.length > 0 && !currentSelected) {
+          // Check if there's a pre-selected conversation from URL params
+          const preselectedId = searchParams.get('conversation');
+          console.log('📍 Inbox: Looking for preselected ID from URL:', preselectedId);
+          console.log('📍 Inbox: Available conversations:', sortedConvos.map(c => ({ id: c.id, name: c.customer_name })));
+          if (preselectedId) {
+            const preselected = sortedConvos.find(c => c.id === preselectedId);
+            if (preselected) {
+              console.log('✅ Inbox: Found and selecting conversation from dashboard:', preselected.customer_name);
+
+              // Immediately clear unread badge when selecting from dashboard
+              if (preselected.unread_count > 0) {
+                setConversations(prev =>
+                  prev.map(c =>
+                    c.id === preselected.id ? { ...c, unread_count: 0 } : c
+                  )
+                );
+              }
+
+              return { ...preselected, unread_count: 0 };
+            } else {
+              console.log('❌ Inbox: Could not find preselected conversation, selecting first');
+              const firstConvo = sortedConvos[0];
+
+              // Clear unread badge for first conversation too
+              if (firstConvo.unread_count > 0) {
+                setConversations(prev =>
+                  prev.map(c =>
+                    c.id === firstConvo.id ? { ...c, unread_count: 0 } : c
+                  )
+                );
+              }
+
+              return { ...firstConvo, unread_count: 0 };
+            }
+          } else {
+            console.log('👆 Inbox: No preselected ID, selecting first conversation');
+            const firstConvo = sortedConvos[0];
+
+            // Clear unread badge for first conversation
+            if (firstConvo.unread_count > 0) {
+              setConversations(prev =>
+                prev.map(c =>
+                  c.id === firstConvo.id ? { ...c, unread_count: 0 } : c
+                )
+              );
+            }
+
+            return { ...firstConvo, unread_count: 0 };
+          }
+        }
+
+        // Always update selected conversation with fresh data (including unread_count)
+        if (currentSelected) {
+          const updatedSelected = sortedConvos.find(c => c.id === currentSelected.id);
+          if (updatedSelected) {
+            return updatedSelected;
+          }
+        }
+
+        return currentSelected;
+      });
+    } catch (error: any) {
+      console.error('❌ [INBOX] Failed to load conversations:', error);
+      setError(error.message || 'Failed to load conversations');
+    } finally {
+      if (showLoading) {
+        console.log('✅ [INBOX] Loading complete, setting loading=false');
+        setLoading(false);
+      } else {
+        console.log('🔄 [INBOX] Polling complete, not changing loading state');
+      }
+    }
+  }, [business]); // Only depend on business - searchParams and selectedConversation accessed via closure/functional updates
+
+  useEffect(() => {
+    console.log('🔄 [INBOX] useEffect triggered:', {
+      user: !!user,
+      business: !!business,
+      businessId: business?.id,
+      authLoading,
+      hasLoaded: hasLoadedRef.current
+    });
+
+    if (!authLoading && business && !hasLoadedRef.current) {
+      console.log('✅ [INBOX] Auth ready, setting up polling and loading conversations');
+      hasLoadedRef.current = true;
       loadConversations();
-      setupRealtimeSubscription();
+
+      // Set up polling instead of realtime
+      const pollInterval = setInterval(() => {
+        // Only poll if tab is visible
+        if (!document.hidden) {
+          console.log('🔄 Polling for updates...');
+          loadConversations(false); // Don't show loading spinner when polling
+        }
+      }, 5000); // Poll every 5 seconds
+
+      // Return cleanup function
+      return () => {
+        clearInterval(pollInterval);
+        console.log('🔌 [INBOX] Stopped polling');
+      };
     } else if (!authLoading && !business) {
-      console.log('❌ No business after auth loaded');
+      console.log('❌ [INBOX] No business after auth loaded, setting loading=false');
       setLoading(false);
       setError('No business found');
+    } else {
+      console.log('⏸️ [INBOX] Waiting - authLoading:', authLoading, 'business:', !!business, 'hasLoaded:', hasLoadedRef.current);
     }
   }, [business, authLoading]);
 
@@ -60,12 +193,35 @@ export default function InboxPage() {
           filter: `business_id=eq.${business.id}`,
         },
         (payload) => {
-          console.log('🔄 Conversation changed via realtime:', payload.eventType);
+          console.log('🔄 Conversation changed via realtime:', payload.eventType, payload);
           handleConversationUpdate(payload);
         }
       )
-      .subscribe((status) => {
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `business_id=eq.${business.id}`,
+        },
+        (payload) => {
+          console.log('💬 New message received via realtime:', payload);
+          handleNewMessage(payload);
+        }
+      )
+      .subscribe((status, err) => {
         console.log('📡 Subscription status:', status);
+        if (err) {
+          console.error('❌ Subscription error:', err);
+        }
+        if (status === 'SUBSCRIBED') {
+          console.log('✅ Successfully subscribed to realtime updates');
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('❌ Channel error - realtime may not be enabled');
+        } else if (status === 'TIMED_OUT') {
+          console.error('❌ Subscription timed out');
+        }
       });
 
     return () => {
@@ -93,49 +249,68 @@ export default function InboxPage() {
       );
     });
 
-    if (selectedConversation?.id === payload.new?.id) {
-      setSelectedConversation(payload.new as Conversation);
+    // Update selected conversation if it's the one that changed
+    if (selectedConversation?.id === newRecord?.id) {
+      console.log('📍 Updating selected conversation:', newRecord);
+      setSelectedConversation(newRecord as Conversation);
     }
   }
 
-  async function loadConversations() {
-    if (!business) {
-      console.log('⏭️ No business, skipping load');
-      return;
-    }
+  function handleNewMessage(payload: any) {
+    const message = payload.new;
+    const conversationId = message.conversation_id;
 
-    console.log('📥 Loading conversations...');
-    setLoading(true);
-    setError(null);
+    console.log('💬 Handling new message for conversation:', conversationId);
 
-    try {
-      const convos = await getConversations(business.id);
-      console.log('✅ Loaded conversations:', convos.length);
+    // Reload the specific conversation to get updated last_message_at and unread_count
+    supabase
+      .from('conversations')
+      .select('*')
+      .eq('id', conversationId)
+      .single()
+      .then(({ data: updatedConversation }) => {
+        if (updatedConversation) {
+          setConversations(prev => {
+            // Check if conversation exists
+            const exists = prev.some(c => c.id === conversationId);
 
-      const sortedConvos = convos.sort((a, b) =>
-        new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
-      );
+            if (exists) {
+              // Update existing conversation and move to top
+              const updated = prev
+                .map(c => c.id === conversationId ? updatedConversation as Conversation : c)
+                .sort((a, b) =>
+                  new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
+                );
+              return updated;
+            } else {
+              // Add new conversation at the top
+              return [updatedConversation as Conversation, ...prev].sort((a, b) =>
+                new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
+              );
+            }
+          });
 
-      setConversations(sortedConvos);
-
-      if (sortedConvos.length > 0 && !selectedConversation) {
-        console.log('👆 Selecting first conversation');
-        setSelectedConversation(sortedConvos[0]);
-      }
-
-      if (selectedConversation) {
-        const updatedSelected = sortedConvos.find(c => c.id === selectedConversation.id);
-        if (updatedSelected) {
-          setSelectedConversation(updatedSelected);
+          // Update selected conversation if it's the one that received the message
+          if (selectedConversation?.id === conversationId) {
+            setSelectedConversation(updatedConversation as Conversation);
+          }
         }
+      });
+  }
+
+  function handleConversationDeleted() {
+    // Remove deleted conversation from list
+    setConversations(prev => prev.filter(c => c.id !== selectedConversation?.id));
+
+    // Select the first remaining conversation or null
+    setConversations(prev => {
+      if (prev.length > 0) {
+        setSelectedConversation(prev[0]);
+      } else {
+        setSelectedConversation(null);
       }
-    } catch (error: any) {
-      console.error('❌ Failed to load conversations:', error);
-      setError(error.message || 'Failed to load conversations');
-    } finally {
-      console.log('✅ Loading complete');
-      setLoading(false);
-    }
+      return prev;
+    });
   }
 
   if (authLoading) {
@@ -193,6 +368,91 @@ export default function InboxPage() {
 
   console.log('✅ Rendering inbox with', conversations.length, 'conversations');
 
+  // Handle conversation selection with instant unread badge clear
+  function handleSelectConversation(conversation: Conversation) {
+    // Immediately update the conversation in the list to clear unread badge
+    if (conversation.unread_count > 0) {
+      setConversations(prev =>
+        prev.map(c =>
+          c.id === conversation.id ? { ...c, unread_count: 0 } : c
+        )
+      );
+    }
+
+    // Set as selected conversation
+    setSelectedConversation({ ...conversation, unread_count: 0 });
+  }
+
+  // Bulk archive conversations
+  async function handleBulkArchive(conversationIds: string[]) {
+    console.log('📦 Archiving conversations:', conversationIds);
+
+    try {
+      // Archive each conversation
+      await Promise.all(
+        conversationIds.map(async (id) => {
+          const response = await fetch(`/api/conversations/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'archived' }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Failed to archive conversation ${id}`);
+          }
+        })
+      );
+
+      // Remove archived conversations from list
+      setConversations(prev => prev.filter(c => !conversationIds.includes(c.id)));
+
+      // Clear selection if the selected conversation was archived
+      if (selectedConversation && conversationIds.includes(selectedConversation.id)) {
+        const remaining = conversations.filter(c => !conversationIds.includes(c.id));
+        setSelectedConversation(remaining.length > 0 ? remaining[0] : null);
+      }
+
+      console.log('✅ Bulk archive complete');
+    } catch (error) {
+      console.error('❌ Bulk archive failed:', error);
+      alert('Failed to archive conversations');
+    }
+  }
+
+  // Bulk delete conversations
+  async function handleBulkDelete(conversationIds: string[]) {
+    console.log('🗑️ Deleting conversations:', conversationIds);
+
+    try {
+      // Delete each conversation
+      await Promise.all(
+        conversationIds.map(async (id) => {
+          const response = await fetch(`/api/conversations/${id}`, {
+            method: 'DELETE',
+          });
+
+          if (!response.ok) {
+            throw new Error(`Failed to delete conversation ${id}`);
+          }
+        })
+      );
+
+      // Remove deleted conversations from list
+      setConversations(prev => prev.filter(c => !conversationIds.includes(c.id)));
+
+      // Clear selection if the selected conversation was deleted
+      if (selectedConversation && conversationIds.includes(selectedConversation.id)) {
+        const remaining = conversations.filter(c => !conversationIds.includes(c.id));
+        setSelectedConversation(remaining.length > 0 ? remaining[0] : null);
+      }
+
+      console.log('✅ Bulk delete complete');
+    } catch (error) {
+      console.error('❌ Bulk delete failed:', error);
+      alert('Failed to delete conversations');
+    }
+  }
+
   return (
     <DashboardLayout>
       <div className="flex h-full bg-gray-50">
@@ -200,15 +460,19 @@ export default function InboxPage() {
           <ConversationList
             conversations={conversations}
             selectedConversation={selectedConversation}
-            onSelectConversation={setSelectedConversation}
+            onSelectConversation={handleSelectConversation}
+            onBulkArchive={handleBulkArchive}
+            onBulkDelete={handleBulkDelete}
           />
         </div>
 
         <div className="flex-1 flex flex-col">
           {selectedConversation ? (
             <MessageThread
+              key={selectedConversation.id}
               conversation={selectedConversation}
               businessId={business.id}
+              onConversationDeleted={handleConversationDeleted}
             />
           ) : (
             <div className="flex items-center justify-center h-full text-gray-500">

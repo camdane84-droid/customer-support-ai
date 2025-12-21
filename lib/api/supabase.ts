@@ -32,6 +32,7 @@ export type Conversation = {
   status: 'open' | 'closed' | 'pending';
   unread_count: number;
   last_message_at: string;
+  notes: string | null;
   created_at: string;
   updated_at: string;
 };

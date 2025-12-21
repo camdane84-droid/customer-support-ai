@@ -5,6 +5,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/lib/context/AuthContext';
 import { supabase } from '@/lib/api/supabase';
 import { Save, Building, Clock, Share2, Mail, MessageCircle, Instagram, Facebook, CheckCircle } from 'lucide-react';
+import TikTokIcon from '@/components/icons/TikTokIcon';
 
 export default function SettingsPage() {
   const { business } = useAuth();
@@ -108,6 +109,18 @@ export default function SettingsPage() {
               isConnected={false}
               canDisconnect={false}
               color="green"
+              disabled={true}
+            />
+
+            {/* TikTok (Coming Soon) */}
+            <ConnectionCard
+              platform="tiktok"
+              icon={TikTokIcon}
+              name="TikTok"
+              description="Coming soon"
+              isConnected={false}
+              canDisconnect={false}
+              color="slate"
               disabled={true}
             />
           </div>
@@ -228,7 +241,7 @@ function ConnectionCard({
   description: string;
   isConnected: boolean;
   canDisconnect: boolean;
-  color: 'blue' | 'pink' | 'green';
+  color: 'blue' | 'pink' | 'green' | 'slate';
   onConnect?: () => void;
   onDisconnect?: () => void;
   disabled?: boolean;
@@ -237,6 +250,7 @@ function ConnectionCard({
     blue: 'text-blue-500 bg-blue-50',
     pink: 'text-pink-500 bg-pink-50',
     green: 'text-green-500 bg-green-50',
+    slate: 'text-slate-700 bg-slate-50',
   };
 
   return (
