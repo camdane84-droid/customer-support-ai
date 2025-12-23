@@ -12,6 +12,7 @@ import { useAuth } from '@/lib/context/AuthContext';
 import type { Conversation } from '@/lib/api/supabase';
 import { MessageSquare, Clock, TrendingUp, Zap, ArrowRight, Mail, Instagram, Phone } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { getCustomerDisplayName, getCustomerInitials } from '@/lib/utils/customerDisplay';
 
 export default function DashboardPage() {
   const { business, loading: authLoading } = useAuth();
@@ -48,7 +49,7 @@ export default function DashboardPage() {
           console.log('🔄 Dashboard: Polling for updates...');
           loadData();
         }
-      }, 5000); // Poll every 5 seconds
+      }, 1000); // Poll every 1 second
 
       // Return cleanup function
       return () => {
@@ -166,7 +167,8 @@ export default function DashboardPage() {
 
   // Navigate to inbox with specific conversation selected
   function handleConversationClick(conversation: Conversation) {
-    console.log('📍 Dashboard: Clicked conversation:', conversation.customer_name, 'ID:', conversation.id);
+    const displayName = getCustomerDisplayName(conversation);
+    console.log('📍 Dashboard: Clicked conversation:', displayName, 'ID:', conversation.id);
     router.push(`/dashboard/inbox?conversation=${conversation.id}`);
   }
 
@@ -200,14 +202,26 @@ export default function DashboardPage() {
     );
   }
 
+  // Show loading spinner while auth is initializing
+  if (authLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Show error state if auth completed but no business found
   if (!business) {
     return (
       <DashboardLayout>
         <div className="p-6 flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">No Business Found</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Unable to Load Business Data</h2>
             <p className="text-gray-600 mb-4">
-              We couldn't find your business account. Please contact support.
+              We couldn't find your business account.
             </p>
             <button
               onClick={() => window.location.reload()}
@@ -349,7 +363,11 @@ export default function DashboardPage() {
                 No conversations yet
               </div>
             ) : (
-              conversations.slice(0, 5).map((convo) => (
+              conversations.slice(0, 5).map((convo) => {
+                const displayName = getCustomerDisplayName(convo);
+                const initials = getCustomerInitials(displayName);
+
+                return (
                 <button
                   key={convo.id}
                   onClick={() => handleConversationClick(convo)}
@@ -359,13 +377,13 @@ export default function DashboardPage() {
                     <div className="flex items-start space-x-4">
                       <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                         <span className="text-sm font-medium text-blue-700">
-                          {convo.customer_name.charAt(0)}
+                          {initials}
                         </span>
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-medium text-gray-900">
-                            {convo.customer_name}
+                            {displayName}
                           </p>
                           <span className={`inline-flex items-center justify-center w-5 h-5 rounded ${getChannelColor(convo.channel)}`}>
                             {getChannelIcon(convo.channel)}
@@ -397,7 +415,8 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 </button>
-              ))
+              );
+              })
             )}
           </div>
         </div>

@@ -13,6 +13,7 @@ import CustomerProfileModal from './CustomerProfileModal';
 import Tag from '@/components/ui/Tag';
 import Toast from '@/components/ui/Toast';
 import { detectTags, type Tag as TagType } from '@/lib/utils/auto-tagging';
+import { getCustomerDisplayName, getCustomerInitials } from '@/lib/utils/customerDisplay';
 
 interface MessageThreadProps {
   conversation: Conversation;
@@ -306,6 +307,9 @@ export default function MessageThread({ conversation, businessId, onConversation
     }
   }
 
+  const displayName = getCustomerDisplayName(conversation);
+  const initials = getCustomerInitials(displayName);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -327,12 +331,12 @@ export default function MessageThread({ conversation, businessId, onConversation
               title="View customer profile"
             >
               <span className="text-white font-semibold text-sm">
-                {conversation.customer_name.charAt(0).toUpperCase()}
+                {initials}
               </span>
             </button>
             <div className="flex-1 min-w-0">
               <div className="flex items-center space-x-3">
-                <h3 className="text-lg font-semibold text-gray-900">{conversation.customer_name}</h3>
+                <h3 className="text-lg font-semibold text-gray-900">{displayName}</h3>
 
                 {/* Notes Button with Expand Animation */}
                 <button
@@ -407,6 +411,18 @@ export default function MessageThread({ conversation, businessId, onConversation
         ) : (
           messages.map((message) => {
             const isCustomer = message.sender_type === 'customer';
+
+            // Get proper display name for customer messages
+            let senderDisplayName = message.sender_name || (isCustomer ? 'Customer' : 'You');
+            if (isCustomer && conversation.channel === 'instagram') {
+              // For Instagram, use the conversation's display name instead of numeric ID
+              // Check if sender_name is all digits (Instagram ID)
+              const isNumericId = /^\d+$/.test(message.sender_name || '');
+              if (isNumericId) {
+                senderDisplayName = displayName; // Use the conversation's display name
+              }
+            }
+
             return (
               <div
                 key={message.id}
@@ -422,7 +438,7 @@ export default function MessageThread({ conversation, businessId, onConversation
                   `}
                 >
                   <p className="text-xs font-medium mb-1 opacity-75">
-                    {message.sender_name || (isCustomer ? 'Customer' : 'You')}
+                    {senderDisplayName}
                   </p>
                   <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
                   <div className={`flex items-center justify-between mt-2 ${isCustomer ? 'text-gray-500' : 'text-blue-100'}`}>
@@ -670,7 +686,7 @@ export default function MessageThread({ conversation, businessId, onConversation
       {showProfileModal && (
         <CustomerProfileModal
           conversationId={conversation.id}
-          customerName={conversation.customer_name}
+          customerName={displayName}
           customerEmail={conversation.customer_email}
           customerInstagram={conversation.customer_instagram_id}
           onClose={() => setShowProfileModal(false)}

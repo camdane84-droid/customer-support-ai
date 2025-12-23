@@ -38,6 +38,17 @@ export async function POST(request: NextRequest) {
       .update({ last_message_at: new Date().toISOString() })
       .eq('id', message.conversation_id);
 
+    // If this is a customer message, trigger auto-notes (fire and forget)
+    if (message.sender_type === 'customer') {
+      // Don't await - let it run in background
+      fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/conversations/${message.conversation_id}/auto-notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).catch(err => {
+        console.log('Auto-notes failed (non-critical):', err.message);
+      });
+    }
+
     // If this is a business reply, try to send it
     if (message.sender_type === 'business') {
       try {

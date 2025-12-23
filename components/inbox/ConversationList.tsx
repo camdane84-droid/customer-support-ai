@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Mail, Instagram, Phone, Search, MoreHorizontal, Archive, Trash2, X } from 'lucide-react';
+import { Mail, Instagram, Phone, Search, MoreHorizontal, Archive, Trash2, X, Download } from 'lucide-react';
 import type { Conversation } from '@/lib/api/supabase';
 import { formatDistanceToNow } from 'date-fns';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import { getCustomerDisplayName, getCustomerInitials } from '@/lib/utils/customerDisplay';
 
 interface ConversationListProps {
   conversations: Conversation[];
@@ -31,7 +32,9 @@ export default function ConversationList({
   const filteredConversations = conversations.filter((convo) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
+    const displayName = getCustomerDisplayName(convo);
     return (
+      displayName.toLowerCase().includes(query) ||
       convo.customer_name.toLowerCase().includes(query) ||
       convo.customer_email?.toLowerCase().includes(query) ||
       convo.channel.toLowerCase().includes(query)
@@ -79,6 +82,58 @@ export default function ConversationList({
     setSelectedIds(newSelected);
   }
 
+  async function handleExportCSV() {
+    try {
+      // Get business_id from conversations
+      const businessId = conversations[0]?.business_id;
+      if (!businessId) {
+        alert('No conversations to export');
+        return;
+      }
+
+      console.log('Starting CSV export for business:', businessId);
+      const response = await fetch(`/api/conversations/export?business_id=${businessId}`);
+
+      console.log('Export response status:', response.status);
+      console.log('Export response headers:', Object.fromEntries(response.headers.entries()));
+
+      if (!response.ok) {
+        // Try to get error details
+        const contentType = response.headers.get('content-type');
+        console.log('Error response content-type:', contentType);
+
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          console.error('Export error details:', errorData);
+          alert(`Export failed (${response.status}): ${errorData.details || errorData.error || 'Unknown error'}`);
+        } else {
+          const textError = await response.text();
+          console.error('Export error (non-JSON):', textError);
+          alert(`Export failed (${response.status}). Check console for details.`);
+        }
+        return;
+      }
+
+      // Create a blob from the response
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      // Create a temporary link and trigger download
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `conversations-export-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Export error:', error);
+      alert('Failed to export conversations. Please try again.');
+    }
+  }
+
   async function handleBulkArchive() {
     if (selectedIds.size === 0 || !onBulkArchive) return;
     setShowArchiveConfirm(true);
@@ -121,13 +176,24 @@ export default function ConversationList({
               }
             </p>
           </div>
-          <button
-            onClick={toggleSelectionMode}
-            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Bulk actions"
-          >
-            {selectionMode ? <X className="w-5 h-5" /> : <MoreHorizontal className="w-5 h-5" />}
-          </button>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handleExportCSV}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Export to CSV"
+              aria-label="Export conversations to CSV"
+            >
+              <Download className="w-5 h-5" aria-hidden="true" />
+            </button>
+            <button
+              onClick={toggleSelectionMode}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Bulk actions"
+              aria-label="Toggle bulk actions"
+            >
+              {selectionMode ? <X className="w-5 h-5" aria-hidden="true" /> : <MoreHorizontal className="w-5 h-5" aria-hidden="true" />}
+            </button>
+          </div>
         </div>
 
         {/* Bulk Action Buttons */}
@@ -198,6 +264,8 @@ export default function ConversationList({
           filteredConversations.map((conversation) => {
             const isSelected = selectedConversation?.id === conversation.id;
             const isChecked = selectedIds.has(conversation.id);
+            const displayName = getCustomerDisplayName(conversation);
+            const initials = getCustomerInitials(displayName);
 
             return (
               <button
@@ -248,7 +316,7 @@ export default function ConversationList({
                     }
                   `}>
                     <span className="text-white font-semibold text-sm">
-                      {conversation.customer_name.charAt(0).toUpperCase()}
+                      {initials}
                     </span>
                   </div>
 
@@ -256,7 +324,7 @@ export default function ConversationList({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between mb-1">
                       <p className={`text-sm font-semibold truncate ${isSelected && !selectionMode ? 'text-blue-900' : 'text-gray-900'}`}>
-                        {conversation.customer_name}
+                        {displayName}
                       </p>
                       {!selectionMode && (
                         <span className="text-xs text-gray-500 flex-shrink-0 ml-2">

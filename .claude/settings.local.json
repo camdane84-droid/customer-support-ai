@@ -31,9 +31,35 @@
       "Bash(node scripts/check-db-token-perms.js:*)",
       "Bash(node scripts/diagnose-app-access.js:*)",
       "Bash(node scripts/check-app-capabilities.js:*)",
-      "Bash(node scripts/refresh-instagram-names.js:*)"
+      "Bash(node scripts/refresh-instagram-names.js:*)",
+      "WebFetch(domain:business-api.tiktok.com)",
+      "WebFetch(domain:ads.tiktok.com)",
+      "WebFetch(domain:partner.tiktokshop.com)",
+      "Bash(node scripts/check-instagram-messages.js:*)",
+      "Bash(node scripts/test-db-instagram-token.js:*)",
+      "Bash(node scripts/test-webhook-fix.js:*)",
+      "Bash(node scripts/debug-instagram-webhook.js:*)",
+      "WebFetch(domain:developers.facebook.com)",
+      "Bash(npm run build:*)",
+      "Bash(where:*)",
+      "Bash(node scripts/debug-business-data.js:*)",
+      "Bash(xargs:*)",
+      "Bash(tree:*)",
+      "Bash(curl:*)",
+      "Bash(wc -l \"C:/Users/cdall/OneDrive/Desktop/VS Code/dev/customer-support-ai\"/{app,lib,components}/**/*.{ts,tsx})",
+      "Bash(timeout 10 cat:*)",
+      "Bash(node scripts/add-analytics-indexes.js:*)",
+      "Bash(chmod:*)",
+      "Bash(git add:*)",
+      "Bash(git reset:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "C:/Users/cdall/OneDrive/Desktop/VS Code/dev/customer-support-ai/.claude/statusline.sh",
+    "padding": 0
   }
 }

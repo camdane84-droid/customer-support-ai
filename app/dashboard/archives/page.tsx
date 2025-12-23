@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import type { Conversation } from '@/lib/api/supabase';
+import { getCustomerDisplayName, getCustomerInitials } from '@/lib/utils/customerDisplay';
 
 type ViewLevel = 'years' | 'months' | 'days' | 'conversations';
 
@@ -29,12 +30,19 @@ interface BreadcrumbItem {
 
 interface ArchivedConversation {
   id: string;
+  business_id: string;
   customer_name: string;
   customer_email: string | null;
+  customer_phone: string | null;
   customer_instagram_id: string | null;
   channel: string;
+  status: string;
+  unread_count: number;
   archived_at: string;
   last_message_at: string;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export default function ArchivesPage() {
@@ -538,7 +546,11 @@ export default function ArchivesPage() {
                           </h3>
                         </div>
                         <div className="flex-1 overflow-y-auto">
-                          {getConversationsForDay().map(conversation => (
+                          {getConversationsForDay().map(conversation => {
+                            const displayName = getCustomerDisplayName(conversation);
+                            const initials = getCustomerInitials(displayName);
+
+                            return (
                             <button
                               key={conversation.id}
                               onClick={() => setSelectedConversation(conversation)}
@@ -553,12 +565,12 @@ export default function ArchivesPage() {
                               <div className="flex items-start space-x-3">
                                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center flex-shrink-0">
                                   <span className="text-white font-semibold text-sm">
-                                    {conversation.customer_name.charAt(0).toUpperCase()}
+                                    {initials}
                                   </span>
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <h3 className="text-sm font-semibold text-gray-900 truncate">
-                                    {conversation.customer_name}
+                                    {displayName}
                                   </h3>
                                   <p className="text-xs text-gray-500 mt-0.5 truncate">
                                     {conversation.customer_email || conversation.customer_instagram_id || 'No contact info'}
@@ -571,7 +583,8 @@ export default function ArchivesPage() {
                                 </div>
                               </div>
                             </button>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
 
@@ -586,7 +599,11 @@ export default function ArchivesPage() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {getConversationsForDay().map(conversation => (
+                      {getConversationsForDay().map(conversation => {
+                        const displayName = getCustomerDisplayName(conversation);
+                        const initials = getCustomerInitials(displayName);
+
+                        return (
                         <button
                           key={conversation.id}
                           onClick={() => setSelectedConversation(conversation)}
@@ -596,12 +613,12 @@ export default function ArchivesPage() {
                             <div className="flex items-start space-x-3 flex-1">
                               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center flex-shrink-0">
                                 <span className="text-white font-semibold text-sm">
-                                  {conversation.customer_name.charAt(0).toUpperCase()}
+                                  {initials}
                                 </span>
                               </div>
                               <div className="flex-1 min-w-0">
                                 <h3 className="text-sm font-semibold text-gray-900">
-                                  {conversation.customer_name}
+                                  {displayName}
                                 </h3>
                                 <p className="text-xs text-gray-500 mt-0.5">
                                   {conversation.customer_email || conversation.customer_instagram_id || 'No contact info'}
@@ -620,7 +637,8 @@ export default function ArchivesPage() {
                             <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
                           </div>
                         </button>
-                      ))}
+                      );
+                      })}
                     </div>
                   )}
                 </>

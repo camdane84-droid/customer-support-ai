@@ -63,6 +63,29 @@ export async function POST(
       );
     }
 
+    // Check if AI insights is enabled for this business
+    const { data: business } = await supabaseAdmin
+      .from('businesses')
+      .select('auto_generate_notes')
+      .eq('id', conversation.business_id)
+      .single();
+
+    if (!business?.auto_generate_notes) {
+      console.log('⚠️ AI Customer Insights not enabled for this business');
+      return NextResponse.json({
+        profile: {
+          past_orders: [],
+          issues: [],
+          sizes_dimensions: {},
+          preferences: [],
+          allergies: [],
+          best_times: [],
+          needs_more_data: ['past_orders', 'issues', 'sizes_dimensions', 'preferences', 'allergies', 'best_times', 'favorite_category']
+        },
+        message: 'AI Customer Insights is disabled. Enable it in Settings to use this feature.'
+      });
+    }
+
     // Fetch all messages for this conversation
     const { data: messages, error: messagesError } = await supabaseAdmin
       .from('messages')

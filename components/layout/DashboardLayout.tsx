@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, MessageSquare, BookOpen, Settings, LayoutDashboard, TrendingUp, TestTube, Archive } from 'lucide-react';
+import { Menu, X, MessageSquare, BookOpen, Settings, LayoutDashboard, TrendingUp, TestTube, Archive, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from '@/lib/auth';
 import { useAuth } from '@/lib/context/AuthContext';
+import { useTheme } from '@/lib/context/ThemeContext';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -22,6 +23,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const { user, business } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const router = useRouter();
 
   async function handleLogout() {
@@ -36,7 +38,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Background with subtle geometric pattern */}
-      <div className="fixed inset-0 bg-slate-50 -z-10">
+      <div className="fixed inset-0 bg-slate-50 dark:bg-slate-900 -z-10">
         {/* Grid pattern */}
         <svg className="absolute inset-0 w-full h-full opacity-[0.4]" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -70,28 +72,31 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div
           className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setMobileMenuOpen(false)}
+          aria-hidden="true"
         />
       )}
 
       {/* Mobile sidebar */}
-      <div
+      <nav
         className={`
-          fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 transform transition-transform duration-300 ease-in-out lg:hidden
+          fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transform transition-transform duration-300 ease-in-out lg:hidden
           ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
+        aria-label="Mobile navigation"
       >
-        <div className="flex items-center justify-between h-14 px-4 border-b border-slate-200">
+        <div className="flex items-center justify-between h-14 px-4 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center space-x-2">
             <div className="w-7 h-7 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center">
               <MessageSquare className="w-4 h-4 text-white" />
             </div>
-            <span className="text-base font-semibold text-slate-900">Relay</span>
+            <span className="text-base font-semibold text-slate-900 dark:text-white">Relay</span>
           </div>
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="text-slate-400 hover:text-slate-600 p-1"
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1"
+            aria-label="Close navigation menu"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
@@ -139,34 +144,35 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <button
               onClick={handleLogout}
               className="text-slate-400 hover:text-slate-600 p-1.5"
-              title="Logout"
+              aria-label="Logout"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
             </button>
           </div>
         </div>
-      </div>
+      </nav>
 
       {/* Desktop Sidebar - Supabase style */}
-      <div
+      <nav
         className={`
-          hidden lg:flex flex-col bg-white border-r border-slate-200 transition-all duration-200 ease-out z-30
+          hidden lg:flex flex-col bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transition-all duration-200 ease-out z-30
           ${sidebarExpanded ? 'w-52' : 'w-14'}
         `}
         onMouseEnter={() => setSidebarExpanded(true)}
         onMouseLeave={() => setSidebarExpanded(false)}
+        aria-label="Main navigation"
       >
         {/* Logo */}
-        <div className="flex items-center h-14 px-3 border-b border-slate-200">
+        <div className="flex items-center h-14 px-3 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center space-x-2 overflow-hidden">
             <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center flex-shrink-0">
               <MessageSquare className="w-4 h-4 text-white" />
             </div>
             <span
               className={`
-                text-base font-semibold text-slate-900 whitespace-nowrap transition-all duration-200
+                text-base font-semibold text-slate-900 dark:text-white whitespace-nowrap transition-all duration-200
                 ${sidebarExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2'}
               `}
             >
@@ -235,37 +241,48 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 text-slate-400 hover:text-slate-600 p-1.5 transition-all duration-200
                 ${sidebarExpanded ? 'opacity-100' : 'opacity-0 w-0 p-0'}
               `}
-              title="Logout"
+              aria-label="Logout"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
             </button>
           </div>
         </div>
-      </div>
+      </nav>
 
       {/* Main content area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar (mobile) */}
-        <div className="lg:hidden flex items-center justify-between h-14 px-4 bg-white/80 backdrop-blur-sm border-b border-slate-200">
+        <div className="lg:hidden flex items-center justify-between h-14 px-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
           <button
             onClick={() => setMobileMenuOpen(true)}
             className="text-slate-500 hover:text-slate-700 p-1"
+            aria-label="Open navigation menu"
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-5 h-5" aria-hidden="true" />
           </button>
           <div className="flex items-center space-x-2">
             <div className="w-6 h-6 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-md flex items-center justify-center">
               <MessageSquare className="w-3.5 h-3.5 text-white" />
             </div>
-            <span className="text-base font-semibold text-slate-900">Relay</span>
+            <span className="text-base font-semibold text-slate-900 dark:text-white">Relay</span>
           </div>
-          <div className="w-7" />
+          <button
+            onClick={toggleTheme}
+            className="p-1.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+            aria-label="Toggle dark mode"
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-5 h-5" aria-hidden="true" />
+            ) : (
+              <Moon className="w-5 h-5" aria-hidden="true" />
+            )}
+          </button>
         </div>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto" role="main">
           {children}
         </main>
       </div>

@@ -19,11 +19,19 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await signIn(email, password);
+      console.log('🔐 [LOGIN] Attempting sign in for:', email);
+      const result = await signIn(email, password);
+      console.log('✅ [LOGIN] Sign in successful:', result.user?.email);
+
+      // Wait for auth state to propagate before navigating
+      console.log('⏳ [LOGIN] Waiting 2s for auth state to propagate...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      console.log('🚀 [LOGIN] Navigating to dashboard...');
       router.push('/dashboard');
     } catch (err: any) {
+      console.error('❌ [LOGIN] Sign in failed:', err);
       setError(err.message || 'Failed to sign in');
-    } finally {
       setLoading(false);
     }
   }

@@ -14,6 +14,8 @@ export default function DashboardLayoutWrapper({
   const redirectedRef = useRef(false);
 
   useEffect(() => {
+    console.log('📊 [DASHBOARD LAYOUT] State:', { loading, hasUser: !!user, userEmail: user?.email, redirected: redirectedRef.current });
+
     // Redirect to login only once if not authenticated
     if (!loading && !user && !redirectedRef.current) {
       console.log('🔒 No user, redirecting to login...');
@@ -21,6 +23,7 @@ export default function DashboardLayoutWrapper({
       router.push('/login');
     } else if (user) {
       // Reset redirect flag when user logs in
+      console.log('✅ [DASHBOARD LAYOUT] User authenticated:', user.email);
       redirectedRef.current = false;
     }
   }, [user, loading]); // Remove router from dependencies - it's stable

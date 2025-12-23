@@ -27,50 +27,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const initializingRef = useRef(false);
   const router = useRouter();
 
-  // Fetch business for a user email - with retry logic
-  const fetchBusiness = useCallback(async (email: string, retries = 3): Promise<Business | null> => {
-    console.log('📡 Fetching business for:', email);
+  // Fetch business for a user email - optimized with caching
+  const fetchBusiness = useCallback(async (email: string, useCache: boolean = true): Promise<Business | null> => {
+    console.log('📡 [FETCH] Fetching business for:', email);
 
-    for (let attempt = 1; attempt <= retries; attempt++) {
-      try {
-        const { data, error } = await supabase
-          .from('businesses')
-          .select('*')
-          .eq('email', email)
-          .maybeSingle();
-
-        if (error) {
-          console.error(`❌ Attempt ${attempt} - Error fetching business:`, error);
-
-          // If it's an RLS or permission error, wait and retry
-          if (error.code === 'PGRST301' || error.message?.includes('permission')) {
-            if (attempt < retries) {
-              console.log(`⏳ Waiting before retry ${attempt + 1}...`);
-              await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-              continue;
-            }
-          }
-
-          // For other errors, don't retry
-          return null;
-        }
-
-        if (data) {
-          console.log('🏢 Business found:', data.name);
-          return data;
-        } else {
-          console.log('🏢 No business found for email');
-          return null;
-        }
-      } catch (err) {
-        console.error(`❌ Attempt ${attempt} - Exception:`, err);
-        if (attempt < retries) {
-          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+    // Try cache first for instant loads
+    if (useCache && typeof window !== 'undefined') {
+      const cacheKey = `business_${email}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        try {
+          const cachedBusiness = JSON.parse(cached);
+          console.log('⚡ [CACHE] Using cached business:', cachedBusiness.name);
+          // Refresh in background to keep cache fresh
+          setTimeout(() => fetchBusiness(email, false), 100);
+          return cachedBusiness;
+        } catch (e) {
+          console.error('❌ [CACHE] Failed to parse cached business');
         }
       }
     }
 
-    return null;
+    try {
+      const { data, error } = await supabase
+        .from('businesses')
+        .select('*')
+        .eq('email', email)
+        .maybeSingle();
+
+      if (error) {
+        console.error('❌ [FETCH] Error:', error.message, error.code);
+        return null;
+      }
+
+      if (data) {
+        console.log('✅ [FETCH] Business found:', data.name, 'ID:', data.id);
+        // Cache for next time
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(`business_${email}`, JSON.stringify(data));
+        }
+        return data;
+      } else {
+        console.log('⚠️ [FETCH] No business found for email:', email);
+        return null;
+      }
+    } catch (err: any) {
+      console.error('❌ [FETCH] Exception:', err.message);
+      return null;
+    }
   }, []);
 
   // Create business for user - with duplicate handling
@@ -106,7 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [fetchBusiness]);
 
-  // Load user and business
+  // Load user and business - optimized for speed
   const loadUserAndBusiness = useCallback(async (currentUser: User) => {
     console.log('🔄 Loading business for user:', currentUser.email);
 
@@ -116,10 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Small delay to allow session to propagate (helps with RLS)
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    // First try to fetch existing business
+    // First try to fetch existing business (no artificial delay)
     let biz = await fetchBusiness(currentUser.email);
 
     // If no business exists, create one
@@ -128,10 +129,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const businessName = currentUser.user_metadata?.business_name;
       biz = await createBusiness(currentUser.email, businessName);
 
-      // If creation failed, try fetching one more time (race condition)
+      // If creation failed, try fetching one more time (race condition handling)
       if (!biz) {
         console.log('🔄 Creation may have raced, trying fetch again...');
-        await new Promise(resolve => setTimeout(resolve, 500));
         biz = await fetchBusiness(currentUser.email);
       }
     }
@@ -145,9 +145,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [fetchBusiness, createBusiness]);
 
-  // Refresh business (can be called manually)
+  // Refresh business (can be called manually) - clears cache
   const refreshBusiness = useCallback(async () => {
     if (user?.email) {
+      // Clear cache to force fresh fetch
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(`business_${user.email}`);
+      }
       await loadUserAndBusiness(user);
     }
   }, [user, loadUserAndBusiness]);
@@ -186,17 +190,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (session?.user) {
           console.log('👤 [AUTH] Found session for:', session.user.email);
-          if (mounted) {
-            console.log('🔧 [AUTH] Setting user and loading business...');
-            setUser(session.user);
-            await loadUserAndBusiness(session.user);
-          }
+          console.log('🔧 [AUTH] Setting user (mounted:', mounted, ')...');
+          setUser(session.user);
+          // Load business in background, don't block on it (regardless of mounted state)
+          console.log('🔧 [AUTH] Loading business in background...');
+          loadUserAndBusiness(session.user).catch(err => {
+            console.error('❌ [AUTH] Background business load failed:', err);
+          });
         } else {
           console.log('❌ [AUTH] No active session');
-          if (mounted) {
-            setUser(null);
-            setBusiness(null);
-          }
+          setUser(null);
+          setBusiness(null);
         }
       } catch (error) {
         console.error('❌ [AUTH] Auth initialization error:', error);
@@ -223,9 +227,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Handle sign in
       if (event === 'SIGNED_IN' && session?.user) {
+        console.log('✅ [AUTH] SIGNED_IN - Setting user:', session.user.email);
         setUser(session.user);
-        await loadUserAndBusiness(session.user);
         setLoading(false);
+        // Load business in background, don't block
+        loadUserAndBusiness(session.user).catch(err => {
+          console.error('❌ [AUTH] Background business load failed:', err);
+        });
       }
       // Handle sign out
       else if (event === 'SIGNED_OUT') {
@@ -256,7 +264,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.warn('⚠️ Auth loading timeout - forcing complete');
         setLoading(false);
       }
-    }, 10000); // 10 second timeout
+    }, 3000); // 3 second timeout (reduced from 10)
 
     return () => clearTimeout(timeout);
   }, [loading]);

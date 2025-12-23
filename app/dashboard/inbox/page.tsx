@@ -161,7 +161,7 @@ export default function InboxPage() {
           console.log('🔄 Polling for updates...');
           loadConversations(false); // Don't show loading spinner when polling
         }
-      }, 5000); // Poll every 5 seconds
+      }, 1000); // Poll every 1 second
 
       // Return cleanup function
       return () => {
@@ -327,6 +327,18 @@ export default function InboxPage() {
     );
   }
 
+  // Show loading state while auth is initializing
+  if (authLoading) {
+    console.log('⏳ Auth still loading...');
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   // Show error if no business after auth loaded
   if (!business) {
     console.log('❌ No business available');
@@ -335,7 +347,7 @@ export default function InboxPage() {
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
             <div className="text-red-600 mb-4 text-4xl">⚠️</div>
-            <div className="text-gray-900 font-medium mb-2">Business Not Found</div>
+            <div className="text-gray-900 font-medium mb-2">Unable to Load Business Data</div>
             <div className="text-gray-500 text-sm">
               {error || 'Unable to load your business account'}
             </div>

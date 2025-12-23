@@ -4,14 +4,15 @@ import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/lib/context/AuthContext';
 import { supabase } from '@/lib/api/supabase';
-import { Save, Building, Clock, Share2, Mail, MessageCircle, Instagram, Facebook, CheckCircle } from 'lucide-react';
+import { Save, Building, Clock, Share2, Mail, MessageCircle, Instagram, Facebook, CheckCircle, FileText, Sparkles } from 'lucide-react';
 import TikTokIcon from '@/components/icons/TikTokIcon';
 
 export default function SettingsPage() {
-  const { business } = useAuth();
+  const { business, loading: authLoading } = useAuth();
   const [businessName, setBusinessName] = useState('');
   const [businessType, setBusinessType] = useState('');
   const [policies, setPolicies] = useState('');
+  const [autoGenerateNotes, setAutoGenerateNotes] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -20,6 +21,7 @@ export default function SettingsPage() {
       setBusinessName(business.name || '');
       setBusinessType(business.business_type || '');
       setPolicies(business.policies || '');
+      setAutoGenerateNotes((business as any).auto_generate_notes || false);
     }
   }, [business]);
 
@@ -30,32 +32,73 @@ export default function SettingsPage() {
     setSaved(false);
 
     try {
-      const { error } = await supabase
+      console.log('💾 Saving settings...');
+
+      // Try to update with auto_generate_notes first
+      let { error } = await supabase
         .from('businesses')
         .update({
           name: businessName,
           business_type: businessType,
           policies: policies,
+          auto_generate_notes: autoGenerateNotes,
         })
         .eq('id', business.id);
 
-      if (error) throw error;
+      // If column doesn't exist, save without it
+      if (error && error.message.includes('auto_generate_notes')) {
+        console.warn('⚠️ auto_generate_notes column not found, saving other fields');
+        const result = await supabase
+          .from('businesses')
+          .update({
+            name: businessName,
+            business_type: businessType,
+            policies: policies,
+          })
+          .eq('id', business.id);
 
+        error = result.error;
+      }
+
+      if (error) {
+        console.error('❌ Save error:', error);
+        throw error;
+      }
+
+      console.log('✅ Settings saved successfully');
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save settings:', error);
-      alert('Failed to save settings');
+      alert(`Failed to save settings: ${error.message || 'Unknown error'}`);
     } finally {
       setSaving(false);
     }
   }
 
-  if (!business) {
+  // Show loading state only while auth is initializing
+  if (authLoading) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-full">
-          <div className="text-gray-500">Loading...</div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Show error state if auth completed but no business found
+  if (!business) {
+    return (
+      <DashboardLayout>
+        <div className="flex flex-col items-center justify-center h-full space-y-4">
+          <div className="text-gray-500 text-lg">Unable to load business data</div>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Retry
+          </button>
         </div>
       </DashboardLayout>
     );
@@ -123,6 +166,66 @@ export default function SettingsPage() {
               color="slate"
               disabled={true}
             />
+          </div>
+        </div>
+
+        {/* AI Features */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center space-x-2 mb-4">
+            <Sparkles className="w-5 h-5 text-purple-500" />
+            <h2 className="text-lg font-semibold text-gray-900">AI Customer Insights</h2>
+          </div>
+          <p className="text-sm text-gray-600 mb-6">
+            Let AI automatically learn about your customers to improve service quality
+          </p>
+
+          <div className="space-y-4">
+            {/* AI Insights Toggle */}
+            <div className="flex items-start justify-between p-4 border border-gray-200 rounded-lg hover:border-purple-300 transition-colors bg-gradient-to-r from-purple-50 to-blue-50">
+              <div className="flex-1 pr-4">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Sparkles className="w-4 h-4 text-purple-600" />
+                  <h3 className="font-medium text-gray-900">AI Customer Insights</h3>
+                  <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
+                    Recommended
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 mb-3">
+                  Enable AI to automatically generate customer profiles and conversation notes.
+                </p>
+
+                <div className="space-y-2 mb-3">
+                  <div className="flex items-start space-x-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5"></div>
+                    <p className="text-sm text-gray-700">
+                      <strong>Auto-Notes:</strong> Creates bullet-point summaries in the notepad (e.g., "asked about S coffee price")
+                    </p>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5"></div>
+                    <p className="text-sm text-gray-700">
+                      <strong>Customer Profiles:</strong> Extracts preferences, allergies, past orders, and more
+                    </p>
+                  </div>
+                </div>
+
+                <p className="text-xs text-gray-500 italic">
+                  When enabled, AI passively collects relevant information from conversations—such as product preferences, questions, concerns, and order history—to help provide better, more personalized service. All data stays private within your account.
+                </p>
+              </div>
+              <button
+                onClick={() => setAutoGenerateNotes(!autoGenerateNotes)}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${
+                  autoGenerateNotes ? 'bg-purple-600' : 'bg-gray-200'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    autoGenerateNotes ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
         </div>
 

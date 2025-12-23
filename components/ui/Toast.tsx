@@ -54,14 +54,20 @@ export default function Toast({ type, message, onClose, duration = 5000 }: Toast
 
   return (
     <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-5 fade-in">
-      <div className={`flex items-start space-x-3 p-4 rounded-lg border shadow-lg max-w-md ${config.bgColor} ${config.borderColor}`}>
-        <Icon className={`w-5 h-5 flex-shrink-0 mt-0.5 ${config.iconColor}`} />
+      <div
+        role="alert"
+        aria-live="polite"
+        aria-atomic="true"
+        className={`flex items-start space-x-3 p-4 rounded-lg border shadow-lg max-w-md ${config.bgColor} ${config.borderColor}`}
+      >
+        <Icon className={`w-5 h-5 flex-shrink-0 mt-0.5 ${config.iconColor}`} aria-hidden="true" />
         <p className={`text-sm font-medium flex-1 ${config.textColor}`}>{message}</p>
         <button
           onClick={onClose}
+          aria-label="Close notification"
           className={`flex-shrink-0 ${config.textColor} hover:opacity-70 transition-opacity`}
         >
-          <X className="w-4 h-4" />
+          <X className="w-4 h-4" aria-hidden="true" />
         </button>
       </div>
     </div>
