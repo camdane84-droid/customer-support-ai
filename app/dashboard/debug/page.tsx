@@ -65,7 +65,7 @@ export default function DebugPage() {
               <button
                 onClick={loadAllBusinesses}
                 disabled={loadingBusinesses}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300"
+                className="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 disabled:bg-gray-300"
               >
                 {loadingBusinesses ? 'Loading...' : 'Load Businesses'}
               </button>
@@ -75,7 +75,7 @@ export default function DebugPage() {
                 {JSON.stringify(businesses, null, 2)}
               </pre>
             ) : (
-              <p className="text-gray-500">Click button to load businesses</p>
+              <p className="text-gray-500 dark:text-slate-400">Click button to load businesses</p>
             )}
           </div>
 

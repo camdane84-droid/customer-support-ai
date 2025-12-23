@@ -234,7 +234,7 @@ export default function CannedResponsePicker({
             <button
               onClick={handleCreateNew}
               disabled={saving}
-              className="flex items-center space-x-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm disabled:opacity-50"
+              className="flex items-center space-x-1 px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
               <span>{saving ? 'Saving...' : 'Save'}</span>
@@ -281,7 +281,7 @@ export default function CannedResponsePicker({
           {/* Add New Button */}
           <button
             onClick={() => setShowCreateForm(true)}
-            className="w-full p-3 border-t border-gray-200 hover:bg-blue-50 transition-colors text-left flex items-center space-x-2 text-blue-600 font-medium"
+            className="w-full p-3 border-t border-gray-200 hover:bg-blue-50 transition-colors text-left flex items-center space-x-2 text-indigo-600 font-medium"
           >
             <Plus className="w-4 h-4" />
             <span className="text-sm">Add New</span>

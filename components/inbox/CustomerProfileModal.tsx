@@ -122,7 +122,7 @@ export default function CustomerProfileModal({
     const needsData = profile?.needs_more_data.includes(title.toLowerCase().replace(/[\/\s]/g, '_'));
 
     const colorClasses = inverse ? {
-      blue: { bg: 'bg-blue-600', border: 'border-blue-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-blue-700' },
+      blue: { bg: 'bg-indigo-600', border: 'border-blue-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-indigo-700' },
       green: { bg: 'bg-green-600', border: 'border-green-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-green-700' },
       orange: { bg: 'bg-orange-600', border: 'border-orange-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-orange-700' },
       red: { bg: 'bg-red-600', border: 'border-red-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-red-700' },
@@ -130,8 +130,8 @@ export default function CustomerProfileModal({
       pink: { bg: 'bg-pink-600', border: 'border-pink-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-pink-700' },
       indigo: { bg: 'bg-indigo-600', border: 'border-indigo-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-indigo-700' },
       teal: { bg: 'bg-teal-600', border: 'border-teal-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-teal-700' },
-    }[color] || { bg: 'bg-blue-600', border: 'border-blue-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-blue-700' } : {
-      blue: { bg: 'bg-blue-50', border: 'border-blue-200', icon: 'text-blue-600', text: 'text-blue-900', iconBg: 'bg-white' },
+    }[color] || { bg: 'bg-indigo-600', border: 'border-blue-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-indigo-700' } : {
+      blue: { bg: 'bg-blue-50', border: 'border-blue-200', icon: 'text-indigo-600', text: 'text-blue-900', iconBg: 'bg-white' },
       green: { bg: 'bg-green-50', border: 'border-green-200', icon: 'text-green-600', text: 'text-green-900', iconBg: 'bg-white' },
       orange: { bg: 'bg-orange-50', border: 'border-orange-200', icon: 'text-orange-600', text: 'text-orange-900', iconBg: 'bg-white' },
       red: { bg: 'bg-red-50', border: 'border-red-200', icon: 'text-red-600', text: 'text-red-900', iconBg: 'bg-white' },
@@ -139,7 +139,7 @@ export default function CustomerProfileModal({
       pink: { bg: 'bg-pink-50', border: 'border-pink-200', icon: 'text-pink-600', text: 'text-pink-900', iconBg: 'bg-white' },
       indigo: { bg: 'bg-indigo-50', border: 'border-indigo-200', icon: 'text-indigo-600', text: 'text-indigo-900', iconBg: 'bg-white' },
       teal: { bg: 'bg-teal-50', border: 'border-teal-200', icon: 'text-teal-600', text: 'text-teal-900', iconBg: 'bg-white' },
-    }[color] || { bg: 'bg-blue-50', border: 'border-blue-200', icon: 'text-blue-600', text: 'text-blue-900', iconBg: 'bg-white' };
+    }[color] || { bg: 'bg-blue-50', border: 'border-blue-200', icon: 'text-indigo-600', text: 'text-blue-900', iconBg: 'bg-white' };
 
     return (
       <div className={`${colorClasses.bg} border ${colorClasses.border} rounded-lg p-4 mb-3 ${inverse ? 'shadow-lg' : ''}`}>
@@ -223,7 +223,7 @@ export default function CustomerProfileModal({
             <button
               onClick={analyzeProfile}
               disabled={analyzing}
-              className="mt-4 flex items-center space-x-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50 text-sm"
+              className="mt-4 flex items-center space-x-2 px-4 py-2 bg-blue-50 text-indigo-600 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50 text-sm"
             >
               {analyzing ? (
                 <>
@@ -244,7 +244,7 @@ export default function CustomerProfileModal({
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+              <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
             </div>
           ) : profile ? (
             <>

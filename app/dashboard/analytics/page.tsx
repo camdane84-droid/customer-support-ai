@@ -336,7 +336,7 @@ export default function AnalyticsPage() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-full">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
         </div>
       </DashboardLayout>
     );
@@ -346,7 +346,7 @@ export default function AnalyticsPage() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-full">
-          <div className="text-gray-500">No analytics data available</div>
+          <div className="text-gray-500 dark:text-slate-400">No analytics data available</div>
         </div>
       </DashboardLayout>
     );
@@ -358,8 +358,8 @@ export default function AnalyticsPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Business Analytics</h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <h1 className="text-3xl font-bold dark:text-white text-gray-900 dark:text-white">Business Analytics</h1>
+            <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
               Comprehensive metrics for {business.name}
             </p>
           </div>
@@ -370,11 +370,10 @@ export default function AnalyticsPage() {
               <button
                 key={range}
                 onClick={() => setDateRange(range)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  dateRange === range
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                }`}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${dateRange === range
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
               >
                 {range === '7d' ? 'Last 7 Days' : range === '30d' ? 'Last 30 Days' : 'Last 90 Days'}
               </button>
@@ -384,7 +383,7 @@ export default function AnalyticsPage() {
 
         {/* Key Performance Indicators */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Key Performance Indicators</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Key Performance Indicators</h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
             <MetricCard
               icon={Users}
@@ -425,9 +424,9 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Customer Intelligence */}
-        <div className="bg-gray-50/50 rounded-lg border border-gray-300/75 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <Users className="w-5 h-5 mr-2 text-blue-600" />
+        <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/65 dark:border-slate-700/50 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+            <Users className="w-5 h-5 mr-2 text-indigo-600" />
             Customer Intelligence
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -447,7 +446,7 @@ export default function AnalyticsPage() {
               label="Avg Customer Lifetime"
               value={`${analytics.avgCustomerLifetime} days`}
               icon={Calendar}
-              iconColor="text-blue-600"
+              iconColor="text-indigo-600"
             />
             <MiniStatCard
               label="Customer Growth"
@@ -459,8 +458,8 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Business Operations */}
-        <div className="bg-gray-50/50 rounded-lg border border-gray-300/75 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/65 dark:border-slate-700/50 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
             <ShoppingCart className="w-5 h-5 mr-2 text-green-600" />
             Business Operations
           </h2>
@@ -475,7 +474,7 @@ export default function AnalyticsPage() {
               label="Avg Order Size"
               value={`${analytics.avgOrderValue} items`}
               icon={BarChart3}
-              iconColor="text-blue-600"
+              iconColor="text-indigo-600"
             />
             <MiniStatCard
               label="Order Growth"
@@ -493,8 +492,8 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Performance Metrics */}
-        <div className="bg-gray-50/50 rounded-lg border border-gray-300/75 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/65 dark:border-slate-700/50 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
             <Activity className="w-5 h-5 mr-2 text-orange-600" />
             Performance & Efficiency
           </h2>
@@ -503,7 +502,7 @@ export default function AnalyticsPage() {
               label="Avg Response Time"
               value={analytics.avgResponseTime}
               icon={Clock}
-              iconColor="text-blue-600"
+              iconColor="text-indigo-600"
             />
             <MiniStatCard
               label="Avg Resolution Time"
@@ -529,8 +528,8 @@ export default function AnalyticsPage() {
         {/* Two-Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Channel Distribution */}
-          <div className="bg-gray-50/50 rounded-lg border border-gray-300/75 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/65 dark:border-slate-700/50 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Channel Distribution
             </h2>
             <div className="space-y-4">
@@ -559,36 +558,36 @@ export default function AnalyticsPage() {
           </div>
 
           {/* AI Performance */}
-          <div className="bg-gray-50/50 rounded-lg border border-gray-300/75 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/75 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
               <Zap className="w-5 h-5 mr-2 text-orange-600" />
               AI Performance
             </h2>
             <div className="space-y-6">
               <div>
                 <div className="flex items-baseline justify-between mb-2">
-                  <span className="text-sm text-gray-600">AI Suggestions Used</span>
-                  <span className="text-2xl font-bold text-gray-900">{analytics.aiUsageCount}</span>
+                  <span className="text-sm text-gray-600 dark:text-slate-300">AI Suggestions Used</span>
+                  <span className="text-2xl font-bold dark:text-white text-gray-900 dark:text-white">{analytics.aiUsageCount}</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-3">
+                <div className="w-full bg-transparent border border-gray-300/75 dark:border-slate-700/50 rounded-full h-3">
                   <div
                     className="h-3 rounded-full bg-gradient-to-r from-orange-500 to-amber-500"
                     style={{ width: `${Math.min(analytics.aiUsageRate, 100)}%` }}
                   />
                 </div>
-                <span className="text-xs text-gray-500 mt-1 block">
+                <span className="text-xs text-gray-500 dark:text-slate-400 mt-1 block">
                   {analytics.aiUsageRate}% of business messages
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-slate-700">
                 <div>
-                  <p className="text-sm text-gray-600">Messages/Day</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">{analytics.messagesPerDay}</p>
+                  <p className="text-sm text-gray-600 dark:text-slate-300">Messages/Day</p>
+                  <p className="text-2xl font-bold dark:text-white text-gray-900 mt-1">{analytics.messagesPerDay}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Total Messages</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">{analytics.totalMessages}</p>
+                  <p className="text-sm text-gray-600 dark:text-slate-300">Total Messages</p>
+                  <p className="text-2xl font-bold dark:text-white text-gray-900 mt-1">{analytics.totalMessages}</p>
                 </div>
               </div>
             </div>
@@ -597,8 +596,8 @@ export default function AnalyticsPage() {
 
         {/* Top Products */}
         {analytics.topProducts.length > 0 && (
-          <div className="bg-gray-50/50 rounded-lg border border-gray-300/75 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/75 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
               <Award className="w-5 h-5 mr-2 text-amber-600" />
               Top Products
             </h2>
@@ -613,8 +612,8 @@ export default function AnalyticsPage() {
                       <span className="text-sm font-bold text-white">#{index + 1}</span>
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">{product.product}</p>
-                      <p className="text-sm text-gray-600">{product.count} orders</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">{product.product}</p>
+                      <p className="text-sm text-gray-600 dark:text-slate-300">{product.count} orders</p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -659,16 +658,16 @@ function MetricCard({
   color: 'blue' | 'green' | 'purple' | 'orange';
 }) {
   const colors = {
-    blue: 'from-blue-500 to-blue-600',
+    blue: 'from-indigo-500 to-indigo-600',
     green: 'from-green-500 to-green-600',
     purple: 'from-purple-500 to-purple-600',
     orange: 'from-orange-500 to-orange-600',
   };
 
   return (
-    <div className="bg-gray-50/50 rounded-lg border border-gray-300/75 p-6 hover:shadow-lg transition-shadow">
+    <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/75 p-6 hover:shadow-lg transition-shadow">
       <div className="flex items-center justify-between mb-3">
-        <div className={`p-3 rounded-lg bg-gradient-to-br ${colors[color]}`}>
+        <div className={`p-3 rounded-lg bg-gradient-to-br ${colors[color]} dark:bg-transparent dark:border dark:border-slate-700`}>
           <Icon className="w-6 h-6 text-white" />
         </div>
         {trend !== 0 && (
@@ -678,9 +677,9 @@ function MetricCard({
           </div>
         )}
       </div>
-      <p className="text-sm font-medium text-gray-600 mb-1">{label}</p>
-      <p className="text-3xl font-bold text-gray-900 mb-1">{value}</p>
-      <p className="text-xs text-gray-500">{subtitle}</p>
+      <p className="text-sm font-medium text-gray-600 dark:text-slate-300 mb-1">{label}</p>
+      <p className="text-3xl font-bold dark:text-white text-gray-900 mb-1">{value}</p>
+      <p className="text-xs text-gray-500 dark:text-slate-400">{subtitle}</p>
     </div>
   );
 }
@@ -698,12 +697,12 @@ function MiniStatCard({
 }) {
   return (
     <div className="flex items-start space-x-3">
-      <div className={`p-2 rounded-lg bg-gray-100 ${iconColor}`}>
+      <div className={`p-2 rounded-lg bg-gray-100 dark:bg-transparent dark:border dark:border-slate-700 ${iconColor}`}>
         <Icon className="w-5 h-5" />
       </div>
       <div>
-        <p className="text-xs text-gray-600 mb-1">{label}</p>
-        <p className="text-xl font-bold text-gray-900">{value}</p>
+        <p className="text-xs text-gray-600 dark:text-slate-300 mb-1">{label}</p>
+        <p className="text-xl font-bold dark:text-white text-gray-900 dark:text-white">{value}</p>
       </div>
     </div>
   );
@@ -725,7 +724,7 @@ function ChannelBar({
   const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
 
   const colors = {
-    blue: { bg: 'bg-blue-500', text: 'text-blue-600', light: 'bg-blue-100' },
+    blue: { bg: 'bg-indigo-500', text: 'text-indigo-600', light: 'bg-blue-100' },
     pink: { bg: 'bg-pink-500', text: 'text-pink-600', light: 'bg-pink-100' },
     green: { bg: 'bg-green-500', text: 'text-green-600', light: 'bg-green-100' },
   };
@@ -735,14 +734,14 @@ function ChannelBar({
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-2">
           <Icon className={`w-4 h-4 ${colors[color].text}`} />
-          <span className="text-sm font-medium text-gray-900">{label}</span>
+          <span className="text-sm font-medium text-gray-900 dark:text-white">{label}</span>
         </div>
         <div className="flex items-center space-x-3">
-          <span className="text-lg font-bold text-gray-900">{count}</span>
-          <span className="text-sm text-gray-500">{percentage}%</span>
+          <span className="text-lg font-bold text-gray-900 dark:text-white">{count}</span>
+          <span className="text-sm text-gray-500 dark:text-slate-400">{percentage}%</span>
         </div>
       </div>
-      <div className="w-full bg-gray-200 rounded-full h-2.5">
+      <div className="w-full bg-transparent border border-gray-300/75 dark:border-slate-700/50 rounded-full h-2.5">
         <div
           className={`h-2.5 rounded-full ${colors[color].bg}`}
           style={{ width: `${percentage}%` }}

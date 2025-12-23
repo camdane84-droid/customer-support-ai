@@ -44,7 +44,7 @@ export default function Toast({ type, message, onClose, duration = 5000 }: Toast
       icon: Info,
       bgColor: 'bg-blue-50',
       borderColor: 'border-blue-200',
-      iconColor: 'text-blue-500',
+      iconColor: 'text-indigo-500',
       textColor: 'text-blue-800',
     },
   };

@@ -135,27 +135,27 @@ export default function ActionableInsights({ analytics }: ActionableInsightsProp
       case 'success': return <CheckCircle className="w-5 h-5 text-green-600" />;
       case 'warning': return <AlertCircle className="w-5 h-5 text-yellow-600" />;
       case 'urgent': return <AlertCircle className="w-5 h-5 text-red-600" />;
-      default: return <TrendingUp className="w-5 h-5 text-blue-600" />;
+      default: return <TrendingUp className="w-5 h-5 text-indigo-600" />;
     }
   };
 
   const getColors = (type: string) => {
     switch (type) {
-      case 'success': return 'bg-green-50 border-green-200';
-      case 'warning': return 'bg-yellow-50 border-yellow-200';
-      case 'urgent': return 'bg-red-50 border-red-200';
-      default: return 'bg-blue-50 border-blue-200';
+      case 'success': return 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700/50';
+      case 'warning': return 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-700/50';
+      case 'urgent': return 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700/50';
+      default: return 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700/50';
     }
   };
 
   if (insights.length === 0) {
     return (
-      <div className="bg-white rounded-lg border border-gray-300/75 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <TrendingUp className="w-5 h-5 mr-2 text-blue-600" />
+      <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/75 dark:border-slate-700/50 p-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+          <TrendingUp className="w-5 h-5 mr-2 text-indigo-600" />
           Actionable Insights
         </h2>
-        <p className="text-gray-500 text-sm">
+        <p className="text-gray-500 dark:text-slate-400 text-sm">
           Keep collecting data and insights will appear here to help you improve your business.
         </p>
       </div>
@@ -163,11 +163,11 @@ export default function ActionableInsights({ analytics }: ActionableInsightsProp
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-        <TrendingUp className="w-5 h-5 mr-2 text-blue-600" />
+    <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/75 dark:border-slate-700/50 p-6">
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+        <TrendingUp className="w-5 h-5 mr-2 text-indigo-600" />
         Actionable Insights
-        <span className="ml-auto text-sm font-normal text-gray-500">{insights.length} insights</span>
+        <span className="ml-auto text-sm font-normal text-gray-500 dark:text-slate-400">{insights.length} insights</span>
       </h2>
 
       <div className="space-y-3">
@@ -182,16 +182,16 @@ export default function ActionableInsights({ analytics }: ActionableInsightsProp
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between">
-                  <h3 className="text-sm font-semibold text-gray-900">{insight.title}</h3>
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{insight.title}</h3>
                   {insight.metric && (
-                    <span className="ml-2 text-sm font-bold text-gray-700 whitespace-nowrap">
+                    <span className="ml-2 text-sm font-bold text-gray-700 dark:text-slate-300 whitespace-nowrap">
                       {insight.metric}
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-gray-700 mt-1">{insight.description}</p>
+                <p className="text-sm text-gray-700 dark:text-slate-300 mt-1">{insight.description}</p>
                 {insight.action && (
-                  <div className="mt-2 flex items-center text-xs text-gray-600 bg-white bg-opacity-50 rounded px-2 py-1 inline-block">
+                  <div className="mt-2 flex items-center text-xs text-gray-600 dark:text-slate-400 bg-white/50 dark:bg-slate-700/50 rounded px-2 py-1 inline-block">
                     <span className="font-medium">💡 Action:</span>
                     <span className="ml-1">{insight.action}</span>
                   </div>

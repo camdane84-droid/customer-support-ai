@@ -133,7 +133,7 @@ export default function CannedResponsesPage() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-full">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
         </div>
       </DashboardLayout>
     );
@@ -145,14 +145,14 @@ export default function CannedResponsesPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Canned Responses</h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Canned Responses</h1>
+            <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
               Create quick reply templates to save time
             </p>
           </div>
           <button
             onClick={startCreate}
-            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
           >
             <Plus className="w-5 h-5" />
             <span>New Response</span>
@@ -161,7 +161,7 @@ export default function CannedResponsesPage() {
 
         {/* Create/Edit Form */}
         {(creatingNew || editingId) && (
-          <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6 shadow-sm">
+          <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6 mb-6 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               {editingId ? 'Edit Response' : 'New Response'}
             </h3>
@@ -231,7 +231,7 @@ export default function CannedResponsesPage() {
                 </button>
                 <button
                   onClick={handleSave}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                 >
                   <Save className="w-4 h-4" />
                   <span>Save</span>
@@ -244,27 +244,27 @@ export default function CannedResponsesPage() {
         {/* Responses List */}
         <div className="space-y-3">
           {responses.length === 0 ? (
-            <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-              <p className="text-gray-500">No canned responses yet</p>
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-12 text-center">
+              <p className="text-gray-500 dark:text-slate-400">No canned responses yet</p>
               <p className="text-sm text-gray-400 mt-1">Create your first quick reply template</p>
             </div>
           ) : (
             responses.map((response) => (
               <div
                 key={response.id}
-                className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow"
+                className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 hover:shadow-md transition-shadow"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">{response.title}</h3>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{response.title}</h3>
                       {response.shortcut && (
-                        <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-mono rounded">
+                        <span className="px-2 py-0.5 bg-blue-100 text-indigo-700 text-xs font-mono rounded">
                           {response.shortcut}
                         </span>
                       )}
                       {response.category && (
-                        <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">
+                        <span className="px-2 py-0.5 bg-gray-100 text-gray-600 dark:text-slate-300 text-xs rounded">
                           {response.category}
                         </span>
                       )}
@@ -276,14 +276,14 @@ export default function CannedResponsesPage() {
                   <div className="flex items-center space-x-2 ml-4">
                     <button
                       onClick={() => startEdit(response)}
-                      className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="p-2 text-gray-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-blue-50 rounded-lg transition-colors"
                       title="Edit"
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(response.id)}
-                      className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-2 text-gray-600 dark:text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                       title="Delete"
                     >
                       <Trash2 className="w-4 h-4" />

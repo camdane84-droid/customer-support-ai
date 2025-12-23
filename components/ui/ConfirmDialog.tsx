@@ -56,7 +56,7 @@ export default function ConfirmDialog({
 
   const confirmButtonClasses = confirmColor === 'red'
     ? 'bg-red-600 hover:bg-red-700 text-white'
-    : 'bg-blue-600 hover:bg-blue-700 text-white';
+    : 'bg-indigo-600 hover:bg-indigo-700 text-white';
 
   return (
     <div
@@ -80,7 +80,7 @@ export default function ConfirmDialog({
             }`}>
               <AlertTriangle
                 className={`w-6 h-6 ${
-                  confirmColor === 'red' ? 'text-red-600' : 'text-blue-600'
+                  confirmColor === 'red' ? 'text-red-600' : 'text-indigo-600'
                 }`}
                 aria-hidden="true"
               />

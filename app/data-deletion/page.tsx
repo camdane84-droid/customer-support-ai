@@ -81,7 +81,7 @@ export default function DataDeletion() {
           <h2 className="text-2xl font-semibold mb-3">Questions?</h2>
           <p>
             If you have questions about data deletion or our data practices, please review our{' '}
-            <a href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</a> or contact us.
+            <a href="/privacy" className="text-indigo-600 hover:underline">Privacy Policy</a> or contact us.
           </p>
         </section>
 

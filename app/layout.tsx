@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SupportAI - Customer Support Platform",
-  description: "AI-powered customer support for small businesses",
+  title: "InboxForge - Craft Exceptional Customer Experiences",
+  description: "Forge stronger customer relationships with AI-powered support built for modern businesses",
 };
 
 export default function RootLayout({

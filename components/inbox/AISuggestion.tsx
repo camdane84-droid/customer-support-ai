@@ -60,12 +60,12 @@ export default function AISuggestion({
   }
 
   return (
-    <div className="border-t border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50 p-4">
+    <div className="border-t border-gray-200 dark:border-slate-700 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-slate-800 dark:to-slate-900 p-4">
       {/* Generate Button */}
       {!suggestion && !loading && (
         <button
           onClick={generateSuggestion}
-          className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all"
+          className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all"
         >
           <Sparkles className="w-4 h-4" />
           <span>Generate AI Response</span>
@@ -74,7 +74,7 @@ export default function AISuggestion({
 
       {/* Loading State */}
       {loading && (
-        <div className="flex items-center space-x-3 text-purple-700">
+        <div className="flex items-center space-x-3 text-purple-700 dark:text-purple-300">
           <Loader2 className="w-5 h-5 animate-spin" />
           <span className="text-sm">AI is thinking...</span>
         </div>
@@ -97,13 +97,13 @@ export default function AISuggestion({
       {suggestion && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 text-purple-700">
+            <div className="flex items-center space-x-2 text-purple-700 dark:text-purple-300">
               <Sparkles className="w-4 h-4" />
               <span className="text-sm font-medium">AI Suggested Response</span>
             </div>
             <button
               onClick={handleCopy}
-              className="flex items-center space-x-1 text-gray-600 hover:text-gray-900 text-sm"
+              className="flex items-center space-x-1 text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white text-sm"
             >
               {copied ? (
                 <>
@@ -119,8 +119,8 @@ export default function AISuggestion({
             </button>
           </div>
 
-          <div className="bg-white border-2 border-purple-200 rounded-lg p-4">
-            <p className="text-sm text-gray-800 whitespace-pre-wrap">{suggestion}</p>
+          <div className="bg-white dark:bg-slate-700 border-2 border-purple-200 dark:border-purple-500/50 rounded-lg p-4">
+            <p className="text-sm text-gray-800 dark:text-white whitespace-pre-wrap">{suggestion}</p>
           </div>
 
           <div className="flex space-x-2">
@@ -135,13 +135,13 @@ export default function AISuggestion({
                 setSuggestion(null);
                 generateSuggestion();
               }}
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-200 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors"
             >
               Regenerate
             </button>
             <button
               onClick={() => setSuggestion(null)}
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-200 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors"
             >
               Dismiss
             </button>

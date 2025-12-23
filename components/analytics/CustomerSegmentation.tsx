@@ -87,32 +87,32 @@ export default function CustomerSegmentation({ conversations }: CustomerSegmenta
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Top Customers */}
-      <div className="bg-white rounded-lg border border-gray-300/75 p-6">
+      <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/75 dark:border-slate-700/50 p-6">
         <div className="flex items-center space-x-2 mb-4">
-          <div className="p-2 bg-amber-100 rounded-lg">
+          <div className="p-2 bg-amber-100 dark:bg-transparent dark:border dark:border-slate-700 rounded-lg">
             <Crown className="w-5 h-5 text-amber-600" />
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900">Top Customers</h3>
-            <p className="text-xs text-gray-500">Most engaged</p>
+            <h3 className="font-semibold text-gray-900 dark:text-white">Top Customers</h3>
+            <p className="text-xs text-gray-500 dark:text-slate-400">Most engaged</p>
           </div>
         </div>
 
         <div className="space-y-3">
           {topCustomers.length === 0 ? (
-            <p className="text-sm text-gray-500">No customer data yet</p>
+            <p className="text-sm text-gray-500 dark:text-slate-400">No customer data yet</p>
           ) : (
             topCustomers.map((customer, index) => (
               <div
                 key={customer.id}
-                className="flex items-center space-x-3 p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200 hover:shadow-md transition-shadow"
+                className="flex items-center space-x-3 p-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg border border-amber-200 dark:border-amber-700/50 hover:shadow-md transition-shadow"
               >
                 <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full flex items-center justify-center">
                   <span className="text-sm font-bold text-white">#{index + 1}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">{customer.name}</p>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{customer.name}</p>
+                  <p className="text-xs text-gray-600 dark:text-slate-300">
                     {customer.conversations} convos • {customer.orderCount} orders
                   </p>
                 </div>
@@ -123,32 +123,32 @@ export default function CustomerSegmentation({ conversations }: CustomerSegmenta
       </div>
 
       {/* At-Risk Customers */}
-      <div className="bg-white rounded-lg border border-gray-300/75 p-6">
+      <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/75 dark:border-slate-700/50 p-6">
         <div className="flex items-center space-x-2 mb-4">
-          <div className="p-2 bg-red-100 rounded-lg">
+          <div className="p-2 bg-red-100 dark:bg-transparent dark:border dark:border-slate-700 rounded-lg">
             <TrendingDown className="w-5 h-5 text-red-600" />
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900">At-Risk Customers</h3>
-            <p className="text-xs text-gray-500">Haven't engaged recently</p>
+            <h3 className="font-semibold text-gray-900 dark:text-white">At-Risk Customers</h3>
+            <p className="text-xs text-gray-500 dark:text-slate-400">Haven't engaged recently</p>
           </div>
         </div>
 
         <div className="space-y-3">
           {atRiskCustomers.length === 0 ? (
-            <p className="text-sm text-gray-500">No at-risk customers identified</p>
+            <p className="text-sm text-gray-500 dark:text-slate-400">No at-risk customers identified</p>
           ) : (
             atRiskCustomers.map((customer) => (
               <div
                 key={customer.id}
-                className="flex items-center space-x-3 p-3 bg-red-50 rounded-lg border border-red-200 hover:shadow-md transition-shadow"
+                className="flex items-center space-x-3 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700/50 hover:shadow-md transition-shadow"
               >
-                <div className="flex-shrink-0 w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                <div className="flex-shrink-0 w-8 h-8 bg-red-100 dark:bg-transparent dark:border dark:border-slate-700 rounded-full flex items-center justify-center">
                   <TrendingDown className="w-4 h-4 text-red-600" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">{customer.name}</p>
-                  <p className="text-xs text-red-600">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{customer.name}</p>
+                  <p className="text-xs text-red-600 dark:text-red-400">
                     Last active: {formatDate(customer.lastActive)}
                   </p>
                 </div>
@@ -159,32 +159,32 @@ export default function CustomerSegmentation({ conversations }: CustomerSegmenta
       </div>
 
       {/* New Customers */}
-      <div className="bg-white rounded-lg border border-gray-300/75 p-6">
+      <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/75 dark:border-slate-700/50 p-6">
         <div className="flex items-center space-x-2 mb-4">
-          <div className="p-2 bg-green-100 rounded-lg">
+          <div className="p-2 bg-green-100 dark:bg-transparent dark:border dark:border-slate-700 rounded-lg">
             <Sparkles className="w-5 h-5 text-green-600" />
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900">New Customers</h3>
-            <p className="text-xs text-gray-500">Joined in last 7 days</p>
+            <h3 className="font-semibold text-gray-900 dark:text-white">New Customers</h3>
+            <p className="text-xs text-gray-500 dark:text-slate-400">Joined in last 7 days</p>
           </div>
         </div>
 
         <div className="space-y-3">
           {newCustomers.length === 0 ? (
-            <p className="text-sm text-gray-500">No new customers this week</p>
+            <p className="text-sm text-gray-500 dark:text-slate-400">No new customers this week</p>
           ) : (
             newCustomers.map((customer) => (
               <div
                 key={customer.id}
-                className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200 hover:shadow-md transition-shadow"
+                className="flex items-center space-x-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700/50 hover:shadow-md transition-shadow"
               >
-                <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-transparent dark:border dark:border-slate-700 rounded-full flex items-center justify-center">
                   <Sparkles className="w-4 h-4 text-green-600" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">{customer.name}</p>
-                  <p className="text-xs text-green-600">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{customer.name}</p>
+                  <p className="text-xs text-green-600 dark:text-green-400">
                     Joined {formatDate(customer.lastActive)}
                   </p>
                 </div>

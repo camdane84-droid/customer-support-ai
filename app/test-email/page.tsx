@@ -53,7 +53,7 @@ export default function TestEmailPage() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <p className="text-gray-600">Please log in to test email</p>
-          <a href="/login" className="text-blue-600 hover:underline mt-2 inline-block">
+          <a href="/login" className="text-indigo-600 hover:underline mt-2 inline-block">
             Go to Login
           </a>
         </div>
@@ -76,7 +76,7 @@ export default function TestEmailPage() {
             <p className="text-sm text-blue-900">
               <strong>Your business email:</strong> {business.email}
             </p>
-            <p className="text-xs text-blue-700 mt-1">
+            <p className="text-xs text-indigo-700 mt-1">
               Simulated emails will appear as if sent to this address
             </p>
           </div>
@@ -140,7 +140,7 @@ export default function TestEmailPage() {
             <button
               onClick={simulateIncomingEmail}
               disabled={loading || !fromEmail || !message}
-              className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+              className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
             >
               {loading ? 'Simulating...' : '📧 Simulate Incoming Email'}
             </button>

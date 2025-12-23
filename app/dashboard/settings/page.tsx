@@ -81,7 +81,7 @@ export default function SettingsPage() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-full">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
         </div>
       </DashboardLayout>
     );
@@ -92,10 +92,10 @@ export default function SettingsPage() {
     return (
       <DashboardLayout>
         <div className="flex flex-col items-center justify-center h-full space-y-4">
-          <div className="text-gray-500 text-lg">Unable to load business data</div>
+          <div className="text-gray-500 dark:text-slate-400 text-lg">Unable to load business data</div>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
           >
             Retry
           </button>
@@ -109,20 +109,20 @@ export default function SettingsPage() {
       <div className="p-6 max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
+          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
             Manage your business information and preferences
           </p>
         </div>
 
         {/* Social Media Connections */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
           <div className="flex items-center space-x-2 mb-4">
-            <Share2 className="w-5 h-5 text-gray-500" />
-            <h2 className="text-lg font-semibold text-gray-900">Connected Accounts</h2>
+            <Share2 className="w-5 h-5 text-gray-500 dark:text-slate-400" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Connected Accounts</h2>
           </div>
-          <p className="text-sm text-gray-600 mb-6">
-            Connect your social media accounts to receive messages in your Relay inbox
+          <p className="text-sm text-gray-600 dark:text-slate-300 mb-6">
+            Connect your social media accounts to receive messages in your InboxForge inbox
           </p>
 
           <div className="space-y-4">
@@ -170,59 +170,57 @@ export default function SettingsPage() {
         </div>
 
         {/* AI Features */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
           <div className="flex items-center space-x-2 mb-4">
             <Sparkles className="w-5 h-5 text-purple-500" />
-            <h2 className="text-lg font-semibold text-gray-900">AI Customer Insights</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">AI Customer Insights</h2>
           </div>
-          <p className="text-sm text-gray-600 mb-6">
+          <p className="text-sm text-gray-600 dark:text-slate-300 mb-6">
             Let AI automatically learn about your customers to improve service quality
           </p>
 
           <div className="space-y-4">
             {/* AI Insights Toggle */}
-            <div className="flex items-start justify-between p-4 border border-gray-200 rounded-lg hover:border-purple-300 transition-colors bg-gradient-to-r from-purple-50 to-blue-50">
+            <div className="flex items-start justify-between p-4 border border-gray-200 dark:border-indigo-700/50 rounded-lg hover:border-purple-300 dark:hover:border-indigo-600 transition-colors bg-gradient-to-r from-purple-50 to-blue-50 dark:from-indigo-900/40 dark:to-purple-900/40">
               <div className="flex-1 pr-4">
                 <div className="flex items-center space-x-2 mb-2">
-                  <Sparkles className="w-4 h-4 text-purple-600" />
-                  <h3 className="font-medium text-gray-900">AI Customer Insights</h3>
-                  <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
+                  <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  <h3 className="font-medium text-gray-900 dark:text-white">AI Customer Insights</h3>
+                  <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-xs font-medium rounded-full">
                     Recommended
                   </span>
                 </div>
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-sm text-gray-600 dark:text-slate-300 mb-3">
                   Enable AI to automatically generate customer profiles and conversation notes.
                 </p>
 
                 <div className="space-y-2 mb-3">
                   <div className="flex items-start space-x-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5"></div>
-                    <p className="text-sm text-gray-700">
+                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500 dark:bg-purple-400 mt-1.5"></div>
+                    <p className="text-sm text-gray-700 dark:text-slate-300">
                       <strong>Auto-Notes:</strong> Creates bullet-point summaries in the notepad (e.g., "asked about S coffee price")
                     </p>
                   </div>
                   <div className="flex items-start space-x-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5"></div>
-                    <p className="text-sm text-gray-700">
+                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500 dark:bg-purple-400 mt-1.5"></div>
+                    <p className="text-sm text-gray-700 dark:text-slate-300">
                       <strong>Customer Profiles:</strong> Extracts preferences, allergies, past orders, and more
                     </p>
                   </div>
                 </div>
 
-                <p className="text-xs text-gray-500 italic">
+                <p className="text-xs text-gray-500 dark:text-slate-400 italic">
                   When enabled, AI passively collects relevant information from conversations—such as product preferences, questions, concerns, and order history—to help provide better, more personalized service. All data stays private within your account.
                 </p>
               </div>
               <button
                 onClick={() => setAutoGenerateNotes(!autoGenerateNotes)}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${
-                  autoGenerateNotes ? 'bg-purple-600' : 'bg-gray-200'
-                }`}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${autoGenerateNotes ? 'bg-purple-600' : 'bg-gray-200'
+                  }`}
               >
                 <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                    autoGenerateNotes ? 'translate-x-5' : 'translate-x-0'
-                  }`}
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${autoGenerateNotes ? 'translate-x-5' : 'translate-x-0'
+                    }`}
                 />
               </button>
             </div>
@@ -230,10 +228,10 @@ export default function SettingsPage() {
         </div>
 
         {/* Business Info */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
           <div className="flex items-center space-x-2 mb-4">
-            <Building className="w-5 h-5 text-gray-500" />
-            <h2 className="text-lg font-semibold text-gray-900">Business Information</h2>
+            <Building className="w-5 h-5 text-gray-500 dark:text-slate-400" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Business Information</h2>
           </div>
 
           <div className="space-y-4">
@@ -278,7 +276,7 @@ export default function SettingsPage() {
                 placeholder="Enter your business policies, return policy, shipping info, etc. This helps the AI provide better responses."
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
                 This information will be used by AI to generate better response suggestions
               </p>
             </div>
@@ -286,35 +284,68 @@ export default function SettingsPage() {
         </div>
 
         {/* Account Info (Read-only) */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Account Information</h2>
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Account Information</h2>
           <div className="space-y-3">
             <div>
-              <p className="text-sm text-gray-600">Email</p>
-              <p className="text-gray-900 font-medium">{business.email}</p>
+              <p className="text-sm text-gray-600 dark:text-slate-300">Email</p>
+              <p className="text-gray-900 dark:text-white font-medium">{business.email}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Subscription Plan</p>
-              <p className="text-gray-900 font-medium capitalize">{business.subscription_plan}</p>
+              <p className="text-sm text-gray-600 dark:text-slate-300">Subscription Plan</p>
+              <p className="text-gray-900 dark:text-white font-medium capitalize">{business.subscription_plan}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Account Created</p>
-              <p className="text-gray-900 font-medium">
+              <p className="text-sm text-gray-600 dark:text-slate-300">Account Created</p>
+              <p className="text-gray-900 dark:text-white font-medium">
                 {new Date(business.created_at).toLocaleDateString()}
               </p>
             </div>
           </div>
         </div>
 
+        {/* Help & Support */}
+        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800 p-6">
+          <div className="flex items-center space-x-2 mb-4">
+            <svg className="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Help & Support</h2>
+          </div>
+          <p className="text-gray-600 dark:text-slate-300 mb-4">
+            Need assistance or have questions? Our support team is here to help you get the most out of InboxForge.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <a
+              href="/contact"
+              className="inline-flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Contact Support
+            </a>
+            <a
+              href="/dashboard/knowledge"
+              className="inline-flex items-center justify-center px-4 py-2 border border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors font-medium"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              View User Guides
+            </a>
+          </div>
+        </div>
+
         {/* Save Button */}
         <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-500 dark:text-slate-400">
             {saved && <span className="text-green-600">✓ Settings saved!</span>}
           </div>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+            className="flex items-center space-x-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
           >
             <Save className="w-5 h-5" />
             <span>{saving ? 'Saving...' : 'Save Changes'}</span>
@@ -350,26 +381,26 @@ function ConnectionCard({
   disabled?: boolean;
 }) {
   const colors = {
-    blue: 'text-blue-500 bg-blue-50',
-    pink: 'text-pink-500 bg-pink-50',
-    green: 'text-green-500 bg-green-50',
-    slate: 'text-slate-700 bg-slate-50',
+    blue: 'text-indigo-500 bg-blue-50 dark:bg-transparent dark:border dark:border-slate-700',
+    pink: 'text-pink-500 bg-pink-50 dark:bg-transparent dark:border dark:border-slate-700',
+    green: 'text-green-500 bg-green-50 dark:bg-transparent dark:border dark:border-slate-700',
+    slate: 'text-slate-700 dark:text-slate-400 bg-slate-50 dark:bg-transparent dark:border dark:border-slate-700',
   };
 
   return (
-    <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+    <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg">
       <div className="flex items-center space-x-4">
         <div className={`p-3 rounded-lg ${colors[color]}`}>
           <Icon className="w-6 h-6" />
         </div>
         <div>
-          <p className="font-medium text-gray-900">{name}</p>
-          <p className="text-sm text-gray-500">{description}</p>
+          <p className="font-medium text-gray-900 dark:text-white">{name}</p>
+          <p className="text-sm text-gray-500 dark:text-slate-400">{description}</p>
         </div>
       </div>
 
       {disabled ? (
-        <span className="px-4 py-2 text-sm text-gray-400 bg-gray-100 rounded-lg">
+        <span className="px-4 py-2 text-sm text-gray-400 dark:text-slate-500 bg-transparent border border-gray-200 dark:border-slate-700 rounded-lg">
           Coming Soon
         </span>
       ) : isConnected ? (
@@ -390,7 +421,7 @@ function ConnectionCard({
       ) : (
         <button
           onClick={onConnect}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
         >
           Connect
         </button>

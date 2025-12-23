@@ -264,10 +264,10 @@ export default function ArchivesPage() {
 
   const getChannelColor = (channel: string) => {
     switch (channel) {
-      case 'email': return 'text-blue-500 bg-blue-50';
+      case 'email': return 'text-indigo-500 bg-blue-50';
       case 'instagram': return 'text-pink-500 bg-pink-50';
       case 'sms': return 'text-green-500 bg-green-50';
-      default: return 'text-gray-500 bg-gray-50';
+      default: return 'text-gray-500 dark:text-slate-400 bg-gray-50';
     }
   };
 
@@ -278,17 +278,17 @@ export default function ArchivesPage() {
 
   return (
     <DashboardLayout>
-      <div className="h-full flex flex-col bg-gray-50">
+      <div className="h-full flex flex-col bg-gray-50 dark:bg-slate-900">
         {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center">
                 <Archive className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Archives</h1>
-                <p className="text-sm text-gray-500 mt-0.5">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white dark:text-white">Archives</h1>
+                <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">
                   {filteredConversations.length} archived conversation{filteredConversations.length !== 1 ? 's' : ''}
                 </p>
               </div>
@@ -301,7 +301,7 @@ export default function ArchivesPage() {
               <Filter className="w-4 h-4" />
               <span>Filters</span>
               {(filterChannel !== 'all' || filterYear !== 'all' || filterMonth !== 'all' || filterDay !== 'all' || filterSearch) && (
-                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                <span className="w-2 h-2 bg-indigo-500 rounded-full"></span>
               )}
             </button>
           </div>
@@ -317,7 +317,7 @@ export default function ArchivesPage() {
                     px-2 py-1 rounded transition-colors
                     ${index === breadcrumbs.length - 1
                       ? 'text-gray-900 font-medium bg-gray-100'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      : 'text-gray-600 dark:text-slate-300 hover:text-gray-900 hover:bg-gray-50'
                     }
                   `}
                 >
@@ -330,12 +330,12 @@ export default function ArchivesPage() {
 
         {/* Filters Panel */}
         {showFilters && (
-          <div className="bg-white border-b border-gray-200 px-6 py-4">
+          <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-6 py-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-gray-900">Filter Archives</h3>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white dark:text-white">Filter Archives</h3>
               <button
                 onClick={clearFilters}
-                className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
               >
                 Clear All
               </button>
@@ -421,7 +421,7 @@ export default function ArchivesPage() {
                   {filterSearch && (
                     <button
                       onClick={() => setFilterSearch('')}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-slate-300"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -437,16 +437,16 @@ export default function ArchivesPage() {
           {loading ? (
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-500">Loading archives...</p>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                <p className="text-gray-500 dark:text-slate-400">Loading archives...</p>
               </div>
             </div>
           ) : filteredConversations.length === 0 ? (
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
                 <Archive className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Archived Conversations</h3>
-                <p className="text-sm text-gray-500">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Archived Conversations</h3>
+                <p className="text-sm text-gray-500 dark:text-slate-400">
                   Conversations you archive will appear here
                 </p>
               </div>
@@ -465,11 +465,11 @@ export default function ArchivesPage() {
                       <button
                         key={year}
                         onClick={() => handleYearClick(year)}
-                        className="p-6 bg-white rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:shadow-md transition-all group"
+                        className="p-6 bg-white dark:bg-slate-800 dark:bg-slate-800 rounded-lg border-2 border-gray-200 dark:border-slate-700 hover:border-indigo-500 hover:shadow-md transition-all group"
                       >
-                        <Calendar className="w-8 h-8 text-gray-400 group-hover:text-blue-500 mb-3 transition-colors" />
-                        <h3 className="text-2xl font-bold text-gray-900 mb-1">{year}</h3>
-                        <p className="text-sm text-gray-500">{count} conversation{count !== 1 ? 's' : ''}</p>
+                        <Calendar className="w-8 h-8 text-gray-400 group-hover:text-indigo-500 mb-3 transition-colors" />
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{year}</h3>
+                        <p className="text-sm text-gray-500 dark:text-slate-400">{count} conversation{count !== 1 ? 's' : ''}</p>
                       </button>
                     );
                   })}
@@ -490,11 +490,11 @@ export default function ArchivesPage() {
                       <button
                         key={month}
                         onClick={() => handleMonthClick(month)}
-                        className="p-6 bg-white rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:shadow-md transition-all group"
+                        className="p-6 bg-white dark:bg-slate-800 dark:bg-slate-800 rounded-lg border-2 border-gray-200 dark:border-slate-700 hover:border-indigo-500 hover:shadow-md transition-all group"
                       >
-                        <Calendar className="w-8 h-8 text-gray-400 group-hover:text-blue-500 mb-3 transition-colors" />
-                        <h3 className="text-xl font-bold text-gray-900 mb-1">{monthNames[month]}</h3>
-                        <p className="text-sm text-gray-500">{count} conversation{count !== 1 ? 's' : ''}</p>
+                        <Calendar className="w-8 h-8 text-gray-400 group-hover:text-indigo-500 mb-3 transition-colors" />
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">{monthNames[month]}</h3>
+                        <p className="text-sm text-gray-500 dark:text-slate-400">{count} conversation{count !== 1 ? 's' : ''}</p>
                       </button>
                     );
                   })}
@@ -516,10 +516,10 @@ export default function ArchivesPage() {
                       <button
                         key={day}
                         onClick={() => handleDayClick(day)}
-                        className="p-4 bg-white rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:shadow-md transition-all group"
+                        className="p-4 bg-white dark:bg-slate-800 dark:bg-slate-800 rounded-lg border-2 border-gray-200 dark:border-slate-700 hover:border-indigo-500 hover:shadow-md transition-all group"
                       >
-                        <div className="text-2xl font-bold text-gray-900 mb-1">{day}</div>
-                        <div className="text-xs text-gray-500">{count}</div>
+                        <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{day}</div>
+                        <div className="text-xs text-gray-500 dark:text-slate-400">{count}</div>
                       </button>
                     );
                   })}
@@ -530,18 +530,18 @@ export default function ArchivesPage() {
               {currentLevel === 'conversations' && (
                 <>
                   {selectedConversation ? (
-                    <div className="flex h-[calc(100vh-300px)] bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div className="flex h-[calc(100vh-300px)] bg-white dark:bg-slate-800 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
                       {/* Conversation List Sidebar */}
-                      <div className="w-80 border-r border-gray-200 flex-shrink-0 flex flex-col">
-                        <div className="p-4 border-b border-gray-200">
+                      <div className="w-80 border-r border-gray-200 dark:border-slate-700 flex-shrink-0 flex flex-col">
+                        <div className="p-4 border-b border-gray-200 dark:border-slate-700">
                           <button
                             onClick={() => setSelectedConversation(null)}
-                            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-3"
+                            className="flex items-center space-x-2 text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:text-white mb-3"
                           >
                             <ArrowLeft className="w-4 h-4" />
                             <span className="text-sm font-medium">Back to list</span>
                           </button>
-                          <h3 className="text-sm font-semibold text-gray-900">
+                          <h3 className="text-sm font-semibold text-gray-900 dark:text-white dark:text-white">
                             {getConversationsForDay().length} conversation{getConversationsForDay().length !== 1 ? 's' : ''}
                           </h3>
                         </div>
@@ -555,7 +555,7 @@ export default function ArchivesPage() {
                               key={conversation.id}
                               onClick={() => setSelectedConversation(conversation)}
                               className={`
-                                w-full p-4 border-b border-gray-200 text-left transition-all
+                                w-full p-4 border-b border-gray-200 dark:border-slate-700 text-left transition-all
                                 ${selectedConversation.id === conversation.id
                                   ? 'bg-blue-50 border-l-4 border-l-blue-500'
                                   : 'bg-white border-l-4 border-l-transparent hover:bg-gray-50'
@@ -569,10 +569,10 @@ export default function ArchivesPage() {
                                   </span>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <h3 className="text-sm font-semibold text-gray-900 truncate">
+                                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                                     {displayName}
                                   </h3>
-                                  <p className="text-xs text-gray-500 mt-0.5 truncate">
+                                  <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 truncate">
                                     {conversation.customer_email || conversation.customer_instagram_id || 'No contact info'}
                                   </p>
                                   <div className="flex items-center space-x-2 mt-2">
@@ -607,7 +607,7 @@ export default function ArchivesPage() {
                         <button
                           key={conversation.id}
                           onClick={() => setSelectedConversation(conversation)}
-                          className="w-full bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md hover:border-blue-300 transition-all text-left"
+                          className="w-full bg-white dark:bg-slate-800 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 hover:shadow-md hover:border-blue-300 transition-all text-left"
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex items-start space-x-3 flex-1">
@@ -617,10 +617,10 @@ export default function ArchivesPage() {
                                 </span>
                               </div>
                               <div className="flex-1 min-w-0">
-                                <h3 className="text-sm font-semibold text-gray-900">
+                                <h3 className="text-sm font-semibold text-gray-900 dark:text-white dark:text-white">
                                   {displayName}
                                 </h3>
-                                <p className="text-xs text-gray-500 mt-0.5">
+                                <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
                                   {conversation.customer_email || conversation.customer_instagram_id || 'No contact info'}
                                 </p>
                                 <div className="flex items-center space-x-3 mt-2">
@@ -628,7 +628,7 @@ export default function ArchivesPage() {
                                     {getChannelIcon(conversation.channel)}
                                     <span className="capitalize">{conversation.channel}</span>
                                   </span>
-                                  <span className="text-xs text-gray-500">
+                                  <span className="text-xs text-gray-500 dark:text-slate-400">
                                     Archived {formatDistanceToNow(getArchiveDate(conversation), { addSuffix: true })}
                                   </span>
                                 </div>

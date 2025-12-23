@@ -52,16 +52,16 @@ export default function NotFound() {
         <div className="mt-12 pt-8 border-t border-gray-200">
           <p className="text-sm text-gray-500 mb-4">Quick Links:</p>
           <div className="flex flex-wrap gap-4 justify-center text-sm">
-            <Link href="/dashboard/inbox" className="text-blue-600 hover:text-blue-700 hover:underline">
+            <Link href="/dashboard/inbox" className="text-indigo-600 hover:text-indigo-700 hover:underline">
               Inbox
             </Link>
-            <Link href="/dashboard/analytics" className="text-blue-600 hover:text-blue-700 hover:underline">
+            <Link href="/dashboard/analytics" className="text-indigo-600 hover:text-indigo-700 hover:underline">
               Analytics
             </Link>
-            <Link href="/dashboard/settings" className="text-blue-600 hover:text-blue-700 hover:underline">
+            <Link href="/dashboard/settings" className="text-indigo-600 hover:text-indigo-700 hover:underline">
               Settings
             </Link>
-            <Link href="/dashboard/knowledge" className="text-blue-600 hover:text-blue-700 hover:underline">
+            <Link href="/dashboard/knowledge" className="text-indigo-600 hover:text-indigo-700 hover:underline">
               Knowledge Base
             </Link>
           </div>

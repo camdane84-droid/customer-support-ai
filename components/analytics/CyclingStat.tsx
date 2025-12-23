@@ -35,7 +35,7 @@ export default function CyclingStat({ analytics }: CyclingStatProps) {
       label: 'First Response Time',
       value: analytics.avgResponseTime || 'N/A',
       subtitle: 'Average time to first reply',
-      color: 'from-blue-500 to-cyan-500'
+      color: 'from-indigo-500 to-cyan-500'
     },
     {
       icon: Calendar,
@@ -99,7 +99,7 @@ export default function CyclingStat({ analytics }: CyclingStatProps) {
   const Icon = currentStat.icon;
 
   return (
-    <div className="relative bg-white rounded-lg border-2 border-gray-300 p-6 overflow-hidden shadow-xl">
+    <div className="relative bg-gradient-to-r from-purple-50 to-blue-50 dark:from-indigo-900/40 dark:to-purple-900/40 rounded-lg border-2 border-gray-300 dark:border-indigo-700/50 p-6 overflow-hidden shadow-xl dark:shadow-indigo-900/20">
       {/* Animated background */}
       <div
         className={`absolute inset-0 bg-gradient-to-br ${currentStat.color} opacity-10 transition-all duration-1000`}
@@ -112,9 +112,9 @@ export default function CyclingStat({ analytics }: CyclingStatProps) {
             <Icon className="w-6 h-6 text-white" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-600 mb-1">{currentStat.label}</p>
-            <p className="text-3xl font-bold text-gray-900 mb-1">{currentStat.value}</p>
-            <p className="text-xs text-gray-500">{currentStat.subtitle}</p>
+            <p className="text-sm font-medium text-gray-600 dark:text-slate-300 mb-1">{currentStat.label}</p>
+            <p className="text-3xl font-bold dark:text-white text-gray-900 mb-1">{currentStat.value}</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400">{currentStat.subtitle}</p>
           </div>
         </div>
       </div>
@@ -124,18 +124,17 @@ export default function CyclingStat({ analytics }: CyclingStatProps) {
         {stats.map((_, index) => (
           <div
             key={index}
-            className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-              index === currentIndex
-                ? `bg-gradient-to-br ${currentStat.color}`
-                : 'bg-gray-300'
-            }`}
+            className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${index === currentIndex
+              ? `bg-gradient-to-br ${currentStat.color}`
+              : 'bg-gray-300'
+              }`}
           />
         ))}
       </div>
 
       {/* Cycling indicator */}
       <div className="absolute top-2 right-2">
-        <div className="flex items-center space-x-1 text-xs text-gray-400">
+        <div className="flex items-center space-x-1 text-xs text-gray-400 dark:text-slate-500">
           <Activity className="w-3 h-3" />
           <span>Live</span>
         </div>

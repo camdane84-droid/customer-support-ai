@@ -183,7 +183,7 @@ export default function DashboardPage() {
 
   const getChannelColor = (channel: string) => {
     switch (channel) {
-      case 'email': return 'bg-blue-100 text-blue-600';
+      case 'email': return 'bg-blue-100 text-indigo-600';
       case 'instagram': return 'bg-pink-100 text-pink-600';
       case 'sms': return 'bg-green-100 text-green-600';
       default: return 'bg-slate-100 text-slate-600';
@@ -207,7 +207,7 @@ export default function DashboardPage() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
         </div>
       </DashboardLayout>
     );
@@ -219,13 +219,13 @@ export default function DashboardPage() {
       <DashboardLayout>
         <div className="p-6 flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Unable to Load Business Data</h2>
-            <p className="text-gray-600 mb-4">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Unable to Load Business Data</h2>
+            <p className="text-gray-600 dark:text-slate-300 mb-4">
               We couldn't find your business account.
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
             >
               Refresh Page
             </button>
@@ -243,27 +243,27 @@ export default function DashboardPage() {
       <div className="p-6 space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
             Welcome back to {business.name}! Here's what's happening with your customer support.
           </p>
         </div>
 
         {/* Welcome Banner for New Users */}
         {totalConversations === 0 && (
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
-            <h2 className="text-2xl font-bold mb-2">Welcome to {business.name}! 🎉</h2>
+          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg p-6 text-white">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Welcome to {business.name}! 🎉</h2>
             <p className="mb-4">Get started by testing your inbox with simulated messages.</p>
             <div className="flex space-x-3">
               <Link
                 href="/test-email"
-                className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium"
+                className="px-4 py-2 bg-white text-indigo-600 rounded-lg hover:bg-blue-50 transition-colors font-medium"
               >
                 Test Email Feature
               </Link>
               <Link
                 href="/dashboard/inbox"
-                className="px-4 py-2 bg-blue-600 border-2 border-white text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                className="px-4 py-2 bg-indigo-600 border-2 border-white text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
               >
                 Go to Inbox
               </Link>
@@ -273,31 +273,31 @@ export default function DashboardPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Conversations</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{totalConversations}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-slate-300">Total Conversations</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{totalConversations}</p>
               </div>
-              <MessageSquare className="w-10 h-10 text-blue-500" />
+              <MessageSquare className="w-10 h-10 text-indigo-500" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Open Conversations</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{openConversations}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-slate-300">Open Conversations</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{openConversations}</p>
               </div>
               <Clock className="w-10 h-10 text-green-500" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Response Rate</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">100%</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-slate-300">Response Rate</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">100%</p>
               </div>
               <TrendingUp className="w-10 h-10 text-purple-500" />
             </div>
@@ -305,52 +305,52 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Link
               href="/dashboard/inbox"
-              className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center space-x-3 p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:bg-slate-900 transition-colors"
             >
-              <MessageSquare className="w-8 h-8 text-blue-600" />
+              <MessageSquare className="w-8 h-8 text-indigo-600" />
               <div>
-                <p className="font-medium text-gray-900">View Inbox</p>
-                <p className="text-sm text-gray-500">{openConversations} open</p>
+                <p className="font-medium text-gray-900 dark:text-white">View Inbox</p>
+                <p className="text-sm text-gray-500 dark:text-slate-400">{openConversations} open</p>
               </div>
             </Link>
 
             <Link
               href="/dashboard/analytics"
-              className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center space-x-3 p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:bg-slate-900 transition-colors"
             >
               <TrendingUp className="w-8 h-8 text-purple-600" />
               <div>
-                <p className="font-medium text-gray-900">View Analytics</p>
-                <p className="text-sm text-gray-500">Track performance</p>
+                <p className="font-medium text-gray-900 dark:text-white">View Analytics</p>
+                <p className="text-sm text-gray-500 dark:text-slate-400">Track performance</p>
               </div>
             </Link>
 
             <Link
               href="/test-email"
-              className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center space-x-3 p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:bg-slate-900 transition-colors"
             >
               <Zap className="w-8 h-8 text-orange-600" />
               <div>
-                <p className="font-medium text-gray-900">Test Features</p>
-                <p className="text-sm text-gray-500">Simulate emails</p>
+                <p className="font-medium text-gray-900 dark:text-white">Test Features</p>
+                <p className="text-sm text-gray-500 dark:text-slate-400">Simulate emails</p>
               </div>
             </Link>
           </div>
         </div>
 
         {/* Recent Conversations - NOW CLICKABLE */}
-        <div className="bg-white rounded-lg border border-gray-200">
-          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Conversations</h2>
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Conversations</h2>
             {conversations.length > 0 && (
               <Link
                 href="/dashboard/inbox"
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+                className="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1"
               >
                 View all
                 <ArrowRight className="w-4 h-4" />
@@ -359,7 +359,7 @@ export default function DashboardPage() {
           </div>
           <div className="divide-y divide-gray-200">
             {conversations.length === 0 ? (
-              <div className="p-6 text-center text-gray-500">
+              <div className="p-6 text-center text-gray-500 dark:text-slate-400">
                 No conversations yet
               </div>
             ) : (
@@ -371,30 +371,30 @@ export default function DashboardPage() {
                 <button
                   key={convo.id}
                   onClick={() => handleConversationClick(convo)}
-                  className="w-full p-6 hover:bg-gray-50 transition-colors text-left group cursor-pointer"
+                  className="w-full p-6 hover:bg-gray-50 dark:bg-slate-900 transition-colors text-left group cursor-pointer"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-4">
                       <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-blue-700">
+                        <span className="text-sm font-medium text-indigo-700">
                           {initials}
                         </span>
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">
                             {displayName}
                           </p>
                           <span className={`inline-flex items-center justify-center w-5 h-5 rounded ${getChannelColor(convo.channel)}`}>
                             {getChannelIcon(convo.channel)}
                           </span>
                           {convo.unread_count > 0 && (
-                            <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-blue-600 text-white text-xs font-medium rounded-full">
+                            <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-indigo-600 text-white text-xs font-medium rounded-full">
                               {convo.unread_count}
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
                           {convo.customer_email || convo.customer_phone || `via ${convo.channel}`}
                         </p>
                       </div>
@@ -407,11 +407,11 @@ export default function DashboardPage() {
                         `}>
                           {convo.status}
                         </span>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
                           {formatDistanceToNow(new Date(convo.last_message_at), { addSuffix: true })}
                         </p>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors" />
+                      <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 dark:text-slate-400 transition-colors" />
                     </div>
                   </div>
                 </button>

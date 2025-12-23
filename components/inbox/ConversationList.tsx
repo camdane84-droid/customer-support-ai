@@ -57,7 +57,7 @@ export default function ConversationList({
   const getChannelColor = (channel: string) => {
     switch (channel) {
       case 'email':
-        return 'text-blue-500';
+        return 'text-indigo-500';
       case 'instagram':
         return 'text-pink-500';
       case 'sms':
@@ -165,11 +165,11 @@ export default function ConversationList({
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 bg-white">
+      <div className="p-4 border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Inbox</h2>
-            <p className="text-sm text-gray-500 mt-1">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Inbox</h2>
+            <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
               {selectionMode && selectedIds.size > 0
                 ? `${selectedIds.size} selected`
                 : `${filteredConversations.length} ${filteredConversations.length === 1 ? 'conversation' : 'conversations'}`
@@ -179,7 +179,7 @@ export default function ConversationList({
           <div className="flex items-center space-x-2">
             <button
               onClick={handleExportCSV}
-              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
               title="Export to CSV"
               aria-label="Export conversations to CSV"
             >
@@ -187,7 +187,7 @@ export default function ConversationList({
             </button>
             <button
               onClick={toggleSelectionMode}
-              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
               title="Bulk actions"
               aria-label="Toggle bulk actions"
             >
@@ -201,7 +201,7 @@ export default function ConversationList({
           <div className="flex items-center space-x-2 mt-3">
             <button
               onClick={handleBulkArchive}
-              className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+              className="flex items-center space-x-2 px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
             >
               <Archive className="w-4 h-4" />
               <span>Archive ({selectedIds.size})</span>
@@ -218,21 +218,21 @@ export default function ConversationList({
       </div>
 
       {/* Search Bar */}
-      <div className="p-3 border-b border-gray-200 bg-white">
+      <div className="p-3 border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-slate-500" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Name of customer, date, type of order, keywords..."
-            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400 placeholder:opacity-60"
+            className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-slate-500 placeholder:opacity-60"
           />
         </div>
         {searchQuery && (
           <button
             onClick={() => setSearchQuery('')}
-            className="mt-2 text-xs text-blue-600 hover:text-blue-700"
+            className="mt-2 text-xs text-indigo-600 hover:text-indigo-700"
           >
             Clear search
           </button>
@@ -240,15 +240,15 @@ export default function ConversationList({
       </div>
 
       {/* Conversation List */}
-      <div className="flex-1 overflow-y-auto bg-gray-50">
+      <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-slate-900">
         {filteredConversations.length === 0 ? (
-          <div className="p-6 text-center text-gray-500 text-sm">
+          <div className="p-6 text-center text-gray-500 dark:text-slate-400 text-sm">
             {searchQuery ? (
               <>
                 <p>No conversations match "{searchQuery}"</p>
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="mt-2 text-blue-600 hover:text-blue-700 underline"
+                  className="mt-2 text-indigo-600 hover:text-indigo-700 underline"
                 >
                   Clear search
                 </button>
@@ -278,10 +278,10 @@ export default function ConversationList({
                   }
                 }}
                 className={`
-                  w-full p-4 border-b border-gray-200 text-left transition-all
+                  w-full p-4 border-b border-gray-200 dark:border-slate-700 text-left transition-all
                   ${isSelected && !selectionMode
-                    ? 'bg-blue-50 border-l-4 border-l-blue-500'
-                    : 'bg-white border-l-4 border-l-transparent hover:bg-gray-50'
+                    ? 'bg-indigo-50 dark:bg-indigo-900/30 border-l-4 border-l-indigo-500'
+                    : 'bg-white dark:bg-slate-800 border-l-4 border-l-transparent hover:bg-gray-50 dark:hover:bg-slate-700'
                   }
                 `}
               >
@@ -293,7 +293,7 @@ export default function ConversationList({
                         className={`
                           w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all
                           ${isChecked
-                            ? 'bg-blue-600 border-blue-600'
+                            ? 'bg-indigo-600 border-indigo-600'
                             : 'border-gray-300'
                           }
                         `}
@@ -311,8 +311,8 @@ export default function ConversationList({
                   <div className={`
                     w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0
                     ${isSelected && !selectionMode
-                      ? 'bg-gradient-to-br from-blue-500 to-purple-600'
-                      : 'bg-gradient-to-br from-blue-400 to-purple-500'
+                      ? 'bg-gradient-to-br from-indigo-600 to-amber-500'
+                      : 'bg-gradient-to-br from-indigo-500 to-amber-400'
                     }
                   `}>
                     <span className="text-white font-semibold text-sm">
@@ -323,11 +323,11 @@ export default function ConversationList({
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between mb-1">
-                      <p className={`text-sm font-semibold truncate ${isSelected && !selectionMode ? 'text-blue-900' : 'text-gray-900'}`}>
+                      <p className={`text-sm font-semibold truncate ${isSelected && !selectionMode ? 'text-indigo-900 dark:text-indigo-200' : 'text-gray-900 dark:text-white'}`}>
                         {displayName}
                       </p>
                       {!selectionMode && (
-                        <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
+                        <span className="text-xs text-gray-500 dark:text-slate-400 flex-shrink-0 ml-2">
                           {formatDistanceToNow(new Date(conversation.last_message_at), { addSuffix: true })}
                         </span>
                       )}
@@ -338,14 +338,14 @@ export default function ConversationList({
                         <span className={getChannelColor(conversation.channel)}>
                           {getChannelIcon(conversation.channel)}
                         </span>
-                        <span className="text-xs text-gray-600 capitalize font-medium">
+                        <span className="text-xs text-gray-600 dark:text-slate-300 capitalize font-medium">
                           {conversation.channel}
                         </span>
                       </div>
 
                       <div className="flex items-center space-x-2">
                         {conversation.unread_count > 0 && (
-                          <span className="bg-blue-500 text-white text-xs font-medium rounded-full px-2 py-0.5">
+                          <span className="bg-indigo-500 text-white text-xs font-medium rounded-full px-2 py-0.5">
                             {conversation.unread_count}
                           </span>
                         )}
