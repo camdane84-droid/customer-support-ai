@@ -43,10 +43,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <svg className="absolute inset-0 w-full h-full opacity-[0.4]" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
-              <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#cbd5e1" strokeWidth="0.5"/>
+              <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#cbd5e1" strokeWidth="0.5" />
             </pattern>
             <pattern id="dots" width="60" height="60" patternUnits="userSpaceOnUse">
-              <circle cx="30" cy="30" r="1" fill="#94a3b8" opacity="0.4"/>
+              <circle cx="30" cy="30" r="1" fill="#94a3b8" opacity="0.4" />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#grid)" />
@@ -86,8 +86,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         <div className="flex items-center justify-between h-14 px-4 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center space-x-2">
-            <div className="w-7 h-7 bg-gradient-to-br from-purple-600 to-violet-500 rounded-lg flex items-center justify-center shadow-sm">
-              <MessageSquare className="w-4 h-4 text-white" />
+            <div className="w-7 h-7 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-lg flex items-center justify-center shadow-sm">
+              <MessageSquare className="w-4 h-4 text-purple-700 dark:text-white" />
             </div>
             <span className="text-base font-semibold text-slate-900 dark:text-white">InboxForge</span>
           </div>
@@ -127,8 +127,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 min-w-0">
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-violet-500 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-xs font-medium text-white">
+              <div className="w-8 h-8 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-medium text-purple-700 dark:text-white">
                   {business?.name?.charAt(0).toUpperCase() || 'U'}
                 </span>
               </div>
@@ -167,8 +167,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Logo */}
         <div className="flex items-center h-14 px-3 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center space-x-2 overflow-hidden">
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-violet-500 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
-              <MessageSquare className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
+              <MessageSquare className="w-4 h-4 text-purple-700 dark:text-white" />
             </div>
             <span
               className={`
@@ -216,8 +216,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="p-2 border-t border-slate-200 dark:border-slate-700">
           <div className={`flex items-center ${sidebarExpanded ? 'justify-between' : 'justify-center'} px-2.5 py-2`}>
             <div className="flex items-center space-x-2 min-w-0 overflow-hidden">
-              <div className="w-7 h-7 bg-gradient-to-br from-purple-600 to-violet-500 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-xs font-medium text-white">
+              <div className="w-7 h-7 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-medium text-purple-700 dark:text-white">
                   {business?.name?.charAt(0).toUpperCase() || 'U'}
                 </span>
               </div>
@@ -278,8 +278,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Menu className="w-5 h-5" aria-hidden="true" />
           </button>
           <div className="flex items-center space-x-2">
-            <div className="w-6 h-6 bg-gradient-to-br from-purple-600 to-violet-500 rounded-md flex items-center justify-center shadow-sm">
-              <MessageSquare className="w-3.5 h-3.5 text-white" />
+            <div className="w-6 h-6 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-md flex items-center justify-center shadow-sm">
+              <MessageSquare className="w-3.5 h-3.5 text-purple-700 dark:text-white" />
             </div>
             <span className="text-base font-semibold text-slate-900 dark:text-white">InboxForge</span>
           </div>

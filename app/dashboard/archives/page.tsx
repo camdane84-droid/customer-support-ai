@@ -181,7 +181,7 @@ export default function ArchivesPage() {
         .filter(c => {
           const date = getArchiveDate(c);
           return date.getFullYear().toString() === selectedYear &&
-                 (date.getMonth() + 1).toString().padStart(2, '0') === selectedMonth;
+            (date.getMonth() + 1).toString().padStart(2, '0') === selectedMonth;
         })
         .map(c => getArchiveDate(c).getDate())
     );
@@ -194,8 +194,8 @@ export default function ArchivesPage() {
     return filteredConversations.filter(c => {
       const date = getArchiveDate(c);
       return date.getFullYear().toString() === selectedYear &&
-             (date.getMonth() + 1).toString().padStart(2, '0') === selectedMonth &&
-             date.getDate().toString().padStart(2, '0') === selectedDay;
+        (date.getMonth() + 1).toString().padStart(2, '0') === selectedMonth &&
+        date.getDate().toString().padStart(2, '0') === selectedDay;
     }).sort((a, b) =>
       getArchiveDate(b).getTime() - getArchiveDate(a).getTime()
     );
@@ -313,8 +313,8 @@ export default function ArchivesPage() {
         <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center">
-                <Archive className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-lg flex items-center justify-center">
+                <Archive className="w-5 h-5 text-purple-700 dark:text-white" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white dark:text-white">Archives</h1>
@@ -554,7 +554,7 @@ export default function ArchivesPage() {
                     const count = filteredConversations.filter(c => {
                       const date = getArchiveDate(c);
                       return date.getFullYear().toString() === selectedYear &&
-                             date.getMonth() === month;
+                        date.getMonth() === month;
                     }).length;
 
                     return (
@@ -579,8 +579,8 @@ export default function ArchivesPage() {
                     const count = filteredConversations.filter(c => {
                       const date = getArchiveDate(c);
                       return date.getFullYear().toString() === selectedYear &&
-                             (date.getMonth() + 1).toString().padStart(2, '0') === selectedMonth &&
-                             date.getDate() === day;
+                        (date.getMonth() + 1).toString().padStart(2, '0') === selectedMonth &&
+                        date.getDate() === day;
                     }).length;
 
                     return (
@@ -622,38 +622,38 @@ export default function ArchivesPage() {
                             const initials = getCustomerInitials(displayName);
 
                             return (
-                            <button
-                              key={conversation.id}
-                              onClick={() => setSelectedConversation(conversation)}
-                              className={`
+                              <button
+                                key={conversation.id}
+                                onClick={() => setSelectedConversation(conversation)}
+                                className={`
                                 w-full p-4 border-b border-gray-200 dark:border-slate-700 text-left transition-all
                                 ${selectedConversation.id === conversation.id
-                                  ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500'
-                                  : 'bg-white dark:bg-slate-800 border-l-4 border-l-transparent hover:bg-gray-50 dark:hover:bg-slate-700'
-                                }
+                                    ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500'
+                                    : 'bg-white dark:bg-slate-800 border-l-4 border-l-transparent hover:bg-gray-50 dark:hover:bg-slate-700'
+                                  }
                               `}
-                            >
-                              <div className="flex items-start space-x-3">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center flex-shrink-0">
-                                  <span className="text-white font-semibold text-sm">
-                                    {initials}
-                                  </span>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                                    {displayName}
-                                  </h3>
-                                  <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 truncate">
-                                    {conversation.customer_email || conversation.customer_instagram_id || 'No contact info'}
-                                  </p>
-                                  <div className="flex items-center space-x-2 mt-2">
-                                    <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${getChannelColor(conversation.channel)}`}>
-                                      {getChannelIcon(conversation.channel)}
+                              >
+                                <div className="flex items-start space-x-3">
+                                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center flex-shrink-0">
+                                    <span className="text-white font-semibold text-sm">
+                                      {initials}
                                     </span>
                                   </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                                      {displayName}
+                                    </h3>
+                                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 truncate">
+                                      {conversation.customer_email || conversation.customer_instagram_id || 'No contact info'}
+                                    </p>
+                                    <div className="flex items-center space-x-2 mt-2">
+                                      <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${getChannelColor(conversation.channel)}`}>
+                                        {getChannelIcon(conversation.channel)}
+                                      </span>
+                                    </div>
+                                  </div>
                                 </div>
-                              </div>
-                            </button>
+                              </button>
                             );
                           })}
                         </div>
@@ -675,40 +675,40 @@ export default function ArchivesPage() {
                         const initials = getCustomerInitials(displayName);
 
                         return (
-                        <button
-                          key={conversation.id}
-                          onClick={() => setSelectedConversation(conversation)}
-                          className="w-full bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all text-left"
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-start space-x-3 flex-1">
-                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center flex-shrink-0">
-                                <span className="text-white font-semibold text-sm">
-                                  {initials}
-                                </span>
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h3 className="text-sm font-semibold text-gray-900 dark:text-white dark:text-white">
-                                  {displayName}
-                                </h3>
-                                <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
-                                  {conversation.customer_email || conversation.customer_instagram_id || 'No contact info'}
-                                </p>
-                                <div className="flex items-center space-x-3 mt-2">
-                                  <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${getChannelColor(conversation.channel)}`}>
-                                    {getChannelIcon(conversation.channel)}
-                                    <span className="capitalize">{conversation.channel}</span>
-                                  </span>
-                                  <span className="text-xs text-gray-500 dark:text-slate-400">
-                                    Archived {formatDistanceToNow(getArchiveDate(conversation), { addSuffix: true })}
+                          <button
+                            key={conversation.id}
+                            onClick={() => setSelectedConversation(conversation)}
+                            className="w-full bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all text-left"
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start space-x-3 flex-1">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center flex-shrink-0">
+                                  <span className="text-white font-semibold text-sm">
+                                    {initials}
                                   </span>
                                 </div>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white dark:text-white">
+                                    {displayName}
+                                  </h3>
+                                  <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
+                                    {conversation.customer_email || conversation.customer_instagram_id || 'No contact info'}
+                                  </p>
+                                  <div className="flex items-center space-x-3 mt-2">
+                                    <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${getChannelColor(conversation.channel)}`}>
+                                      {getChannelIcon(conversation.channel)}
+                                      <span className="capitalize">{conversation.channel}</span>
+                                    </span>
+                                    <span className="text-xs text-gray-500 dark:text-slate-400">
+                                      Archived {formatDistanceToNow(getArchiveDate(conversation), { addSuffix: true })}
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
+                              <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
                             </div>
-                            <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                          </div>
-                        </button>
-                      );
+                          </button>
+                        );
                       })}
                     </div>
                   )}

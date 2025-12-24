@@ -60,12 +60,12 @@ export default function AISuggestion({
   }
 
   return (
-    <div className="border-t border-gray-200 dark:border-slate-700 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-slate-800 dark:to-slate-900 p-4">
+    <div className="border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 p-4">
       {/* Generate Button */}
       {!suggestion && !loading && (
         <button
           onClick={generateSuggestion}
-          className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all"
+          className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all shadow-sm"
         >
           <Sparkles className="w-4 h-4" />
           <span>Generate AI Response</span>

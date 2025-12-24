@@ -667,7 +667,7 @@ function MetricCard({
   return (
     <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/75 p-6 hover:shadow-lg transition-shadow">
       <div className="flex items-center justify-between mb-3">
-        <div className={`p-3 rounded-lg bg-gradient-to-br ${colors[color]} dark:bg-transparent dark:border dark:border-slate-700`}>
+        <div className={`p-3 rounded-lg bg-gradient-to-br ${colors[color]} ${color === 'purple' ? 'dark:bg-gradient-to-br dark:from-indigo-600 dark:to-purple-600 dark:border-purple-500/30' : 'dark:bg-transparent'} dark:border dark:border-slate-700`}>
           <Icon className="w-6 h-6 text-white" />
         </div>
         {trend !== 0 && (
