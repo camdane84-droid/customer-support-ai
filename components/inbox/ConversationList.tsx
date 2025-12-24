@@ -311,8 +311,8 @@ export default function ConversationList({
                   <div className={`
                     w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0
                     ${isSelected && !selectionMode
-                      ? 'bg-gradient-to-br from-indigo-600 to-amber-500'
-                      : 'bg-gradient-to-br from-indigo-500 to-amber-400'
+                      ? 'bg-gradient-to-br from-purple-600 to-violet-500'
+                      : 'bg-gradient-to-br from-purple-600 to-violet-500'
                     }
                   `}>
                     <span className="text-white font-semibold text-sm">
@@ -352,8 +352,8 @@ export default function ConversationList({
                         <span className={`
                           text-xs px-2 py-0.5 rounded-full font-medium
                           ${conversation.status === 'open'
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-gray-100 text-gray-600'
+                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                            : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300'
                           }
                         `}>
                           {conversation.status}

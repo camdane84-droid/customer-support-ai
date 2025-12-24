@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Send, Loader2, Archive, Trash2, StickyNote } from 'lucide-react';
+import { Send, Loader2, Archive, Trash2, StickyNote, CheckCircle, RotateCcw } from 'lucide-react';
 import type { Conversation, Message } from '@/lib/api/supabase';
 import { getConversationMessages, createMessage, retryFailedMessage } from '@/lib/api/conversations';
 import { supabase } from '@/lib/api/supabase';
@@ -30,10 +30,13 @@ export default function MessageThread({ conversation, businessId, onConversation
   const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info' | 'warning'; message: string } | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showArchiveModal, setShowArchiveModal] = useState(false);
+  const [showResolveModal, setShowResolveModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showNotesModal, setShowNotesModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [archiving, setArchiving] = useState(false);
+  const [resolving, setResolving] = useState(false);
+  const [returning, setReturning] = useState(false);
   const [savingNotes, setSavingNotes] = useState(false);
   const [notes, setNotes] = useState(conversation.notes || '');
   const [tags, setTags] = useState<TagType[]>([]);
@@ -197,7 +200,7 @@ export default function MessageThread({ conversation, businessId, onConversation
       const response = await fetch(`/api/conversations/${conversation.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'archive' }),
+        body: JSON.stringify({ action: 'archive', archive_type: 'archived' }),
       });
 
       console.log('Archive response status:', response.status);
@@ -227,6 +230,49 @@ export default function MessageThread({ conversation, businessId, onConversation
       setShowArchiveModal(false);
     } finally {
       setArchiving(false);
+    }
+  }
+
+  async function handleResolveConversation() {
+    try {
+      setResolving(true);
+
+      console.log('Resolving conversation:', conversation.id);
+
+      // Resolve the conversation
+      const response = await fetch(`/api/conversations/${conversation.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'archive', archive_type: 'resolved' }),
+      });
+
+      console.log('Resolve response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Resolve failed:', errorData);
+        throw new Error(errorData.error || 'Failed to resolve conversation');
+      }
+
+      const result = await response.json();
+      console.log('Resolve successful:', result);
+
+      setToast({ type: 'success', message: 'Conversation resolved successfully!' });
+      setShowResolveModal(false);
+
+      // Call the callback to let parent handle the UI update
+      if (onConversationDeleted) {
+        onConversationDeleted();
+      }
+    } catch (error: any) {
+      console.error('Failed to resolve conversation:', error);
+      setToast({
+        type: 'error',
+        message: error.message || 'Failed to resolve conversation',
+      });
+      setShowResolveModal(false);
+    } finally {
+      setResolving(false);
     }
   }
 
@@ -268,6 +314,53 @@ export default function MessageThread({ conversation, businessId, onConversation
       setShowDeleteModal(false);
     } finally {
       setDeleting(false);
+    }
+  }
+
+  async function handleReturnToInbox() {
+    try {
+      setReturning(true);
+
+      console.log('Returning conversation to inbox:', conversation.id);
+
+      // Update the conversation status back to 'open'
+      const response = await fetch(`/api/conversations/${conversation.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'open' }),
+      });
+
+      console.log('Return to inbox response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Return to inbox failed:', errorData);
+        throw new Error(errorData.error || 'Failed to return conversation to inbox');
+      }
+
+      const result = await response.json();
+      console.log('Return to inbox successful:', result);
+
+      // Show brief success message
+      setToast({ type: 'success', message: 'Returned to inbox!' });
+
+      // Immediately trigger parent to remove this conversation from view
+      // This will cause the conversation to disappear from the archives list
+      if (onConversationDeleted) {
+        onConversationDeleted();
+      }
+
+      // Small delay to show the toast, then redirect to inbox
+      setTimeout(() => {
+        window.location.href = '/dashboard/inbox';
+      }, 500);
+    } catch (error: any) {
+      console.error('Failed to return conversation to inbox:', error);
+      setToast({
+        type: 'error',
+        message: error.message || 'Failed to return conversation to inbox',
+      });
+      setReturning(false);
     }
   }
 
@@ -359,28 +452,60 @@ export default function MessageThread({ conversation, businessId, onConversation
           <div className="flex items-center space-x-3">
             <span className={`
               px-3 py-1 rounded-full text-xs font-medium
-              ${conversation.status === 'open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}
+              ${conversation.status === 'open' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400' : 'bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-slate-300'}
             `}>
               {conversation.status}
             </span>
 
-            {/* Archive Button with Expand Animation */}
-            <button
-              onClick={() => setShowArchiveModal(true)}
-              className="group relative overflow-hidden p-2 text-gray-600 hover:text-indigo-600 hover:bg-blue-50 rounded-lg transition-all duration-300 ease-in-out hover:pr-20"
-            >
-              <div className="flex items-center space-x-2">
-                <Archive className="w-5 h-5 transition-transform duration-300" />
-                <span className="absolute left-9 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-medium whitespace-nowrap">
-                  Archive
-                </span>
-              </div>
-            </button>
+            {/* Show Archive/Resolve buttons only if conversation is not archived */}
+            {conversation.status !== 'archived' ? (
+              <>
+                {/* Archive Button with Expand Animation */}
+                <button
+                  onClick={() => setShowArchiveModal(true)}
+                  className="group relative overflow-hidden p-2 text-gray-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg transition-all duration-300 ease-in-out hover:pr-20"
+                >
+                  <div className="flex items-center space-x-2">
+                    <Archive className="w-5 h-5 transition-transform duration-300" />
+                    <span className="absolute left-9 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-medium whitespace-nowrap">
+                      Archive
+                    </span>
+                  </div>
+                </button>
+
+                {/* Resolve Button with Expand Animation */}
+                <button
+                  onClick={() => setShowResolveModal(true)}
+                  className="group relative overflow-hidden p-2 text-gray-600 dark:text-slate-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-slate-700 rounded-lg transition-all duration-300 ease-in-out hover:pr-20"
+                >
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="w-5 h-5 transition-transform duration-300" />
+                    <span className="absolute left-9 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-medium whitespace-nowrap">
+                      Resolve
+                    </span>
+                  </div>
+                </button>
+              </>
+            ) : (
+              /* Return to Inbox Button - shown only for archived conversations */
+              <button
+                onClick={handleReturnToInbox}
+                disabled={returning}
+                className="group relative overflow-hidden p-2 text-gray-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg transition-all duration-300 ease-in-out hover:pr-32"
+              >
+                <div className="flex items-center space-x-2">
+                  <RotateCcw className="w-5 h-5 transition-transform duration-300" />
+                  <span className="absolute left-9 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-medium whitespace-nowrap">
+                    {returning ? 'Returning...' : 'Return to Inbox'}
+                  </span>
+                </div>
+              </button>
+            )}
 
             {/* Delete Button with Expand Animation */}
             <button
               onClick={() => setShowDeleteModal(true)}
-              className="group relative overflow-hidden p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-300 ease-in-out hover:pr-16"
+              className="group relative overflow-hidden p-2 text-gray-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-slate-700 rounded-lg transition-all duration-300 ease-in-out hover:pr-16"
             >
               <div className="flex items-center space-x-2">
                 <Trash2 className="w-5 h-5 transition-transform duration-300" />
@@ -545,16 +670,16 @@ export default function MessageThread({ conversation, businessId, onConversation
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                <Archive className="w-6 h-6 text-indigo-600" />
+              <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-slate-700 flex items-center justify-center">
+                <Archive className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Archive Conversation</h3>
-                <p className="text-sm text-gray-500">Move to archives</p>
+                <p className="text-sm text-gray-500 dark:text-slate-400">Move to archives</p>
               </div>
             </div>
 
-            <p className="text-gray-700 mb-6">
+            <p className="text-gray-700 dark:text-slate-300 mb-6">
               Are you sure you want to archive this conversation? You can find it later in the Archives section organized by date.
             </p>
 
@@ -585,13 +710,58 @@ export default function MessageThread({ conversation, businessId, onConversation
         </div>
       )}
 
+      {/* Resolve Confirmation Modal */}
+      {showResolveModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-slate-700 flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Resolve Conversation</h3>
+                <p className="text-sm text-gray-500 dark:text-slate-400">Mark as resolved</p>
+              </div>
+            </div>
+
+            <p className="text-gray-700 dark:text-slate-300 mb-6">
+              Are you sure you want to mark this conversation as resolved? You can find it later in the Resolved section of Archives organized by date.
+            </p>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowResolveModal(false)}
+                disabled={resolving}
+                className="flex-1 px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleResolveConversation}
+                disabled={resolving}
+                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center space-x-2"
+              >
+                {resolving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Resolving...</span>
+                  </>
+                ) : (
+                  <span>Resolve</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                <Trash2 className="w-6 h-6 text-red-600" />
+              <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-slate-700 flex items-center justify-center">
+                <Trash2 className="w-6 h-6 text-red-600 dark:text-red-400" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Delete Conversation</h3>

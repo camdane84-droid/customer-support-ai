@@ -84,23 +84,39 @@ export async function PATCH(
     const params = await context.params;
     const conversationId = params.id;
     const body = await request.json();
+    const archiveType = body.archive_type || 'archived'; // Default to 'archived' if not specified
 
-    console.log('📦 Archiving conversation:', conversationId);
+    console.log('📦 Archiving conversation:', conversationId, 'Type:', archiveType);
 
-    // First, try to update with archived_at (if column exists)
+    // First, try to update with archived_at and archive_type (if columns exist)
     let result = await supabaseAdmin
       .from('conversations')
       .update({
         status: 'archived',
         archived_at: new Date().toISOString(),
+        archive_type: archiveType,
       })
       .eq('id', conversationId)
       .select()
       .single();
 
-    // If archived_at column doesn't exist, try without it
+    // If archived_at column doesn't exist, try without it but keep archive_type
     if (result.error && result.error.message?.includes('archived_at')) {
       console.log('⚠️ archived_at column not found, updating without it');
+      result = await supabaseAdmin
+        .from('conversations')
+        .update({
+          status: 'archived',
+          archive_type: archiveType,
+        })
+        .eq('id', conversationId)
+        .select()
+        .single();
+    }
+
+    // If archive_type column also doesn't exist, try without both
+    if (result.error && result.error.message?.includes('archive_type')) {
+      console.log('⚠️ archive_type column not found, updating without optional columns');
       result = await supabaseAdmin
         .from('conversations')
         .update({

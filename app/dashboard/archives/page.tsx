@@ -14,13 +14,14 @@ import {
   Phone,
   Search,
   X,
-  ArrowLeft
+  ArrowLeft,
+  CheckCircle
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import type { Conversation } from '@/lib/api/supabase';
 import { getCustomerDisplayName, getCustomerInitials } from '@/lib/utils/customerDisplay';
 
-type ViewLevel = 'years' | 'months' | 'days' | 'conversations';
+type ViewLevel = 'categories' | 'years' | 'months' | 'days' | 'conversations';
 
 interface BreadcrumbItem {
   level: ViewLevel;
@@ -39,6 +40,7 @@ interface ArchivedConversation {
   status: string;
   unread_count: number;
   archived_at: string;
+  archive_type?: string;
   last_message_at: string;
   notes: string | null;
   created_at: string;
@@ -47,10 +49,11 @@ interface ArchivedConversation {
 
 export default function ArchivesPage() {
   const { business } = useAuth();
-  const [currentLevel, setCurrentLevel] = useState<ViewLevel>('years');
+  const [currentLevel, setCurrentLevel] = useState<ViewLevel>('categories');
   const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([
-    { level: 'years', label: 'Archives' }
+    { level: 'categories', label: 'Archives' }
   ]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
@@ -78,7 +81,7 @@ export default function ArchivesPage() {
   // Apply filters
   useEffect(() => {
     applyFilters();
-  }, [conversations, filterChannel, filterYear, filterMonth, filterDay, filterSearch]);
+  }, [conversations, selectedCategory, filterChannel, filterYear, filterMonth, filterDay, filterSearch]);
 
   async function loadArchivedConversations() {
     if (!business) return;
@@ -102,6 +105,11 @@ export default function ArchivesPage() {
 
   function applyFilters() {
     let filtered = [...conversations];
+
+    // Category filter (filter by selected category in navigation)
+    if (selectedCategory) {
+      filtered = filtered.filter(c => (c.archive_type || 'archived') === selectedCategory);
+    }
 
     // Channel filter
     if (filterChannel !== 'all') {
@@ -193,13 +201,27 @@ export default function ArchivesPage() {
     );
   }
 
+  function handleCategoryClick(category: string) {
+    const categoryLabel = category === 'archived' ? 'Archived' : 'Resolved';
+    setSelectedCategory(category);
+    setSelectedYear(null);
+    setSelectedMonth(null);
+    setSelectedDay(null);
+    setCurrentLevel('years');
+    setBreadcrumbs([
+      { level: 'categories', label: 'Archives' },
+      { level: 'years', label: categoryLabel, value: category }
+    ]);
+  }
+
   function handleYearClick(year: number) {
     setSelectedYear(year.toString());
     setSelectedMonth(null);
     setSelectedDay(null);
     setCurrentLevel('months');
     setBreadcrumbs([
-      { level: 'years', label: 'Archives' },
+      { level: 'categories', label: 'Archives' },
+      { level: 'years', label: selectedCategory === 'archived' ? 'Archived' : 'Resolved', value: selectedCategory! },
       { level: 'months', label: year.toString(), value: year.toString() }
     ]);
   }
@@ -210,7 +232,8 @@ export default function ArchivesPage() {
     setSelectedDay(null);
     setCurrentLevel('days');
     setBreadcrumbs([
-      { level: 'years', label: 'Archives' },
+      { level: 'categories', label: 'Archives' },
+      { level: 'years', label: selectedCategory === 'archived' ? 'Archived' : 'Resolved', value: selectedCategory! },
       { level: 'months', label: selectedYear!, value: selectedYear! },
       { level: 'days', label: monthName, value: (month + 1).toString().padStart(2, '0') }
     ]);
@@ -220,7 +243,8 @@ export default function ArchivesPage() {
     setSelectedDay(day.toString().padStart(2, '0'));
     setCurrentLevel('conversations');
     setBreadcrumbs([
-      { level: 'years', label: 'Archives' },
+      { level: 'categories', label: 'Archives' },
+      { level: 'years', label: selectedCategory === 'archived' ? 'Archived' : 'Resolved', value: selectedCategory! },
       { level: 'months', label: selectedYear!, value: selectedYear! },
       { level: 'days', label: new Date(parseInt(selectedYear!), parseInt(selectedMonth!) - 1, 1).toLocaleString('default', { month: 'long' }), value: selectedMonth! },
       { level: 'conversations', label: `Day ${day}`, value: day.toString().padStart(2, '0') }
@@ -231,7 +255,13 @@ export default function ArchivesPage() {
     setBreadcrumbs(breadcrumbs.slice(0, index + 1));
     setCurrentLevel(item.level);
 
-    if (item.level === 'years') {
+    if (item.level === 'categories') {
+      setSelectedCategory(null);
+      setSelectedYear(null);
+      setSelectedMonth(null);
+      setSelectedDay(null);
+    } else if (item.level === 'years') {
+      setSelectedCategory(item.value!);
       setSelectedYear(null);
       setSelectedMonth(null);
       setSelectedDay(null);
@@ -296,7 +326,7 @@ export default function ArchivesPage() {
 
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              className="flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
             >
               <Filter className="w-4 h-4" />
               <span>Filters</span>
@@ -316,8 +346,8 @@ export default function ArchivesPage() {
                   className={`
                     px-2 py-1 rounded transition-colors
                     ${index === breadcrumbs.length - 1
-                      ? 'text-gray-900 font-medium bg-gray-100'
-                      : 'text-gray-600 dark:text-slate-300 hover:text-gray-900 hover:bg-gray-50'
+                      ? 'text-gray-900 dark:text-white font-medium bg-gray-100 dark:bg-slate-700'
+                      : 'text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-700'
                     }
                   `}
                 >
@@ -335,7 +365,7 @@ export default function ArchivesPage() {
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white dark:text-white">Filter Archives</h3>
               <button
                 onClick={clearFilters}
-                className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+                className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium"
               >
                 Clear All
               </button>
@@ -344,11 +374,11 @@ export default function ArchivesPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               {/* Channel Filter */}
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Channel</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1.5">Channel</label>
                 <select
                   value={filterChannel}
                   onChange={(e) => setFilterChannel(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="all">All Channels</option>
                   <option value="email">Email</option>
@@ -359,11 +389,11 @@ export default function ArchivesPage() {
 
               {/* Year Filter */}
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Year</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1.5">Year</label>
                 <select
                   value={filterYear}
                   onChange={(e) => setFilterYear(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="all">All Years</option>
                   {getYears().map(year => (
@@ -374,11 +404,11 @@ export default function ArchivesPage() {
 
               {/* Month Filter */}
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Month</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1.5">Month</label>
                 <select
                   value={filterMonth}
                   onChange={(e) => setFilterMonth(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="all">All Months</option>
                   {monthNames.map((month, idx) => (
@@ -391,11 +421,11 @@ export default function ArchivesPage() {
 
               {/* Day Filter */}
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Day</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1.5">Day</label>
                 <select
                   value={filterDay}
                   onChange={(e) => setFilterDay(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="all">All Days</option>
                   {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
@@ -408,20 +438,20 @@ export default function ArchivesPage() {
 
               {/* Search Filter */}
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Search</label>
+                <label className="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1.5">Search</label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-slate-500" />
                   <input
                     type="text"
                     value={filterSearch}
                     onChange={(e) => setFilterSearch(e.target.value)}
                     placeholder="Customer name..."
-                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   {filterSearch && (
                     <button
                       onClick={() => setFilterSearch('')}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-slate-300"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -453,6 +483,47 @@ export default function ArchivesPage() {
             </div>
           ) : (
             <>
+              {/* Categories View */}
+              {currentLevel === 'categories' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                  <button
+                    onClick={() => handleCategoryClick('archived')}
+                    className="p-8 bg-white dark:bg-slate-800 rounded-lg border-2 border-gray-200 dark:border-slate-700 hover:border-indigo-500 hover:shadow-lg transition-all group"
+                  >
+                    <div className="flex flex-col items-center">
+                      <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <Archive className="w-8 h-8 text-white" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Archived</h3>
+                      <p className="text-sm text-gray-500 dark:text-slate-400 mb-3">
+                        {conversations.filter(c => (c.archive_type || 'archived') === 'archived').length} conversation{conversations.filter(c => (c.archive_type || 'archived') === 'archived').length !== 1 ? 's' : ''}
+                      </p>
+                      <p className="text-xs text-gray-400 dark:text-slate-500 text-center">
+                        Conversations archived for later reference
+                      </p>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => handleCategoryClick('resolved')}
+                    className="p-8 bg-white dark:bg-slate-800 rounded-lg border-2 border-gray-200 dark:border-slate-700 hover:border-green-500 hover:shadow-lg transition-all group"
+                  >
+                    <div className="flex flex-col items-center">
+                      <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <CheckCircle className="w-8 h-8 text-white" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Resolved</h3>
+                      <p className="text-sm text-gray-500 dark:text-slate-400 mb-3">
+                        {conversations.filter(c => c.archive_type === 'resolved').length} conversation{conversations.filter(c => c.archive_type === 'resolved').length !== 1 ? 's' : ''}
+                      </p>
+                      <p className="text-xs text-gray-400 dark:text-slate-500 text-center">
+                        Issues marked as resolved and completed
+                      </p>
+                    </div>
+                  </button>
+                </div>
+              )}
+
               {/* Years View */}
               {currentLevel === 'years' && (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -557,8 +628,8 @@ export default function ArchivesPage() {
                               className={`
                                 w-full p-4 border-b border-gray-200 dark:border-slate-700 text-left transition-all
                                 ${selectedConversation.id === conversation.id
-                                  ? 'bg-blue-50 border-l-4 border-l-blue-500'
-                                  : 'bg-white border-l-4 border-l-transparent hover:bg-gray-50'
+                                  ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500'
+                                  : 'bg-white dark:bg-slate-800 border-l-4 border-l-transparent hover:bg-gray-50 dark:hover:bg-slate-700'
                                 }
                               `}
                             >
@@ -607,7 +678,7 @@ export default function ArchivesPage() {
                         <button
                           key={conversation.id}
                           onClick={() => setSelectedConversation(conversation)}
-                          className="w-full bg-white dark:bg-slate-800 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 hover:shadow-md hover:border-blue-300 transition-all text-left"
+                          className="w-full bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all text-left"
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex items-start space-x-3 flex-1">

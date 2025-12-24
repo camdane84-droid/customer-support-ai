@@ -54,7 +54,9 @@
       "Bash(git reset:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(node scripts/apply-archive-type-migration.js:*)",
+      "Bash(node scripts/verify-archive-type.js:*)"
     ],
     "deny": [],
     "ask": []

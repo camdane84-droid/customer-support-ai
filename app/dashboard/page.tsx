@@ -183,10 +183,10 @@ export default function DashboardPage() {
 
   const getChannelColor = (channel: string) => {
     switch (channel) {
-      case 'email': return 'bg-blue-100 text-indigo-600';
-      case 'instagram': return 'bg-pink-100 text-pink-600';
-      case 'sms': return 'bg-green-100 text-green-600';
-      default: return 'bg-slate-100 text-slate-600';
+      case 'email': return 'bg-blue-100 dark:bg-blue-900/30 text-indigo-600 dark:text-indigo-400';
+      case 'instagram': return 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400';
+      case 'sms': return 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400';
+      default: return 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400';
     }
   };
 
@@ -375,8 +375,8 @@ export default function DashboardPage() {
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-4">
-                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-indigo-700">
+                      <div className="w-10 h-10 bg-blue-100 dark:bg-slate-700 rounded-full flex items-center justify-center">
+                        <span className="text-sm font-medium text-indigo-700 dark:text-indigo-400">
                           {initials}
                         </span>
                       </div>
@@ -403,7 +403,7 @@ export default function DashboardPage() {
                       <div>
                         <span className={`
                           inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                          ${convo.status === 'open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}
+                          ${convo.status === 'open' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400' : 'bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-slate-300'}
                         `}>
                           {convo.status}
                         </span>

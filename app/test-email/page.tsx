@@ -50,10 +50,10 @@ export default function TestEmailPage() {
 
   if (!business) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900">
         <div className="text-center">
-          <p className="text-gray-600">Please log in to test email</p>
-          <a href="/login" className="text-indigo-600 hover:underline mt-2 inline-block">
+          <p className="text-gray-600 dark:text-slate-400">Please log in to test email</p>
+          <a href="/login" className="text-indigo-600 dark:text-indigo-400 hover:underline mt-2 inline-block">
             Go to Login
           </a>
         </div>
@@ -62,77 +62,77 @@ export default function TestEmailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 py-12 px-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6 mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
             📧 Email Simulator
           </h1>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-slate-400">
             Simulate incoming emails to test your inbox without needing SendGrid setup
           </p>
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-900">
+          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <p className="text-sm text-blue-900 dark:text-blue-200">
               <strong>Your business email:</strong> {business.email}
             </p>
-            <p className="text-xs text-indigo-700 mt-1">
+            <p className="text-xs text-indigo-700 dark:text-indigo-300 mt-1">
               Simulated emails will appear as if sent to this address
             </p>
           </div>
         </div>
 
         {/* Form */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6">
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                 From Name
               </label>
               <input
                 type="text"
                 value={fromName}
                 onChange={(e) => setFromName(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Customer Name"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                 From Email
               </label>
               <input
                 type="email"
                 value={fromEmail}
                 onChange={(e) => setFromEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="customer@example.com"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                 Subject
               </label>
               <input
                 type="text"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Email subject line"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                 Message
               </label>
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 rows={6}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Email message content"
               />
             </div>
@@ -140,7 +140,7 @@ export default function TestEmailPage() {
             <button
               onClick={simulateIncomingEmail}
               disabled={loading || !fromEmail || !message}
-              className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+              className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed transition-colors font-medium"
             >
               {loading ? 'Simulating...' : '📧 Simulate Incoming Email'}
             </button>
@@ -148,8 +148,8 @@ export default function TestEmailPage() {
             {result && (
               <div className={`p-4 rounded-lg ${
                 result.startsWith('✅')
-                  ? 'bg-green-50 border border-green-200 text-green-800'
-                  : 'bg-red-50 border border-red-200 text-red-800'
+                  ? 'bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200'
+                  : 'bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
               }`}>
                 {result}
               </div>
@@ -158,8 +158,8 @@ export default function TestEmailPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="mt-6 bg-white rounded-lg shadow-sm p-6">
-          <h3 className="font-medium text-gray-900 mb-3">Quick Test Scenarios</h3>
+        <div className="mt-6 bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6">
+          <h3 className="font-medium text-gray-900 dark:text-white mb-3">Quick Test Scenarios</h3>
           <div className="space-y-2">
             <button
               onClick={() => {
@@ -168,7 +168,7 @@ export default function TestEmailPage() {
                 setSubject('Question about your services');
                 setMessage('Hi! I was wondering if you offer delivery? Thanks!');
               }}
-              className="w-full text-left px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
+              className="w-full text-left px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 text-sm"
             >
               📦 Delivery Question
             </button>
@@ -179,7 +179,7 @@ export default function TestEmailPage() {
                 setSubject('Urgent: Order issue');
                 setMessage('I placed an order yesterday but haven\'t received confirmation. Can you help?');
               }}
-              className="w-full text-left px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
+              className="w-full text-left px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 text-sm"
             >
               🚨 Order Issue
             </button>
@@ -190,7 +190,7 @@ export default function TestEmailPage() {
                 setSubject('Hours of operation?');
                 setMessage('What are your hours today?');
               }}
-              className="w-full text-left px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
+              className="w-full text-left px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 text-sm"
             >
               🕐 Hours Question
             </button>
@@ -198,9 +198,9 @@ export default function TestEmailPage() {
         </div>
 
         {/* Instructions */}
-        <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <h3 className="font-medium text-yellow-900 mb-2">How to Test:</h3>
-          <ol className="text-sm text-yellow-800 space-y-1 list-decimal list-inside">
+        <div className="mt-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+          <h3 className="font-medium text-yellow-900 dark:text-yellow-200 mb-2">How to Test:</h3>
+          <ol className="text-sm text-yellow-800 dark:text-yellow-300 space-y-1 list-decimal list-inside">
             <li>Fill in the form above (or use quick scenarios)</li>
             <li>Click "Simulate Incoming Email"</li>
             <li>Go to your Inbox page</li>
@@ -213,7 +213,7 @@ export default function TestEmailPage() {
         <div className="mt-6 text-center">
           <Link
             href="/dashboard/inbox"
-            className="inline-flex items-center px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+            className="inline-flex items-center px-6 py-3 bg-gray-900 dark:bg-slate-700 text-white rounded-lg hover:bg-gray-800 dark:hover:bg-slate-600 transition-colors"
           >
             Go to Inbox →
           </Link>

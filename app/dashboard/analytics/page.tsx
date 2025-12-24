@@ -558,7 +558,7 @@ export default function AnalyticsPage() {
           </div>
 
           {/* AI Performance */}
-          <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/75 p-6">
+          <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/65 dark:border-slate-700/50 p-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
               <Zap className="w-5 h-5 mr-2 text-orange-600" />
               AI Performance

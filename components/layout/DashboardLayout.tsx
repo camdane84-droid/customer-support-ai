@@ -86,7 +86,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         <div className="flex items-center justify-between h-14 px-4 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center space-x-2">
-            <div className="w-7 h-7 bg-gradient-to-br from-indigo-600 to-amber-500 rounded-lg flex items-center justify-center shadow-sm">
+            <div className="w-7 h-7 bg-gradient-to-br from-purple-600 to-violet-500 rounded-lg flex items-center justify-center shadow-sm">
               <MessageSquare className="w-4 h-4 text-white" />
             </div>
             <span className="text-base font-semibold text-slate-900 dark:text-white">InboxForge</span>
@@ -124,19 +124,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </nav>
 
         {/* Mobile user section */}
-        <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-slate-200 bg-white">
+        <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 min-w-0">
-              <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-amber-400 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-violet-500 rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-xs font-medium text-white">
                   {business?.name?.charAt(0).toUpperCase() || 'U'}
                 </span>
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-medium text-slate-900 truncate">
+                <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
                   {business?.name || 'User'}
                 </p>
-                <p className="text-xs text-slate-500 truncate">
+                <p className="text-xs text-slate-600 dark:text-slate-400 truncate">
                   {user?.email || ''}
                 </p>
               </div>
@@ -167,7 +167,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Logo */}
         <div className="flex items-center h-14 px-3 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center space-x-2 overflow-hidden">
-            <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-amber-500 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-violet-500 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
               <MessageSquare className="w-4 h-4 text-white" />
             </div>
             <span
@@ -213,10 +213,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </nav>
 
         {/* User section at bottom */}
-        <div className="p-2 border-t border-slate-200">
+        <div className="p-2 border-t border-slate-200 dark:border-slate-700">
           <div className={`flex items-center ${sidebarExpanded ? 'justify-between' : 'justify-center'} px-2.5 py-2`}>
             <div className="flex items-center space-x-2 min-w-0 overflow-hidden">
-              <div className="w-7 h-7 bg-gradient-to-br from-indigo-500 to-amber-400 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-7 h-7 bg-gradient-to-br from-purple-600 to-violet-500 rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-xs font-medium text-white">
                   {business?.name?.charAt(0).toUpperCase() || 'U'}
                 </span>
@@ -227,10 +227,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   ${sidebarExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0'}
                 `}
               >
-                <p className="text-sm font-medium text-slate-900 truncate">
+                <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
                   {business?.name || 'User'}
                 </p>
-                <p className="text-xs text-slate-500 truncate">
+                <p className="text-xs text-slate-600 dark:text-slate-400 truncate">
                   {user?.email || ''}
                 </p>
               </div>
@@ -278,7 +278,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Menu className="w-5 h-5" aria-hidden="true" />
           </button>
           <div className="flex items-center space-x-2">
-            <div className="w-6 h-6 bg-gradient-to-br from-indigo-600 to-amber-500 rounded-md flex items-center justify-center shadow-sm">
+            <div className="w-6 h-6 bg-gradient-to-br from-purple-600 to-violet-500 rounded-md flex items-center justify-center shadow-sm">
               <MessageSquare className="w-3.5 h-3.5 text-white" />
             </div>
             <span className="text-base font-semibold text-slate-900 dark:text-white">InboxForge</span>
