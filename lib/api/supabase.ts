@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 // Get environment variables - trim to remove any whitespace
@@ -18,8 +18,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error('NEXT_PUBLIC_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'SET' : 'MISSING');
 }
 
-// Create Supabase client with minimal configuration
-export const supabase = createClient(
+// Create browser client using @supabase/ssr (proper Next.js App Router pattern)
+export const supabase = createBrowserClient(
   supabaseUrl,
   supabaseAnonKey
 );
