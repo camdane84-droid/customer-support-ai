@@ -57,8 +57,11 @@ export default function UsageDisplay({ businessId, compact = false }: UsageDispl
 
   if (!usage) return null;
 
-  const aiPercentage = (usage.aiSuggestionsUsed / usage.aiSuggestionsLimit) * 100;
-  const conversationsPercentage = (usage.conversationsUsed / usage.conversationsLimit) * 100;
+  const isUnlimitedAI = usage.aiSuggestionsLimit >= 999999999;
+  const isUnlimitedConvos = usage.conversationsLimit >= 999999999;
+
+  const aiPercentage = isUnlimitedAI ? 0 : (usage.aiSuggestionsUsed / usage.aiSuggestionsLimit) * 100;
+  const conversationsPercentage = isUnlimitedConvos ? 0 : (usage.conversationsUsed / usage.conversationsLimit) * 100;
 
   const getProgressColor = (percentage: number) => {
     if (percentage >= 90) return 'bg-red-500';
@@ -84,18 +87,21 @@ export default function UsageDisplay({ businessId, compact = false }: UsageDispl
   };
 
   if (compact) {
+    const isUnlimitedAI = usage.aiSuggestionsLimit >= 999999999;
+    const isUnlimitedConvos = usage.conversationsLimit >= 999999999;
+
     return (
       <div className="flex items-center gap-4 text-sm">
         <div className="flex items-center gap-2">
           <Zap className="h-4 w-4 text-yellow-500" />
           <span className="text-gray-600 dark:text-gray-400">
-            {usage.aiSuggestionsLimit === Infinity ? '∞' : usage.aiSuggestionsRemaining} AI left
+            {isUnlimitedAI ? '∞' : usage.aiSuggestionsRemaining} AI left
           </span>
         </div>
         <div className="flex items-center gap-2">
           <MessageSquare className="h-4 w-4 text-blue-500" />
           <span className="text-gray-600 dark:text-gray-400">
-            {usage.conversationsLimit === Infinity ? '∞' : usage.conversationsRemaining} convos left
+            {isUnlimitedConvos ? '∞' : usage.conversationsRemaining} convos left
           </span>
         </div>
       </div>
@@ -124,10 +130,10 @@ export default function UsageDisplay({ businessId, compact = false }: UsageDispl
               </span>
             </div>
             <span className="text-sm text-gray-600 dark:text-gray-400">
-              {usage.aiSuggestionsUsed} / {usage.aiSuggestionsLimit === Infinity ? '∞' : usage.aiSuggestionsLimit}
+              {usage.aiSuggestionsUsed} / {isUnlimitedAI ? '∞' : usage.aiSuggestionsLimit}
             </span>
           </div>
-          {usage.aiSuggestionsLimit !== Infinity && (
+          {!isUnlimitedAI && (
             <>
               <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-2">
                 <div
@@ -153,10 +159,10 @@ export default function UsageDisplay({ businessId, compact = false }: UsageDispl
               </span>
             </div>
             <span className="text-sm text-gray-600 dark:text-gray-400">
-              {usage.conversationsUsed} / {usage.conversationsLimit === Infinity ? '∞' : usage.conversationsLimit}
+              {usage.conversationsUsed} / {isUnlimitedConvos ? '∞' : usage.conversationsLimit}
             </span>
           </div>
-          {usage.conversationsLimit !== Infinity && (
+          {!isUnlimitedConvos && (
             <>
               <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-2">
                 <div

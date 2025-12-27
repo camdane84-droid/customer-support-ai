@@ -74,17 +74,21 @@ export async function getUsageStatus(businessId: string): Promise<UsageStatus | 
   const tier = (business.subscription_tier || 'free') as 'free' | 'starter' | 'pro';
   const limits = TIER_LIMITS[tier];
 
-  const aiRemaining = Math.max(0, limits.ai_suggestions_per_day - aiUsed);
-  const conversationsRemaining = Math.max(0, limits.conversations_per_month - conversationsUsed);
+  // For JSON serialization, use a large number instead of Infinity
+  const aiLimit = limits.ai_suggestions_per_day === Infinity ? 999999999 : limits.ai_suggestions_per_day;
+  const conversationsLimit = limits.conversations_per_month === Infinity ? 999999999 : limits.conversations_per_month;
+
+  const aiRemaining = aiLimit === 999999999 ? 999999999 : Math.max(0, aiLimit - aiUsed);
+  const conversationsRemaining = conversationsLimit === 999999999 ? 999999999 : Math.max(0, conversationsLimit - conversationsUsed);
 
   return {
-    canUseAI: aiUsed < limits.ai_suggestions_per_day,
-    canCreateConversation: conversationsUsed < limits.conversations_per_month,
+    canUseAI: limits.ai_suggestions_per_day === Infinity || aiUsed < limits.ai_suggestions_per_day,
+    canCreateConversation: limits.conversations_per_month === Infinity || conversationsUsed < limits.conversations_per_month,
     aiSuggestionsUsed: aiUsed,
-    aiSuggestionsLimit: limits.ai_suggestions_per_day,
+    aiSuggestionsLimit: aiLimit,
     aiSuggestionsRemaining: aiRemaining,
     conversationsUsed,
-    conversationsLimit: limits.conversations_per_month,
+    conversationsLimit: conversationsLimit,
     conversationsRemaining,
     resetAiAt: aiResetAt,
     resetConversationsAt: conversationsResetAt,
