@@ -1,16 +1,31 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-  },
-});
+// Always log what we're using
+console.log('🔧 [SUPABASE] Initializing with URL:', supabaseUrl);
+console.log('🔧 [SUPABASE] URL length:', supabaseUrl?.length);
+console.log('🔧 [SUPABASE] URL type:', typeof supabaseUrl);
+console.log('🔧 [SUPABASE] Anon key present:', !!supabaseAnonKey);
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('❌ Missing Supabase environment variables!');
+  console.error('NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl);
+  console.error('NEXT_PUBLIC_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'SET' : 'MISSING');
+}
+
+export const supabase = createClient(
+  supabaseUrl,
+  supabaseAnonKey,
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+    },
+  }
+);
 
 // Types for our database
 export type Business = {
@@ -23,6 +38,13 @@ export type Business = {
   policies: string | null;
   subscription_status: string;
   subscription_plan: string;
+  subscription_tier?: 'free' | 'starter' | 'pro';
+  stripe_customer_id?: string | null;
+  stripe_subscription_id?: string | null;
+  ai_suggestions_used_today?: number;
+  ai_suggestions_reset_at?: string;
+  conversations_used_this_month?: number;
+  conversations_reset_at?: string;
   message_count: number;
   created_at: string;
   updated_at: string;
@@ -36,7 +58,7 @@ export type Conversation = {
   customer_phone: string | null;
   customer_instagram_id: string | null;
   channel: 'email' | 'instagram' | 'sms';
-  status: 'open' | 'closed' | 'pending';
+  status: 'open' | 'closed' | 'pending' | 'archived';
   unread_count: number;
   last_message_at: string;
   notes: string | null;
