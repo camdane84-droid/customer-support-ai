@@ -4,18 +4,23 @@ import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/lib/context/AuthContext';
 import { supabase } from '@/lib/api/supabase';
-import { Save, Building, Clock, Share2, Mail, MessageCircle, Instagram, Facebook, CheckCircle, FileText, Sparkles } from 'lucide-react';
+import { Save, Building, Clock, Share2, Mail, MessageCircle, Instagram, Facebook, CheckCircle, FileText, Sparkles, Trash2, AlertTriangle } from 'lucide-react';
 import TikTokIcon from '@/components/icons/TikTokIcon';
 import BillingSection from '@/components/ui/BillingSection';
+import { useRouter } from 'next/navigation';
 
 export default function SettingsPage() {
-  const { business, loading: authLoading } = useAuth();
+  const { business, loading: authLoading, user } = useAuth();
+  const router = useRouter();
   const [businessName, setBusinessName] = useState('');
   const [businessType, setBusinessType] = useState('');
   const [policies, setPolicies] = useState('');
   const [autoGenerateNotes, setAutoGenerateNotes] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (business) {
@@ -74,6 +79,41 @@ export default function SettingsPage() {
       alert(`Failed to save settings: ${error.message || 'Unknown error'}`);
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    if (!business || !user) return;
+
+    // Verify confirmation matches business name
+    if (deleteConfirmation !== business.name) {
+      alert('Business name does not match. Please type your business name exactly to confirm deletion.');
+      return;
+    }
+
+    setDeleting(true);
+
+    try {
+      // Delete all related data first
+      await supabase.from('messages').delete().eq('business_id', business.id);
+      await supabase.from('conversations').delete().eq('business_id', business.id);
+      await supabase.from('social_connections').delete().eq('business_id', business.id);
+      await supabase.from('canned_responses').delete().eq('business_id', business.id);
+      await supabase.from('customers').delete().eq('business_id', business.id);
+
+      // Delete business
+      await supabase.from('businesses').delete().eq('id', business.id);
+
+      // Delete user account
+      const { error: deleteError } = await supabase.auth.admin.deleteUser(user.id);
+      if (deleteError) throw deleteError;
+
+      // Sign out and redirect
+      await supabase.auth.signOut();
+      router.push('/');
+    } catch (error: any) {
+      alert(`Failed to delete account: ${error.message}`);
+      setDeleting(false);
     }
   }
 
@@ -344,6 +384,82 @@ export default function SettingsPage() {
             </a>
           </div>
         </div>
+
+        {/* Danger Zone - Delete Account */}
+        <div className="bg-red-50 dark:bg-red-900/20 rounded-lg border-2 border-red-200 dark:border-red-800 p-6">
+          <div className="flex items-center space-x-2 mb-4">
+            <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
+            <h2 className="text-lg font-semibold text-red-900 dark:text-red-300">Danger Zone</h2>
+          </div>
+          <p className="text-red-800 dark:text-red-300 mb-4">
+            Once you delete your account, there is no going back. This will permanently delete your business data, conversations, and customer information.
+          </p>
+          <button
+            onClick={() => setShowDeleteModal(true)}
+            className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete Account
+          </button>
+        </div>
+
+        {/* Delete Account Confirmation Modal */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-lg max-w-md w-full p-6 shadow-xl">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                  <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Delete Account</h3>
+              </div>
+
+              <p className="text-gray-600 dark:text-slate-300 mb-4">
+                This action cannot be undone. This will permanently delete:
+              </p>
+
+              <ul className="list-disc list-inside text-sm text-gray-600 dark:text-slate-300 mb-4 space-y-1">
+                <li>Your business profile</li>
+                <li>All conversations and messages</li>
+                <li>Customer data and profiles</li>
+                <li>Social media connections</li>
+                <li>Canned responses</li>
+              </ul>
+
+              <p className="text-gray-900 dark:text-white font-medium mb-2">
+                Please type <span className="font-bold text-red-600 dark:text-red-400">{business?.name}</span> to confirm:
+              </p>
+
+              <input
+                type="text"
+                value={deleteConfirmation}
+                onChange={(e) => setDeleteConfirmation(e.target.value)}
+                placeholder="Type business name here"
+                className="w-full px-4 py-2 border-2 border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 mb-4"
+              />
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setDeleteConfirmation('');
+                  }}
+                  disabled={deleting}
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors font-medium disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={deleting || deleteConfirmation !== business?.name}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {deleting ? 'Deleting...' : 'Delete Forever'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Save Button */}
         <div className="flex items-center justify-between">
