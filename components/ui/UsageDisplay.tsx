@@ -88,14 +88,14 @@ export default function UsageDisplay({ businessId, compact = false }: UsageDispl
       <div className="flex items-center gap-4 text-sm">
         <div className="flex items-center gap-2">
           <Zap className="h-4 w-4 text-yellow-500" />
-          <span className="text-muted-foreground">
-            {usage.aiSuggestionsRemaining} AI left
+          <span className="text-gray-600 dark:text-gray-400">
+            {usage.aiSuggestionsLimit === Infinity ? '∞' : usage.aiSuggestionsRemaining} AI left
           </span>
         </div>
         <div className="flex items-center gap-2">
           <MessageSquare className="h-4 w-4 text-blue-500" />
-          <span className="text-muted-foreground">
-            {usage.conversationsRemaining} convos left
+          <span className="text-gray-600 dark:text-gray-400">
+            {usage.conversationsLimit === Infinity ? '∞' : usage.conversationsRemaining} convos left
           </span>
         </div>
       </div>
