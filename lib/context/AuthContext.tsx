@@ -78,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Create business for user - with duplicate handling
-  const createBusiness = useCallback(async (email: string, businessName?: string): Promise<Business | null> => {
+  const createBusiness = useCallback(async (email: string, businessName?: string, userId?: string): Promise<Business | null> => {
     const name = businessName || `${email.split('@')[0]}'s Business`;
     console.log('📝 Creating business:', name, 'for:', email);
 
@@ -88,6 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .insert({
           email: email,
           name: name,
+          user_id: userId,
         })
         .select()
         .single();
@@ -127,7 +128,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!biz) {
       console.log('📝 No business found, creating one...');
       const businessName = currentUser.user_metadata?.business_name;
-      biz = await createBusiness(currentUser.email, businessName);
+      biz = await createBusiness(currentUser.email, businessName, currentUser.id);
 
       // If creation failed, try fetching one more time (race condition handling)
       if (!biz) {
