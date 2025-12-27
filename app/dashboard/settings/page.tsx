@@ -94,19 +94,17 @@ export default function SettingsPage() {
     setDeleting(true);
 
     try {
-      // Delete all related data first
-      await supabase.from('messages').delete().eq('business_id', business.id);
-      await supabase.from('conversations').delete().eq('business_id', business.id);
-      await supabase.from('social_connections').delete().eq('business_id', business.id);
-      await supabase.from('canned_responses').delete().eq('business_id', business.id);
-      await supabase.from('customers').delete().eq('business_id', business.id);
+      // Call API to delete account
+      const response = await fetch('/api/account/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ businessName: business.name }),
+      });
 
-      // Delete business
-      await supabase.from('businesses').delete().eq('id', business.id);
-
-      // Delete user account
-      const { error: deleteError } = await supabase.auth.admin.deleteUser(user.id);
-      if (deleteError) throw deleteError;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete account');
+      }
 
       // Sign out and redirect
       await supabase.auth.signOut();
@@ -434,8 +432,8 @@ export default function SettingsPage() {
                 type="text"
                 value={deleteConfirmation}
                 onChange={(e) => setDeleteConfirmation(e.target.value)}
-                placeholder="Type business name here"
-                className="w-full px-4 py-2 border-2 border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 mb-4"
+                placeholder={business?.name}
+                className="w-full px-4 py-2 border-2 border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 mb-4 placeholder:text-red-400 placeholder:opacity-50"
               />
 
               <div className="flex gap-3">
