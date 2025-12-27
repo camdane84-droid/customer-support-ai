@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
 import crypto from 'crypto';
+import { canCreateConversation, incrementConversationUsage } from '@/lib/usage/tracker';
 
 // GET - Webhook verification
 export async function GET(request: NextRequest) {
@@ -220,6 +221,16 @@ async function handleInstagramMessage(event: any) {
       } else {
         // Create new conversation with username (only for incoming messages)
         if (!isEcho) {
+          // Check conversation usage limit before creating
+          const canCreate = await canCreateConversation(connection.business_id);
+          if (!canCreate) {
+            console.log('⚠️ Conversation limit reached for business:', connection.business_id);
+            // Note: We still need to store the message somehow, but won't create a new conversation
+            // For now, we'll log it. In the future, you might want to create a "pending" conversation
+            // or send an email notification to the business owner
+            return;
+          }
+
           const { data: newConv, error: createError } = await supabaseAdmin
             .from('conversations')
             .insert({
@@ -238,6 +249,14 @@ async function handleInstagramMessage(event: any) {
             console.error('❌ Failed to create conversation:', createError);
           } else {
             console.log('✓ Created new conversation:', newConv?.id);
+
+            // Increment conversation usage counter
+            const incrementSuccess = await incrementConversationUsage(connection.business_id);
+            if (!incrementSuccess) {
+              console.warn('⚠️ Failed to increment conversation usage counter');
+            } else {
+              console.log('✓ Conversation usage incremented');
+            }
           }
 
           conversationId = newConv?.id;

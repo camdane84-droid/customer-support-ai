@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/context/AuthContext';
 import { supabase } from '@/lib/api/supabase';
 import { Save, Building, Clock, Share2, Mail, MessageCircle, Instagram, Facebook, CheckCircle, FileText, Sparkles } from 'lucide-react';
 import TikTokIcon from '@/components/icons/TikTokIcon';
+import BillingSection from '@/components/ui/BillingSection';
 
 export default function SettingsPage() {
   const { business, loading: authLoading } = useAuth();
@@ -114,6 +115,13 @@ export default function SettingsPage() {
             Manage your business information and preferences
           </p>
         </div>
+
+        {/* Billing & Subscription */}
+        <BillingSection
+          businessId={business.id}
+          currentTier={(business.subscription_tier || 'free') as 'free' | 'starter' | 'pro'}
+          stripeCustomerId={business.stripe_customer_id}
+        />
 
         {/* Social Media Connections */}
         <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">

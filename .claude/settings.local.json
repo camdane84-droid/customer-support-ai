@@ -56,7 +56,12 @@
       "Bash(git push:*)",
       "Bash(find:*)",
       "Bash(node scripts/apply-archive-type-migration.js:*)",
-      "Bash(node scripts/verify-archive-type.js:*)"
+      "Bash(node scripts/verify-archive-type.js:*)",
+      "WebFetch(domain:orizon-template.webflow.io)",
+      "Bash(node scripts/migrate-usage-tracking.js:*)",
+      "Bash(npx vercel --yes)",
+      "Bash(npx vercel --prod)",
+      "Bash(npx vercel:*)"
     ],
     "deny": [],
     "ask": []

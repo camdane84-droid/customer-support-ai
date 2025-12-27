@@ -1,8 +1,3 @@
-'use client';
-
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/context/AuthContext';
 import Link from 'next/link';
 import {
   MessageSquare,
@@ -19,26 +14,6 @@ import {
 } from 'lucide-react';
 
 export default function LandingPage() {
-  const { user, loading } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    // If user is logged in, redirect to dashboard (Supabase-style)
-    if (!loading && user) {
-      router.push('/dashboard');
-    }
-  }, [user, loading, router]);
-
-  // Show loading while checking auth or if user is logged in (redirecting)
-  if (loading || user) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-muted-foreground">Loading...</div>
-      </div>
-    );
-  }
-
-  // Show landing page only for logged-out users
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateResponseSuggestion } from '@/lib/ai/claude';
 import { supabaseServer } from '@/lib/supabase-server';
 import { rateLimitMiddleware } from '@/lib/middleware/rateLimit';
+import { canUseAiSuggestion, incrementAiUsage, getUsageStatus } from '@/lib/usage/tracker';
 
 export async function POST(request: NextRequest) {
   // Rate limit: 20 requests per minute per IP
@@ -55,6 +56,30 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('[AI Suggest] Business found:', business.name);
+
+    // Check usage limits
+    const canUse = await canUseAiSuggestion(businessId);
+    if (!canUse) {
+      console.log('[AI Suggest] Usage limit reached for business:', businessId);
+      const usageStatus = await getUsageStatus(businessId);
+
+      return NextResponse.json(
+        {
+          error: 'AI suggestion limit reached',
+          limitReached: true,
+          usageStatus: {
+            aiSuggestionsUsed: usageStatus?.aiSuggestionsUsed,
+            aiSuggestionsLimit: usageStatus?.aiSuggestionsLimit,
+            resetAt: usageStatus?.resetAiAt,
+            tier: usageStatus?.tier,
+          },
+          message: `You've reached your daily limit of ${usageStatus?.aiSuggestionsLimit} AI suggestions. Upgrade to get more, or wait until ${usageStatus?.resetAiAt?.toLocaleString()} for your limit to reset.`,
+        },
+        { status: 429 } // 429 Too Many Requests
+      );
+    }
+
+    console.log('[AI Suggest] Usage check passed');
 
     // Get conversation messages
     const { data: messages, error: messagesError } = await supabaseServer
@@ -130,6 +155,14 @@ export async function POST(request: NextRequest) {
     );
 
     console.log('[AI Suggest] Claude API response received');
+
+    // Increment AI usage counter
+    const incrementSuccess = await incrementAiUsage(businessId);
+    if (!incrementSuccess) {
+      console.warn('[AI Suggest] Failed to increment usage counter');
+    } else {
+      console.log('[AI Suggest] Usage counter incremented');
+    }
 
     return NextResponse.json({ suggestion });
   } catch (error: any) {

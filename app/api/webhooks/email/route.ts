@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase-server';
+import { canCreateConversation, incrementConversationUsage } from '@/lib/usage/tracker';
 
 export async function POST(request: NextRequest) {
   try {
@@ -67,6 +68,21 @@ export async function POST(request: NextRequest) {
       console.log('📝 Updated existing conversation:', conversationId, 'Unread count:', currentUnreadCount + 1);
     } else {
       console.log('📝 Creating new conversation for:', senderEmail);
+
+      // Check conversation usage limit before creating
+      const canCreate = await canCreateConversation(business.id);
+      if (!canCreate) {
+        console.log('⚠️ Conversation limit reached for business:', business.id);
+        // Return error response - the email won't be processed
+        return NextResponse.json(
+          {
+            error: 'Conversation limit reached',
+            message: 'Your monthly conversation limit has been reached. Please upgrade your plan to continue receiving new conversations.'
+          },
+          { status: 429 }
+        );
+      }
+
       const { data: newConvo, error: convoError } = await supabaseServer
         .from('conversations')
         .insert({
@@ -83,6 +99,14 @@ export async function POST(request: NextRequest) {
 
       if (convoError) throw convoError;
       conversationId = newConvo?.id;
+
+      // Increment conversation usage counter
+      const incrementSuccess = await incrementConversationUsage(business.id);
+      if (!incrementSuccess) {
+        console.warn('⚠️ Failed to increment conversation usage counter');
+      } else {
+        console.log('✓ Conversation usage incremented');
+      }
     }
 
     if (!conversationId) {

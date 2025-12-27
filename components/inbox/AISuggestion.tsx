@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Sparkles, Loader2, Copy, Check } from 'lucide-react';
+import UpgradePrompt from '@/components/ui/UpgradePrompt';
 
 interface AISuggestionProps {
   conversationId: string;
@@ -18,6 +19,12 @@ export default function AISuggestion({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [limitInfo, setLimitInfo] = useState<{
+    used: number;
+    limit: number;
+    resetAt?: string;
+  } | null>(null);
 
   async function generateSuggestion() {
     setLoading(true);
@@ -38,6 +45,18 @@ export default function AISuggestion({
       if (!response.ok) {
         const errorData = await response.json();
         console.error('[AISuggestion] Error response:', errorData);
+
+        // Check if it's a limit reached error (429 status)
+        if (response.status === 429 && errorData.limitReached) {
+          setLimitInfo({
+            used: errorData.usageStatus?.aiSuggestionsUsed || 0,
+            limit: errorData.usageStatus?.aiSuggestionsLimit || 0,
+            resetAt: errorData.usageStatus?.resetAt,
+          });
+          setShowUpgradePrompt(true);
+          return; // Don't throw, just show the upgrade prompt
+        }
+
         throw new Error(errorData.error || 'Failed to generate suggestion');
       }
 
@@ -60,8 +79,20 @@ export default function AISuggestion({
   }
 
   return (
-    <div className="border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 p-4">
-      {/* Generate Button */}
+    <>
+      {/* Upgrade Prompt Modal */}
+      {showUpgradePrompt && limitInfo && (
+        <UpgradePrompt
+          type="ai"
+          currentUsage={limitInfo.used}
+          limit={limitInfo.limit}
+          resetAt={limitInfo.resetAt}
+          onClose={() => setShowUpgradePrompt(false)}
+        />
+      )}
+
+      <div className="border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 p-4">
+        {/* Generate Button */}
       {!suggestion && !loading && (
         <button
           onClick={generateSuggestion}
@@ -148,6 +179,7 @@ export default function AISuggestion({
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }

@@ -7,6 +7,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from '@/lib/auth';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useTheme } from '@/lib/context/ThemeContext';
+import UsageDisplay from '@/components/ui/UsageDisplay';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -253,8 +254,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Main content area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Desktop top bar - Dark mode toggle */}
-        <div className="hidden lg:flex items-center justify-end h-14 px-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
+        {/* Desktop top bar - Usage display and dark mode toggle */}
+        <div className="hidden lg:flex items-center justify-end gap-4 h-14 px-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
+          {business?.id && <UsageDisplay businessId={business.id} compact />}
           <button
             onClick={toggleTheme}
             className="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
