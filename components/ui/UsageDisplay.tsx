@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { AlertCircle, Zap, MessageSquare, Clock } from 'lucide-react';
+import { AlertCircle, Zap, MessageSquare, Clock, Infinity } from 'lucide-react';
 
 interface UsageStatus {
   canUseAI: boolean;
@@ -94,15 +94,29 @@ export default function UsageDisplay({ businessId, compact = false }: UsageDispl
       <div className="flex items-center gap-4 text-sm">
         <div className="flex items-center gap-2">
           <Zap className="h-4 w-4 text-yellow-500" />
-          <span className="text-gray-600 dark:text-gray-400">
-            {isUnlimitedAI ? '∞' : usage.aiSuggestionsRemaining} AI left
-          </span>
+          {isUnlimitedAI ? (
+            <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">
+              <Infinity className="h-4 w-4" />
+              <span>Unlimited AI</span>
+            </div>
+          ) : (
+            <span className="text-gray-600 dark:text-gray-400">
+              {usage.aiSuggestionsRemaining} AI left
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <MessageSquare className="h-4 w-4 text-blue-500" />
-          <span className="text-gray-600 dark:text-gray-400">
-            {isUnlimitedConvos ? '∞' : usage.conversationsRemaining} convos left
-          </span>
+          {isUnlimitedConvos ? (
+            <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">
+              <Infinity className="h-4 w-4" />
+              <span>Unlimited</span>
+            </div>
+          ) : (
+            <span className="text-gray-600 dark:text-gray-400">
+              {usage.conversationsRemaining} convos left
+            </span>
+          )}
         </div>
       </div>
     );
@@ -129,8 +143,16 @@ export default function UsageDisplay({ businessId, compact = false }: UsageDispl
                 AI Suggestions
               </span>
             </div>
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              {usage.aiSuggestionsUsed} / {isUnlimitedAI ? '∞' : usage.aiSuggestionsLimit}
+            <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+              {isUnlimitedAI ? (
+                <>
+                  <span>{usage.aiSuggestionsUsed}</span>
+                  <span>/</span>
+                  <Infinity className="h-4 w-4" />
+                </>
+              ) : (
+                <>{usage.aiSuggestionsUsed} / {usage.aiSuggestionsLimit}</>
+              )}
             </span>
           </div>
           {!isUnlimitedAI && (
@@ -158,8 +180,16 @@ export default function UsageDisplay({ businessId, compact = false }: UsageDispl
                 Conversations
               </span>
             </div>
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              {usage.conversationsUsed} / {isUnlimitedConvos ? '∞' : usage.conversationsLimit}
+            <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+              {isUnlimitedConvos ? (
+                <>
+                  <span>{usage.conversationsUsed}</span>
+                  <span>/</span>
+                  <Infinity className="h-4 w-4" />
+                </>
+              ) : (
+                <>{usage.conversationsUsed} / {usage.conversationsLimit}</>
+              )}
             </span>
           </div>
           {!isUnlimitedConvos && (
