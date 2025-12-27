@@ -1,5 +1,5 @@
 export default function ContactPage() {
-    const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@inboxforge.com';
+    const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'inboxforgeapp@outlook.com';
     const companyName = process.env.NEXT_PUBLIC_COMPANY_NAME || 'InboxForge';
 
     return (

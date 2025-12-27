@@ -302,7 +302,7 @@ export default function PricingPage() {
         <div className="mt-16 text-center">
           <p className="text-gray-600 dark:text-gray-400">
             Need a custom plan or have questions?{' '}
-            <a href="mailto:support@inboxforge.com" className="text-blue-600 hover:text-blue-700 font-semibold">
+            <a href="mailto:inboxforgeapp@outlook.com" className="text-blue-600 hover:text-blue-700 font-semibold">
               Contact us
             </a>
           </p>

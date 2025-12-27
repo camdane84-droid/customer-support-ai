@@ -500,7 +500,7 @@ export default function LandingPage() {
             <div>
               <h4 className="font-semibold mb-4">Connect</h4>
               <ul className="space-y-2">
-                <li><a href="mailto:support@inboxforge.com" className="text-sm text-muted-foreground hover:text-foreground">Email Support</a></li>
+                <li><a href="mailto:inboxforgeapp@outlook.com" className="text-sm text-muted-foreground hover:text-foreground">Email Support</a></li>
               </ul>
             </div>
           </div>
