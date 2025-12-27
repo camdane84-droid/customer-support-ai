@@ -1,13 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+// Get environment variables - trim to remove any whitespace
+const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim();
+const supabaseAnonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
 
 // Always log what we're using
 console.log('🔧 [SUPABASE] Initializing with URL:', supabaseUrl);
 console.log('🔧 [SUPABASE] URL length:', supabaseUrl?.length);
 console.log('🔧 [SUPABASE] URL type:', typeof supabaseUrl);
 console.log('🔧 [SUPABASE] Anon key present:', !!supabaseAnonKey);
+console.log('🔧 [SUPABASE] Anon key length:', supabaseAnonKey?.length);
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error('❌ Missing Supabase environment variables!');
@@ -15,16 +18,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error('NEXT_PUBLIC_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'SET' : 'MISSING');
 }
 
+// Create Supabase client with minimal configuration
 export const supabase = createClient(
   supabaseUrl,
-  supabaseAnonKey,
-  {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-    },
-  }
+  supabaseAnonKey
 );
 
 // Types for our database
