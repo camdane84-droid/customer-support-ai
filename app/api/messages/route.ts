@@ -2,11 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase-server';
 import { sendEmail } from '@/lib/api/email';
 import { logError } from '@/lib/services/errorLogger';
+import { authenticateRequest } from '@/lib/api/auth-middleware';
 import type { Message } from '@/lib/api/supabase';
 
 export async function POST(request: NextRequest) {
   try {
     const message = await request.json();
+
+    // Authenticate and authorize - verify user owns this business
+    const auth = await authenticateRequest(request, message.business_id);
+    if (!auth.success) {
+      return auth.response;
+    }
 
     // Save message to database with 'sending' status if it's a business reply
     const messageData = {
@@ -22,7 +29,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error creating message:', error);
       await logError({
         businessId: message.business_id,
         errorType: 'message_creation_failed',
@@ -44,8 +50,8 @@ export async function POST(request: NextRequest) {
       fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/conversations/${message.conversation_id}/auto-notes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
-      }).catch(err => {
-        console.log('Auto-notes failed (non-critical):', err.message);
+      }).catch(() => {
+        // Auto-notes failure is non-critical
       });
     }
 
@@ -66,8 +72,6 @@ export async function POST(request: NextRequest) {
             sent_at: new Date().toISOString(),
           })
           .eq('id', data.id);
-
-        console.log(`✅ ${message.channel} message sent successfully`);
       } catch (sendError: any) {
         // Update status to failed
         await supabaseServer
@@ -90,13 +94,11 @@ export async function POST(request: NextRequest) {
         });
 
         // Don't throw - message is saved, just delivery failed
-        console.error(`Failed to send ${message.channel} message:`, sendError);
       }
     }
 
     return NextResponse.json(data);
   } catch (error: any) {
-    console.error('Error in messages API:', error);
     return NextResponse.json(
       { error: error.message || 'Internal error' },
       { status: 500 }
@@ -107,7 +109,6 @@ export async function POST(request: NextRequest) {
 async function handleEmailSend(message: Message, businessId: string) {
   // Only send if SendGrid is configured
   if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_API_KEY.startsWith('SG.')) {
-    console.log('📧 Email reply saved (SendGrid not configured)');
     throw new Error('Email service not configured. Please add SENDGRID_API_KEY to your environment variables.');
   }
 
@@ -119,7 +120,6 @@ async function handleEmailSend(message: Message, businessId: string) {
     .single();
 
   if (convError) {
-    console.error('Failed to fetch conversation:', convError);
     throw new Error(`Failed to fetch conversation: ${convError.message}`);
   }
 
@@ -131,7 +131,6 @@ async function handleEmailSend(message: Message, businessId: string) {
     .single();
 
   if (bizError) {
-    console.error('Failed to fetch business:', bizError);
     throw new Error(`Failed to fetch business: ${bizError.message}`);
   }
 
@@ -143,8 +142,6 @@ async function handleEmailSend(message: Message, businessId: string) {
     throw new Error('Business email not found');
   }
 
-  console.log(`📧 Sending email from ${business.email} to ${conversation.customer_email}`);
-
   try {
     await sendEmail({
       to: conversation.customer_email,
@@ -152,16 +149,12 @@ async function handleEmailSend(message: Message, businessId: string) {
       subject: `Re: Message from ${business.name}`,
       text: message.content,
     });
-    console.log('✅ Email sent successfully');
   } catch (emailError: any) {
-    console.error('SendGrid error:', emailError);
     throw new Error(`Email delivery failed: ${emailError.message}`);
   }
 }
 
 async function handleInstagramSend(message: Message, businessId: string) {
-  console.log('📸 Sending Instagram message...');
-
   // Get the Instagram connection with access token
   const { data: connection, error: connError } = await supabaseServer
     .from('social_connections')
@@ -172,7 +165,6 @@ async function handleInstagramSend(message: Message, businessId: string) {
     .single();
 
   if (connError || !connection) {
-    console.error('No Instagram connection found:', connError);
     throw new Error('Instagram not connected');
   }
 
@@ -180,11 +172,8 @@ async function handleInstagramSend(message: Message, businessId: string) {
   const accessToken = connection.access_token || process.env.META_ACCESS_TOKEN;
 
   if (!accessToken) {
-    console.error('No access token in connection or environment');
     throw new Error('Instagram access token missing');
   }
-
-  console.log('Using access token from:', connection.access_token ? 'database' : 'environment');
 
   // Get conversation for recipient Instagram ID
   const { data: conversation } = await supabaseServer
@@ -196,10 +185,6 @@ async function handleInstagramSend(message: Message, businessId: string) {
   if (!conversation?.customer_instagram_id) {
     throw new Error('Customer Instagram ID not found');
   }
-
-  console.log('📤 Sending Instagram DM...');
-  console.log('To Instagram ID:', conversation.customer_instagram_id);
-  console.log('From Account ID:', connection.platform_user_id);
 
   // Use Facebook Graph API for Instagram Business messaging
   const url = `https://graph.facebook.com/v21.0/${connection.platform_user_id}/messages?access_token=${accessToken}`;
@@ -220,12 +205,8 @@ async function handleInstagramSend(message: Message, businessId: string) {
   });
 
   const responseData = await response.json();
-  console.log('Instagram API response:', responseData);
 
   if (!response.ok) {
-    console.error('❌ Instagram send failed:', responseData);
     throw new Error(responseData.error?.message || 'Failed to send Instagram message');
   }
-
-  console.log('✅ Instagram message sent!');
 }

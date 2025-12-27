@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUsageStatus } from '@/lib/usage/tracker';
+import { authenticateRequest } from '@/lib/api/auth-middleware';
 
 export async function GET(request: NextRequest) {
+  // Authenticate and authorize request
+  const auth = await authenticateRequest(request);
+  if (!auth.success) {
+    return auth.response;
+  }
+
+  const { businessId } = auth.data;
+
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const businessId = searchParams.get('businessId');
-
-    if (!businessId) {
-      return NextResponse.json(
-        { error: 'businessId is required' },
-        { status: 400 }
-      );
-    }
-
     const usageStatus = await getUsageStatus(businessId);
 
     if (!usageStatus) {
@@ -24,7 +23,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(usageStatus);
   } catch (error: any) {
-    console.error('[Usage API] Error:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to fetch usage' },
       { status: 500 }

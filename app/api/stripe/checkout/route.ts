@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe, getPriceIdForTier } from '@/lib/stripe/config';
 import { supabaseServer } from '@/lib/supabase-server';
+import { authenticateRequest } from '@/lib/api/auth-middleware';
 
 export async function POST(request: NextRequest) {
   try {
     const { businessId, tier, successUrl, cancelUrl } = await request.json();
+
+    // Authenticate and authorize - verify user owns this business
+    const auth = await authenticateRequest(request, businessId);
+    if (!auth.success) {
+      return auth.response;
+    }
 
     if (!businessId || !tier) {
       return NextResponse.json(
@@ -90,7 +97,6 @@ export async function POST(request: NextRequest) {
       url: session.url
     });
   } catch (error: any) {
-    console.error('[Stripe Checkout] Error:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to create checkout session' },
       { status: 500 }
