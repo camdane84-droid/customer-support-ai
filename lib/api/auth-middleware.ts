@@ -61,15 +61,28 @@ export async function authenticateRequest(
       };
     }
 
-    // Verify user owns this business
-    const { data: business, error: businessError } = await supabase
+    // Verify user owns this business (check both user_id and email for legacy accounts)
+    let { data: business, error: businessError } = await supabase
       .from('businesses')
-      .select('id')
+      .select('id, email, user_id')
       .eq('id', businessId)
-      .eq('user_id', user.id)
       .single();
 
     if (businessError || !business) {
+      return {
+        success: false,
+        response: NextResponse.json(
+          { error: 'Forbidden - Business not found' },
+          { status: 403 }
+        ),
+      };
+    }
+
+    // Check if user owns this business (by user_id OR email for legacy accounts)
+    const ownsBusinessByUserId = business.user_id === user.id;
+    const ownsBusinessByEmail = business.email === user.email;
+
+    if (!ownsBusinessByUserId && !ownsBusinessByEmail) {
       return {
         success: false,
         response: NextResponse.json(
