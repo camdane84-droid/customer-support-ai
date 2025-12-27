@@ -14,12 +14,35 @@ export async function POST(request: NextRequest) {
   try {
     const { businessName } = await request.json();
 
-    // Get user's business
-    const { data: business, error: bizError } = await supabaseAdmin
+    // Get user's email
+    const { data: userData } = await supabaseAdmin.auth.admin.getUserById(userId);
+    const userEmail = userData?.user?.email;
+
+    if (!userEmail) {
+      return NextResponse.json(
+        { error: 'User email not found' },
+        { status: 404 }
+      );
+    }
+
+    // Try to find business by user_id first, then fall back to email (for legacy accounts)
+    let { data: business, error: bizError } = await supabaseAdmin
       .from('businesses')
       .select('*')
       .eq('user_id', userId)
       .single();
+
+    // If not found by user_id, try by email (legacy accounts without user_id)
+    if (bizError || !business) {
+      const result = await supabaseAdmin
+        .from('businesses')
+        .select('*')
+        .eq('email', userEmail)
+        .single();
+
+      business = result.data;
+      bizError = result.error;
+    }
 
     if (bizError || !business) {
       return NextResponse.json(
