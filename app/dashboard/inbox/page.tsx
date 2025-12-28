@@ -487,7 +487,7 @@ export default function InboxPage() {
               onConversationDeleted={handleConversationDeleted}
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-500 dark:text-slate-400">
+            <div className="flex items-center justify-center h-full bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400">
               <div className="text-center">
                 <p className="text-lg font-medium">No conversation selected</p>
                 <p className="text-sm mt-2">Choose a conversation from the list to start messaging</p>
