@@ -221,7 +221,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </nav>
 
         {/* User section at bottom */}
-        <div className="p-2 border-t border-slate-200 dark:border-slate-700">
+        <div className="relative z-40 p-2 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
           <div className={`flex items-center ${sidebarExpanded ? 'justify-between' : 'justify-center'} px-2.5 py-2`}>
             <div className="flex items-center space-x-2 min-w-0 overflow-hidden">
               <div className="w-7 h-7 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
