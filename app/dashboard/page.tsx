@@ -235,7 +235,8 @@ export default function DashboardPage() {
     );
   }
 
-  const totalConversations = conversations.length;
+  // Use the usage tracking number for total (includes archived conversations)
+  const totalConversations = business.conversations_used_this_month || 0;
   const openConversations = conversations.filter(c => c.status === 'open').length;
 
   return (
