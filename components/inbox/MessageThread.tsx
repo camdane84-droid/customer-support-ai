@@ -623,7 +623,7 @@ export default function MessageThread({ conversation, businessId, onConversation
               }}
               placeholder="Type your reply... (Press Enter to send, Shift+Enter for new line)"
               rows={3}
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
+              className="flex-1 px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-purple-500 focus:border-transparent resize-none text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-400"
               disabled={sending}
             />
             <button
@@ -650,7 +650,7 @@ export default function MessageThread({ conversation, businessId, onConversation
             />
           </div>
 
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-slate-400">
             💡 Tip: Press Enter to send, Shift+Enter for new line
           </p>
         </form>
@@ -819,7 +819,7 @@ export default function MessageThread({ conversation, businessId, onConversation
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Type your notes here..."
-              className="w-full h-64 p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
+              className="w-full h-64 p-4 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 dark:focus:ring-purple-500 focus:border-transparent resize-none bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-400"
             />
 
             <div className="flex justify-end space-x-3 mt-4">
