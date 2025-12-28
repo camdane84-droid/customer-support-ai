@@ -190,7 +190,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-2 space-y-0.5 overflow-hidden">
+        <nav className="relative flex-1 p-2 space-y-0.5 overflow-x-hidden overflow-y-auto">
           {navigation.map((item) => {
             const isActive = pathname === item.href;
             return (
