@@ -86,12 +86,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         aria-label="Mobile navigation"
       >
         <div className="flex items-center justify-between h-14 px-4 border-b border-slate-200 dark:border-slate-700">
-          <div className="flex items-center space-x-2">
-            <div className="w-7 h-7 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-lg flex items-center justify-center shadow-sm">
-              <MessageSquare className="w-4 h-4 text-purple-700 dark:text-white" />
+          <Link
+            href="/dashboard"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center space-x-2 group rounded-lg px-2 py-1.5 -mx-2 transition-all duration-200 hover:bg-white dark:hover:bg-white"
+          >
+            <div className="w-7 h-7 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-lg flex items-center justify-center shadow-sm transition-all duration-200 group-hover:bg-white dark:group-hover:bg-white">
+              <MessageSquare className="w-4 h-4 text-purple-700 dark:text-white transition-colors duration-200 group-hover:text-purple-600 dark:group-hover:text-purple-600" />
             </div>
-            <span className="text-base font-semibold text-slate-900 dark:text-white">InboxForge</span>
-          </div>
+            <span className="text-base font-semibold text-slate-900 dark:text-white transition-colors duration-200 group-hover:text-purple-600 dark:group-hover:text-purple-600">InboxForge</span>
+          </Link>
           <button
             onClick={() => setMobileMenuOpen(false)}
             className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1"
@@ -167,19 +171,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         {/* Logo */}
         <div className="flex items-center h-14 px-3 border-b border-slate-200 dark:border-slate-700">
-          <div className="flex items-center space-x-2 overflow-hidden">
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
-              <MessageSquare className="w-4 h-4 text-purple-700 dark:text-white" />
+          <Link
+            href="/dashboard"
+            className="flex items-center space-x-2 overflow-hidden group cursor-pointer rounded-lg px-2 py-1.5 -mx-2 transition-all duration-200 hover:bg-white dark:hover:bg-white"
+          >
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm transition-all duration-200 group-hover:bg-white dark:group-hover:bg-white">
+              <MessageSquare className="w-4 h-4 text-purple-700 dark:text-white transition-colors duration-200 group-hover:text-purple-600 dark:group-hover:text-purple-600" />
             </div>
             <span
               className={`
-                text-base font-semibold text-slate-900 dark:text-white whitespace-nowrap transition-all duration-200
+                text-base font-semibold text-slate-900 dark:text-white whitespace-nowrap transition-all duration-200 group-hover:text-purple-600 dark:group-hover:text-purple-600
                 ${sidebarExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2'}
               `}
             >
               InboxForge
             </span>
-          </div>
+          </Link>
         </div>
 
         {/* Navigation */}
@@ -279,12 +286,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           >
             <Menu className="w-5 h-5" aria-hidden="true" />
           </button>
-          <div className="flex items-center space-x-2">
-            <div className="w-6 h-6 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-md flex items-center justify-center shadow-sm">
-              <MessageSquare className="w-3.5 h-3.5 text-purple-700 dark:text-white" />
+          <Link
+            href="/dashboard"
+            className="flex items-center space-x-2 group rounded-lg px-2 py-1 transition-all duration-200 hover:bg-white dark:hover:bg-white"
+          >
+            <div className="w-6 h-6 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-md flex items-center justify-center shadow-sm transition-all duration-200 group-hover:bg-white dark:group-hover:bg-white">
+              <MessageSquare className="w-3.5 h-3.5 text-purple-700 dark:text-white transition-colors duration-200 group-hover:text-purple-600 dark:group-hover:text-purple-600" />
             </div>
-            <span className="text-base font-semibold text-slate-900 dark:text-white">InboxForge</span>
-          </div>
+            <span className="text-base font-semibold text-slate-900 dark:text-white transition-colors duration-200 group-hover:text-purple-600 dark:group-hover:text-purple-600">InboxForge</span>
+          </Link>
           <button
             onClick={toggleTheme}
             className="p-1.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
