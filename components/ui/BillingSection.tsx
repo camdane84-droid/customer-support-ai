@@ -70,13 +70,13 @@ export default function BillingSection({
       name: 'Starter Plan',
       price: '$29/month',
       color: 'text-blue-700 dark:text-blue-300',
-      bgColor: 'bg-blue-50 dark:bg-blue-900/20',
+      bgColor: 'bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800',
     },
     pro: {
       name: 'Pro Plan',
       price: '$79/month',
       color: 'text-purple-700 dark:text-purple-300',
-      bgColor: 'bg-purple-50 dark:bg-purple-900/20',
+      bgColor: 'bg-purple-100 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800',
     },
   };
 
