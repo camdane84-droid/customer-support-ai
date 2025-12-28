@@ -17,6 +17,7 @@ import { getCustomerDisplayName, getCustomerInitials } from '@/lib/utils/custome
 export default function DashboardPage() {
   const { business, loading: authLoading } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [totalConversationCount, setTotalConversationCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -31,6 +32,14 @@ export default function DashboardPage() {
         new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
       );
       setConversations(sorted);
+
+      // Fetch total count including archived conversations
+      const { count } = await supabase
+        .from('conversations')
+        .select('*', { count: 'exact', head: true })
+        .eq('business_id', business.id);
+
+      setTotalConversationCount(count || 0);
     } catch (error) {
       console.error('Failed to load data:', error);
     } finally {
@@ -235,8 +244,8 @@ export default function DashboardPage() {
     );
   }
 
-  // Use the usage tracking number for total (includes archived conversations)
-  const totalConversations = business.conversations_used_this_month || 0;
+  // Use the fetched total count (includes all conversations: open, resolved, and archived)
+  const totalConversations = totalConversationCount;
   const openConversations = conversations.filter(c => c.status === 'open').length;
 
   return (
