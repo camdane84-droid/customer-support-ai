@@ -63,7 +63,11 @@
       "Bash(npx vercel --prod)",
       "Bash(npx vercel:*)",
       "Bash(node scripts/fix-user-id.js:*)",
-      "Bash(node scripts/check-instagram-connections.js:*)"
+      "Bash(node scripts/check-instagram-connections.js:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git merge:*)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
     "ask": []

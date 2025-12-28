@@ -91,8 +91,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             onClick={() => setMobileMenuOpen(false)}
             className="flex items-center space-x-2 group rounded-lg px-2 py-1.5 -mx-2 transition-all duration-200 hover:bg-white dark:hover:bg-white"
           >
-            <div className="w-7 h-7 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-lg flex items-center justify-center shadow-sm transition-all duration-200 group-hover:bg-white dark:group-hover:bg-white">
-              <MessageSquare className="w-4 h-4 text-purple-700 dark:text-white transition-colors duration-200 group-hover:text-purple-600 dark:group-hover:text-purple-600" />
+            <div className="w-7 h-7 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-lg flex items-center justify-center shadow-sm transition-all duration-200 group-hover:bg-purple-600 dark:group-hover:bg-purple-600">
+              <MessageSquare className="w-4 h-4 text-purple-700 dark:text-white transition-colors duration-200 group-hover:text-white dark:group-hover:text-white" />
             </div>
             <span className="text-base font-semibold text-slate-900 dark:text-white transition-colors duration-200 group-hover:text-purple-600 dark:group-hover:text-purple-600">InboxForge</span>
           </Link>
@@ -175,8 +175,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             href="/dashboard"
             className="flex items-center space-x-2 overflow-hidden group cursor-pointer rounded-lg px-2 py-1.5 -mx-2 transition-all duration-200 hover:bg-white dark:hover:bg-white"
           >
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm transition-all duration-200 group-hover:bg-white dark:group-hover:bg-white">
-              <MessageSquare className="w-4 h-4 text-purple-700 dark:text-white transition-colors duration-200 group-hover:text-purple-600 dark:group-hover:text-purple-600" />
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm transition-all duration-200 group-hover:bg-purple-600 dark:group-hover:bg-purple-600">
+              <MessageSquare className="w-4 h-4 text-purple-700 dark:text-white transition-colors duration-200 group-hover:text-white dark:group-hover:text-white" />
             </div>
             <span
               className={`
@@ -290,8 +290,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             href="/dashboard"
             className="flex items-center space-x-2 group rounded-lg px-2 py-1 transition-all duration-200 hover:bg-white dark:hover:bg-white"
           >
-            <div className="w-6 h-6 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-md flex items-center justify-center shadow-sm transition-all duration-200 group-hover:bg-white dark:group-hover:bg-white">
-              <MessageSquare className="w-3.5 h-3.5 text-purple-700 dark:text-white transition-colors duration-200 group-hover:text-purple-600 dark:group-hover:text-purple-600" />
+            <div className="w-6 h-6 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-md flex items-center justify-center shadow-sm transition-all duration-200 group-hover:bg-purple-600 dark:group-hover:bg-purple-600">
+              <MessageSquare className="w-3.5 h-3.5 text-purple-700 dark:text-white transition-colors duration-200 group-hover:text-white dark:group-hover:text-white" />
             </div>
             <span className="text-base font-semibold text-slate-900 dark:text-white transition-colors duration-200 group-hover:text-purple-600 dark:group-hover:text-purple-600">InboxForge</span>
           </Link>
