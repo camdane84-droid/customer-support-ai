@@ -339,7 +339,7 @@ export default function SettingsPage() {
             </div>
             <div>
               <p className="text-sm text-gray-600 dark:text-slate-300">Subscription Plan</p>
-              <p className="text-gray-900 dark:text-white font-medium capitalize">{business.subscription_plan}</p>
+              <p className="text-gray-900 dark:text-white font-medium capitalize">{business.subscription_tier || 'free'}</p>
             </div>
             <div>
               <p className="text-sm text-gray-600 dark:text-slate-300">Account Created</p>
