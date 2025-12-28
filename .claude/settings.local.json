@@ -61,7 +61,9 @@
       "Bash(node scripts/migrate-usage-tracking.js:*)",
       "Bash(npx vercel --yes)",
       "Bash(npx vercel --prod)",
-      "Bash(npx vercel:*)"
+      "Bash(npx vercel:*)",
+      "Bash(node scripts/fix-user-id.js:*)",
+      "Bash(node scripts/check-instagram-connections.js:*)"
     ],
     "deny": [],
     "ask": []
