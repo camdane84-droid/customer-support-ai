@@ -272,14 +272,13 @@ async function handleInstagramMessage(event: any) {
       }
 
       // Check if message already exists (prevent duplicates from webhook retries)
-      const { data: existingMessage } = await supabaseAdmin
+      const { data: existingMessages } = await supabaseAdmin
         .from('messages')
         .select('id')
         .eq('conversation_id', conversationId)
-        .eq('metadata->instagram_message_id', messageId)
-        .single();
+        .contains('metadata', { instagram_message_id: messageId });
 
-      if (existingMessage) {
+      if (existingMessages && existingMessages.length > 0) {
         console.log('⚠️ Message already exists, skipping duplicate:', messageId);
         return;
       }
