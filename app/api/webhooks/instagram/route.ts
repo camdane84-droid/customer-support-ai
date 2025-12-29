@@ -271,6 +271,19 @@ async function handleInstagramMessage(event: any) {
         return;
       }
 
+      // Check if message already exists (prevent duplicates from webhook retries)
+      const { data: existingMessage } = await supabaseAdmin
+        .from('messages')
+        .select('id')
+        .eq('conversation_id', conversationId)
+        .eq('metadata->instagram_message_id', messageId)
+        .single();
+
+      if (existingMessage) {
+        console.log('⚠️ Message already exists, skipping duplicate:', messageId);
+        return;
+      }
+
       // Save message
       // For echo messages: sender_type is 'business', status is 'sent'
       // For incoming messages: sender_type is 'customer', no status needed
