@@ -100,7 +100,7 @@ export async function PATCH(request: NextRequest) {
     // Send email
     await sendEmail({
       to: invitation.email,
-      from: 'noreply@inbox-forge.com',
+      from: process.env.SENDGRID_FROM_EMAIL || 'noreply@inbox-forge.com',
       subject: `You've been invited to join ${businessName} on InboxForge`,
       text: `You've been invited to join ${businessName} on InboxForge!\n\nClick the link below to accept the invitation:\n${inviteUrl}\n\nThis invitation will expire in 7 days.`,
       html: `

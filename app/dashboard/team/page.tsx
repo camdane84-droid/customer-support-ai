@@ -478,35 +478,35 @@ export default function TeamPage() {
                 <div className="p-3 bg-gray-50 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600 mb-4">
                   <code className="text-sm text-gray-800 dark:text-slate-200 break-all">{inviteUrl}</code>
                 </div>
-                <div className="flex gap-2">
+                <div className="space-y-2">
+                  {createdInvitationId && (
+                    <button
+                      onClick={() => handleSendInviteEmail(createdInvitationId)}
+                      disabled={sendingEmail}
+                      className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors flex items-center justify-center gap-2 font-medium"
+                    >
+                      {sendingEmail ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Sending Email...
+                        </>
+                      ) : (
+                        <>
+                          <Mail className="w-4 h-4" />
+                          Send Invitation via Email
+                        </>
+                      )}
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(inviteUrl);
                       setActionSuccess('Invitation link copied to clipboard!');
                     }}
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
                   >
-                    Copy Link
+                    Copy Link (Backup)
                   </button>
-                  {createdInvitationId && (
-                    <button
-                      onClick={() => handleSendInviteEmail(createdInvitationId)}
-                      disabled={sendingEmail}
-                      className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors flex items-center justify-center gap-2"
-                    >
-                      {sendingEmail ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          Sending...
-                        </>
-                      ) : (
-                        <>
-                          <Mail className="w-4 h-4" />
-                          Send via Email
-                        </>
-                      )}
-                    </button>
-                  )}
                 </div>
               </div>
             ) : (
