@@ -215,10 +215,10 @@ export default function TeamPage() {
                 {canManageTeam && member.role !== 'owner' && (
                   <button
                     onClick={() => handleRemoveMember(member.id)}
-                    className="text-red-600 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-colors"
+                    className="group text-red-600 hover:text-white p-2 hover:bg-red-600 rounded-lg transition-all duration-200 hover:scale-110 hover:shadow-md active:scale-95"
                     title="Remove member"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4 transition-transform group-hover:scale-110" />
                   </button>
                 )}
               </div>
@@ -253,10 +253,10 @@ export default function TeamPage() {
                 {canManageTeam && (
                   <button
                     onClick={() => handleRevokeInvitation(invitation.id)}
-                    className="text-red-600 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-colors"
+                    className="group text-red-600 hover:text-white p-2 hover:bg-red-600 rounded-lg transition-all duration-200 hover:scale-110 hover:shadow-md hover:rotate-90 active:scale-95"
                     title="Revoke invitation"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-4 h-4 transition-transform group-hover:scale-110" />
                   </button>
                 )}
               </div>
