@@ -8,6 +8,7 @@ import { Save, Building, Clock, Share2, Mail, MessageCircle, Instagram, Facebook
 import TikTokIcon from '@/components/icons/TikTokIcon';
 import BillingSection from '@/components/ui/BillingSection';
 import { useRouter } from 'next/navigation';
+import { hasPermission } from '@/lib/permissions';
 
 export default function SettingsPage() {
   const { currentBusiness: business, loading: authLoading, user } = useAuth();
@@ -161,7 +162,8 @@ export default function SettingsPage() {
           stripeCustomerId={business.stripe_customer_id}
         />
 
-        {/* Social Media Connections */}
+        {/* Social Media Connections - Only for owners and admins */}
+        {business && hasPermission(business.member_role, 'MANAGE_SOCIAL_CONNECTIONS') && (
         <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
           <div className="flex items-center space-x-2 mb-4">
             <Share2 className="w-5 h-5 text-gray-500 dark:text-slate-400" />
@@ -214,6 +216,7 @@ export default function SettingsPage() {
             />
           </div>
         </div>
+        )}
 
         {/* AI Features */}
         <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
