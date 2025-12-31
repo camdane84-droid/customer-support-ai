@@ -22,6 +22,8 @@ export async function GET(request: NextRequest) {
           business_type,
           subscription_status,
           subscription_plan,
+          subscription_tier,
+          stripe_customer_id,
           created_at
         )
       `)
