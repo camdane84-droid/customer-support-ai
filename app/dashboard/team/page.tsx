@@ -36,6 +36,8 @@ export default function TeamPage() {
   const [inviting, setInviting] = useState(false);
   const [error, setError] = useState('');
   const [inviteUrl, setInviteUrl] = useState('');
+  const [createdInvitationId, setCreatedInvitationId] = useState<string | null>(null);
+  const [sendingEmail, setSendingEmail] = useState(false);
   const [viewingInviteId, setViewingInviteId] = useState<string | null>(null);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [newRole, setNewRole] = useState<Role>('agent');
@@ -113,8 +115,9 @@ export default function TeamPage() {
         throw new Error(data.error || 'Failed to send invitation');
       }
 
-      const { inviteUrl: url } = await response.json();
+      const { inviteUrl: url, invitation } = await response.json();
       setInviteUrl(url);
+      setCreatedInvitationId(invitation.id);
       setInviteEmail('');
       setInviteRole('agent');
       await fetchTeamData();
@@ -167,6 +170,33 @@ export default function TeamPage() {
     } catch (error: any) {
       console.error('Failed to revoke invitation:', error);
       setActionError(error.message || 'Failed to revoke invitation');
+    }
+  }
+
+  async function handleSendInviteEmail(invitationId: string) {
+    if (!currentBusiness) return;
+
+    setSendingEmail(true);
+    try {
+      const response = await fetch(
+        `/api/team/invitations?businessId=${currentBusiness.id}&invitationId=${invitationId}`,
+        { method: 'PATCH' }
+      );
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to send email');
+      }
+
+      setActionSuccess('Invitation email sent successfully!');
+      setShowInviteModal(false);
+      setInviteUrl('');
+      setCreatedInvitationId(null);
+    } catch (error: any) {
+      console.error('Failed to send invitation email:', error);
+      setActionError(error.message || 'Failed to send invitation email');
+    } finally {
+      setSendingEmail(false);
     }
   }
 
@@ -448,15 +478,36 @@ export default function TeamPage() {
                 <div className="p-3 bg-gray-50 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600 mb-4">
                   <code className="text-sm text-gray-800 dark:text-slate-200 break-all">{inviteUrl}</code>
                 </div>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(inviteUrl);
-                    alert('Link copied to clipboard!');
-                  }}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Copy Link
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(inviteUrl);
+                      setActionSuccess('Invitation link copied to clipboard!');
+                    }}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Copy Link
+                  </button>
+                  {createdInvitationId && (
+                    <button
+                      onClick={() => handleSendInviteEmail(createdInvitationId)}
+                      disabled={sendingEmail}
+                      className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors flex items-center justify-center gap-2"
+                    >
+                      {sendingEmail ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Mail className="w-4 h-4" />
+                          Send via Email
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
             ) : (
               <div>
@@ -555,7 +606,8 @@ export default function TeamPage() {
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(inviteLink);
-                  alert('Link copied to clipboard!');
+                  setActionSuccess('Invitation link copied to clipboard!');
+                  setViewingInviteId(null);
                 }}
                 className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
               >
