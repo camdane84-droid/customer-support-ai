@@ -45,31 +45,45 @@ export async function POST(request: NextRequest) {
       // Check if user is already a member
       const { data: existingMember } = await supabaseAdmin
         .from('business_members')
-        .select('id')
+        .select('id, role')
         .eq('business_id', invitation.business_id)
         .eq('user_id', userId)
         .single();
 
+      let member;
+
       if (existingMember) {
-        return NextResponse.json(
-          { error: 'You are already a member of this business' },
-          { status: 400 }
-        );
+        // User already exists - update their role if invitation has different role
+        if (existingMember.role !== invitation.role) {
+          const { data: updatedMember, error: updateError } = await supabaseAdmin
+            .from('business_members')
+            .update({ role: invitation.role })
+            .eq('id', existingMember.id)
+            .select()
+            .single();
+
+          if (updateError) throw updateError;
+          member = updatedMember;
+        } else {
+          // Same role, just use existing membership
+          member = existingMember;
+        }
+      } else {
+        // New member - add to business
+        const { data: newMember, error: memberError } = await supabaseAdmin
+          .from('business_members')
+          .insert({
+            business_id: invitation.business_id,
+            user_id: userId,
+            role: invitation.role,
+            invited_by: invitation.invited_by,
+          })
+          .select()
+          .single();
+
+        if (memberError) throw memberError;
+        member = newMember;
       }
-
-      // Add user to business
-      const { data: member, error: memberError } = await supabaseAdmin
-        .from('business_members')
-        .insert({
-          business_id: invitation.business_id,
-          user_id: userId,
-          role: invitation.role,
-          invited_by: invitation.invited_by,
-        })
-        .select()
-        .single();
-
-      if (memberError) throw memberError;
 
       // Update invitation status
       await supabaseAdmin

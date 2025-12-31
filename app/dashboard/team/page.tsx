@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/context/AuthContext';
-import { Crown, Shield, Users, Eye, Mail, Trash2, X, Loader2 } from 'lucide-react';
+import { Crown, Shield, Users, Eye, Mail, Trash2, X, Loader2, Link2, Edit3 } from 'lucide-react';
 import { hasPermission } from '@/lib/permissions';
 import type { Role } from '@/lib/permissions';
 
@@ -18,6 +18,7 @@ interface TeamInvitation {
   id: string;
   email: string;
   role: Role;
+  token: string;
   created_at: string;
   expires_at: string;
   status: string;
@@ -34,6 +35,9 @@ export default function TeamPage() {
   const [inviting, setInviting] = useState(false);
   const [error, setError] = useState('');
   const [inviteUrl, setInviteUrl] = useState('');
+  const [viewingInviteId, setViewingInviteId] = useState<string | null>(null);
+  const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
+  const [newRole, setNewRole] = useState<Role>('agent');
 
   const currentMember = members.find(m => m.user_id === currentBusiness?.member_role);
   const canManageTeam = currentBusiness && hasPermission(currentBusiness.member_role, 'INVITE_MEMBERS');
@@ -143,6 +147,36 @@ export default function TeamPage() {
     }
   }
 
+  async function handleChangeRole(memberId: string, role: Role) {
+    if (!currentBusiness) return;
+
+    try {
+      const response = await fetch(
+        `/api/team/members/${memberId}?businessId=${currentBusiness.id}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role }),
+        }
+      );
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to update role');
+      }
+
+      setEditingMemberId(null);
+      await fetchTeamData();
+    } catch (error: any) {
+      console.error('Failed to change role:', error);
+      alert(error.message || 'Failed to change member role');
+    }
+  }
+
+  function getInviteUrl(token: string) {
+    return `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/invite/${token}`;
+  }
+
   function getRoleIcon(role: Role) {
     switch (role) {
       case 'owner': return <Crown className="w-4 h-4 text-yellow-600" />;
@@ -213,13 +247,57 @@ export default function TeamPage() {
                   </div>
                 </div>
                 {canManageTeam && member.role !== 'owner' && (
-                  <button
-                    onClick={() => handleRemoveMember(member.id)}
-                    className="group text-red-600 hover:text-white p-2 hover:bg-red-600 rounded-lg transition-all duration-200 hover:scale-110 hover:shadow-md active:scale-95"
-                    title="Remove member"
-                  >
-                    <Trash2 className="w-4 h-4 transition-transform group-hover:scale-110" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {/* Change Role Button */}
+                    {editingMemberId === member.id ? (
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={newRole}
+                          onChange={(e) => setNewRole(e.target.value as Role)}
+                          className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="viewer">Viewer</option>
+                          <option value="agent">Agent</option>
+                          <option value="admin">Admin</option>
+                          {currentBusiness.member_role === 'owner' && (
+                            <option value="owner">Owner</option>
+                          )}
+                        </select>
+                        <button
+                          onClick={() => handleChangeRole(member.id, newRole)}
+                          className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setEditingMemberId(null)}
+                          className="px-3 py-1 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setEditingMemberId(member.id);
+                          setNewRole(member.role);
+                        }}
+                        className="group text-blue-600 hover:text-white p-2 hover:bg-blue-600 rounded-lg transition-all duration-200 hover:scale-110 hover:shadow-md active:scale-95"
+                        title="Change role"
+                      >
+                        <Edit3 className="w-4 h-4 transition-transform group-hover:scale-110" />
+                      </button>
+                    )}
+
+                    {/* Remove Member Button */}
+                    <button
+                      onClick={() => handleRemoveMember(member.id)}
+                      className="group text-red-600 hover:text-white p-2 hover:bg-red-600 rounded-lg transition-all duration-200 hover:scale-110 hover:shadow-md active:scale-95"
+                      title="Remove member"
+                    >
+                      <Trash2 className="w-4 h-4 transition-transform group-hover:scale-110" />
+                    </button>
+                  </div>
                 )}
               </div>
             ))
@@ -251,13 +329,25 @@ export default function TeamPage() {
                   </div>
                 </div>
                 {canManageTeam && (
-                  <button
-                    onClick={() => handleRevokeInvitation(invitation.id)}
-                    className="group text-red-600 hover:text-white p-2 hover:bg-red-600 rounded-lg transition-all duration-200 hover:scale-110 hover:shadow-md hover:rotate-90 active:scale-95"
-                    title="Revoke invitation"
-                  >
-                    <X className="w-4 h-4 transition-transform group-hover:scale-110" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {/* View Link Button */}
+                    <button
+                      onClick={() => setViewingInviteId(invitation.id)}
+                      className="group text-blue-600 hover:text-white p-2 hover:bg-blue-600 rounded-lg transition-all duration-200 hover:scale-110 hover:shadow-md active:scale-95"
+                      title="View invitation link"
+                    >
+                      <Link2 className="w-4 h-4 transition-transform group-hover:scale-110" />
+                    </button>
+
+                    {/* Revoke Button */}
+                    <button
+                      onClick={() => handleRevokeInvitation(invitation.id)}
+                      className="group text-red-600 hover:text-white p-2 hover:bg-red-600 rounded-lg transition-all duration-200 hover:scale-110 hover:shadow-md hover:rotate-90 active:scale-95"
+                      title="Revoke invitation"
+                    >
+                      <X className="w-4 h-4 transition-transform group-hover:scale-110" />
+                    </button>
+                  </div>
                 )}
               </div>
             ))}
@@ -362,6 +452,53 @@ export default function TeamPage() {
           </div>
         </div>
       )}
+
+      {/* View Invite Link Modal */}
+      {viewingInviteId && (() => {
+        const invitation = invitations.find(inv => inv.id === viewingInviteId);
+        if (!invitation) return null;
+        const inviteLink = getInviteUrl(invitation.token);
+
+        return (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Invitation Link</h3>
+                <button
+                  onClick={() => setViewingInviteId(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-1">
+                  Invited: <span className="font-medium text-gray-900">{invitation.email}</span>
+                </p>
+                <p className="text-sm text-gray-600">
+                  Role: <span className="font-medium text-gray-900 capitalize">{invitation.role}</span>
+                </p>
+              </div>
+
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 mb-4">
+                <code className="text-sm text-gray-800 break-all">{inviteLink}</code>
+              </div>
+
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(inviteLink);
+                  alert('Link copied to clipboard!');
+                }}
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+              >
+                <Link2 className="w-4 h-4" />
+                Copy Link
+              </button>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
