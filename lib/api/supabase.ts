@@ -94,3 +94,40 @@ export type KnowledgeBase = {
   created_at: string;
   updated_at: string;
 };
+
+// Team collaboration types
+export type BusinessMember = {
+  id: string;
+  business_id: string;
+  user_id: string;
+  role: 'owner' | 'admin' | 'agent' | 'viewer';
+  invited_by: string | null;
+  joined_at: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type TeamInvitation = {
+  id: string;
+  business_id: string;
+  email: string;
+  role: 'admin' | 'agent' | 'viewer';
+  invited_by: string;
+  token: string;
+  status: 'pending' | 'accepted' | 'expired' | 'revoked';
+  expires_at: string;
+  accepted_at: string | null;
+  created_at: string;
+};
+
+export type UserPreferences = {
+  user_id: string;
+  active_business_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type BusinessWithRole = Business & {
+  member_role: 'owner' | 'admin' | 'agent' | 'viewer';
+  member_joined_at: string;
+};

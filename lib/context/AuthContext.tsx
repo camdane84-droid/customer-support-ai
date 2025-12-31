@@ -4,158 +4,111 @@ import { createContext, useContext, useEffect, useState, useCallback, useRef } f
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/api/supabase';
 import type { User } from '@supabase/supabase-js';
-import type { Business } from '@/lib/api/supabase';
+import type { BusinessWithRole } from '@/lib/api/supabase';
 
 interface AuthContextType {
   user: User | null;
-  business: Business | null;
+  businesses: BusinessWithRole[];
+  currentBusiness: BusinessWithRole | null;
   loading: boolean;
-  refreshBusiness: () => Promise<void>;
+  refreshBusinesses: () => Promise<void>;
+  switchBusiness: (businessId: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  business: null,
+  businesses: [],
+  currentBusiness: null,
   loading: true,
-  refreshBusiness: async () => {},
+  refreshBusinesses: async () => {},
+  switchBusiness: () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [business, setBusiness] = useState<Business | null>(null);
+  const [businesses, setBusinesses] = useState<BusinessWithRole[]>([]);
+  const [currentBusiness, setCurrentBusiness] = useState<BusinessWithRole | null>(null);
   const [loading, setLoading] = useState(true);
   const initializingRef = useRef(false);
   const router = useRouter();
 
-  // Fetch business for a user email - optimized with caching
-  const fetchBusiness = useCallback(async (email: string, useCache: boolean = true): Promise<Business | null> => {
-    console.log('📡 [FETCH] Fetching business for:', email);
-
-    // Try cache first for instant loads
-    if (useCache && typeof window !== 'undefined') {
-      const cacheKey = `business_${email}`;
-      const cached = localStorage.getItem(cacheKey);
-      if (cached) {
-        try {
-          const cachedBusiness = JSON.parse(cached);
-          console.log('⚡ [CACHE] Using cached business:', cachedBusiness.name);
-          // Refresh in background to keep cache fresh
-          setTimeout(() => fetchBusiness(email, false), 100);
-          return cachedBusiness;
-        } catch (e) {
-          console.error('❌ [CACHE] Failed to parse cached business');
-        }
-      }
-    }
+  // Fetch all businesses for the current user
+  const fetchBusinesses = useCallback(async (): Promise<BusinessWithRole[]> => {
+    console.log('📡 [FETCH] Fetching businesses for user');
 
     try {
-      const { data, error } = await supabase
-        .from('businesses')
-        .select('*')
-        .eq('email', email)
-        .maybeSingle();
+      const response = await fetch('/api/businesses');
 
-      if (error) {
-        console.error('❌ [FETCH] Error:', error.message, error.code);
-        return null;
+      if (!response.ok) {
+        console.error('❌ [FETCH] Failed to fetch businesses:', response.statusText);
+        return [];
       }
 
-      if (data) {
-        console.log('✅ [FETCH] Business found:', data.name, 'ID:', data.id);
-        // Cache for next time
-        if (typeof window !== 'undefined') {
-          localStorage.setItem(`business_${email}`, JSON.stringify(data));
-        }
-        return data;
-      } else {
-        console.log('⚠️ [FETCH] No business found for email:', email);
-        return null;
-      }
+      const { businesses: bizList } = await response.json();
+      console.log('✅ [FETCH] Found', bizList?.length || 0, 'businesses');
+      return bizList || [];
     } catch (err: any) {
       console.error('❌ [FETCH] Exception:', err.message);
-      return null;
+      return [];
     }
   }, []);
 
-  // Create business for user - with duplicate handling
-  const createBusiness = useCallback(async (email: string, businessName?: string, userId?: string): Promise<Business | null> => {
-    const name = businessName || `${email.split('@')[0]}'s Business`;
-    console.log('📝 Creating business:', name, 'for:', email);
+  // Load active business ID from localStorage
+  const getActiveBusinessId = useCallback((userId: string): string | null => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem(`active_business_${userId}`);
+  }, []);
 
-    try {
-      const { data, error } = await supabase
-        .from('businesses')
-        .insert({
-          email: email,
-          name: name,
-          user_id: userId,
-        })
-        .select()
-        .single();
+  // Save active business ID to localStorage
+  const saveActiveBusinessId = useCallback((userId: string, businessId: string) => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(`active_business_${userId}`, businessId);
+  }, []);
 
-      if (error) {
-        // Check if it's a duplicate - if so, fetch the existing one
-        if (error.code === '23505') {
-          console.log('⚠️ Business already exists, fetching...');
-          return fetchBusiness(email);
-        }
-        console.error('❌ Failed to create business:', error);
-        return null;
-      }
-
-      console.log('✅ Business created:', data.name);
-      return data;
-    } catch (err) {
-      console.error('❌ Exception creating business:', err);
-      return null;
+  // Switch to a different business
+  const switchBusiness = useCallback((businessId: string) => {
+    const business = businesses.find(b => b.id === businessId);
+    if (business && user) {
+      console.log('🔄 Switching to business:', business.name);
+      setCurrentBusiness(business);
+      saveActiveBusinessId(user.id, businessId);
     }
-  }, [fetchBusiness]);
+  }, [businesses, user, saveActiveBusinessId]);
 
-  // Load user and business - optimized for speed
-  const loadUserAndBusiness = useCallback(async (currentUser: User) => {
-    console.log('🔄 Loading business for user:', currentUser.email);
+  // Load user and businesses
+  const loadUserAndBusinesses = useCallback(async (currentUser: User) => {
+    console.log('🔄 Loading businesses for user:', currentUser.email);
 
-    if (!currentUser.email) {
-      console.error('❌ User has no email');
-      setBusiness(null);
+    // Fetch all businesses user belongs to
+    const bizList = await fetchBusinesses();
+    setBusinesses(bizList);
+
+    if (bizList.length === 0) {
+      console.warn('⚠️ User has no businesses');
+      setCurrentBusiness(null);
       return;
     }
 
-    // First try to fetch existing business (no artificial delay)
-    let biz = await fetchBusiness(currentUser.email);
+    // Try to load previously active business
+    const activeBusinessId = getActiveBusinessId(currentUser.id);
+    let activeBusiness = bizList.find(b => b.id === activeBusinessId);
 
-    // If no business exists, create one
-    if (!biz) {
-      console.log('📝 No business found, creating one...');
-      const businessName = currentUser.user_metadata?.business_name;
-      biz = await createBusiness(currentUser.email, businessName, currentUser.id);
-
-      // If creation failed, try fetching one more time (race condition handling)
-      if (!biz) {
-        console.log('🔄 Creation may have raced, trying fetch again...');
-        biz = await fetchBusiness(currentUser.email);
-      }
+    // If no saved preference or business not found, use first business
+    if (!activeBusiness) {
+      activeBusiness = bizList[0];
     }
 
-    if (biz) {
-      console.log('✅ Setting business:', biz.name);
-      setBusiness(biz);
-    } else {
-      console.error('❌ Could not fetch or create business');
-      setBusiness(null);
-    }
-  }, [fetchBusiness, createBusiness]);
+    console.log('✅ Setting active business:', activeBusiness.name);
+    setCurrentBusiness(activeBusiness);
+    saveActiveBusinessId(currentUser.id, activeBusiness.id);
+  }, [fetchBusinesses, getActiveBusinessId, saveActiveBusinessId]);
 
-  // Refresh business (can be called manually) - clears cache
-  const refreshBusiness = useCallback(async () => {
-    if (user?.email) {
-      // Clear cache to force fresh fetch
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem(`business_${user.email}`);
-      }
-      await loadUserAndBusiness(user);
+  // Refresh businesses (can be called manually)
+  const refreshBusinesses = useCallback(async () => {
+    if (user) {
+      await loadUserAndBusinesses(user);
     }
-  }, [user, loadUserAndBusiness]);
+  }, [user, loadUserAndBusinesses]);
 
   // Initialize auth state
   useEffect(() => {
@@ -183,7 +136,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.error('❌ Error getting session:', error);
           if (mounted) {
             setUser(null);
-            setBusiness(null);
+            setBusinesses([]);
+            setCurrentBusiness(null);
             setLoading(false);
           }
           return;
@@ -193,21 +147,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log('👤 [AUTH] Found session for:', session.user.email);
           console.log('🔧 [AUTH] Setting user (mounted:', mounted, ')...');
           setUser(session.user);
-          // Load business in background, don't block on it (regardless of mounted state)
-          console.log('🔧 [AUTH] Loading business in background...');
-          loadUserAndBusiness(session.user).catch(err => {
+          // Load businesses in background, don't block on it
+          console.log('🔧 [AUTH] Loading businesses in background...');
+          loadUserAndBusinesses(session.user).catch(err => {
             console.error('❌ [AUTH] Background business load failed:', err);
           });
         } else {
           console.log('❌ [AUTH] No active session');
           setUser(null);
-          setBusiness(null);
+          setBusinesses([]);
+          setCurrentBusiness(null);
         }
       } catch (error) {
         console.error('❌ [AUTH] Auth initialization error:', error);
         if (mounted) {
           setUser(null);
-          setBusiness(null);
+          setBusinesses([]);
+          setCurrentBusiness(null);
         }
       } finally {
         if (mounted) {
@@ -231,18 +187,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('✅ [AUTH] SIGNED_IN - Setting user:', session.user.email);
         setUser(session.user);
         setLoading(false);
-        // Load business in background, don't block
-        loadUserAndBusiness(session.user).catch(err => {
+        // Load businesses in background, don't block
+        loadUserAndBusinesses(session.user).catch(err => {
           console.error('❌ [AUTH] Background business load failed:', err);
         });
       }
       // Handle sign out
       else if (event === 'SIGNED_OUT') {
         setUser(null);
-        setBusiness(null);
+        setBusinesses([]);
+        setCurrentBusiness(null);
         setLoading(false);
       }
-      // Handle token refresh - just update user, don't reload business
+      // Handle token refresh - just update user, don't reload businesses
       else if (event === 'TOKEN_REFRESHED' && session?.user) {
         setUser(session.user);
       }
@@ -256,7 +213,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [loadUserAndBusiness]);
+  }, [loadUserAndBusinesses]);
 
   // Timeout fallback to prevent infinite loading
   useEffect(() => {
@@ -271,7 +228,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [loading]);
 
   return (
-    <AuthContext.Provider value={{ user, business, loading, refreshBusiness }}>
+    <AuthContext.Provider value={{ user, businesses, currentBusiness, loading, refreshBusinesses, switchBusiness }}>
       {children}
     </AuthContext.Provider>
   );

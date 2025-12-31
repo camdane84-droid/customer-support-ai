@@ -88,7 +88,7 @@ interface AnalyticsData {
 }
 
 export default function AnalyticsPage() {
-  const { business } = useAuth();
+  const { currentBusiness: business } = useAuth();
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [allConversations, setAllConversations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

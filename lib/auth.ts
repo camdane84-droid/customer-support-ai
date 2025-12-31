@@ -1,6 +1,11 @@
 import { supabase } from '@/lib/api/supabase';
 
-export async function signUp(email: string, password: string, businessName: string) {
+export async function signUp(
+  email: string,
+  password: string,
+  businessName: string,
+  invitationToken?: string
+) {
   console.log('🔐 Starting signup for:', email);
 
   // Sign up the user
@@ -17,9 +22,87 @@ export async function signUp(email: string, password: string, businessName: stri
   // Wait a moment for session to settle
   await new Promise(resolve => setTimeout(resolve, 500));
 
-  // Create business record
-  console.log('✅ User created, now creating business...');
+  const userId = authData.user.id;
 
+  // Option 1: Accept invitation if token provided
+  if (invitationToken) {
+    console.log('✅ User created, accepting invitation...');
+    try {
+      const response = await fetch('/api/team/join', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: invitationToken }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('❌ Failed to accept invitation:', error);
+        throw new Error(error.error || 'Failed to accept invitation');
+      }
+
+      const { businessId } = await response.json();
+
+      // Fetch the business details
+      const { data: business } = await supabase
+        .from('businesses')
+        .select('*')
+        .eq('id', businessId)
+        .single();
+
+      console.log('✅ Invitation accepted, joined business');
+      return { user: authData.user, business };
+    } catch (error) {
+      console.error('❌ Invitation acceptance failed:', error);
+      throw error;
+    }
+  }
+
+  // Option 2: Try to join existing business by name
+  if (businessName) {
+    console.log('✅ User created, checking for existing business...');
+    try {
+      // Search for businesses with matching name_slug
+      const { data: slugData } = await supabase.rpc('slugify', {
+        text: businessName,
+      });
+
+      if (slugData) {
+        const { data: matchingBusiness } = await supabase
+          .from('businesses')
+          .select('*')
+          .eq('name_slug', slugData)
+          .maybeSingle();
+
+        // If exact match found, join it
+        if (matchingBusiness) {
+          console.log('✅ Found matching business, joining as agent...');
+
+          // Add user to business_members
+          const { error: memberError } = await supabase
+            .from('business_members')
+            .insert({
+              business_id: matchingBusiness.id,
+              user_id: userId,
+              role: 'agent',
+            });
+
+          if (memberError && memberError.code !== '23505') {
+            // Ignore duplicate constraint errors
+            throw memberError;
+          }
+
+          console.log('✅ Joined existing business');
+          return { user: authData.user, business: matchingBusiness };
+        }
+      }
+    } catch (error) {
+      console.error('⚠️ Error checking for existing business:', error);
+      // Continue to create new business
+    }
+  }
+
+  // Option 3: Create new business
+  console.log('✅ User created, creating new business...');
   try {
     const { data: businessData, error: businessError } = await supabase
       .from('businesses')
@@ -31,29 +114,29 @@ export async function signUp(email: string, password: string, businessName: stri
       .single();
 
     if (businessError) {
-      // If it's a duplicate error, that's okay - business already exists
-      if (businessError.code === '23505') {
-        console.log('⚠️ Business already exists, fetching it...');
-        const { data: existingBiz } = await supabase
-          .from('businesses')
-          .select('*')
-          .eq('email', email)
-          .single();
-
-        return { user: authData.user, business: existingBiz };
-      }
-
       console.error('❌ Business creation error:', businessError);
       throw businessError;
     }
 
-    console.log('✅ Business created successfully');
+    // Add user as owner in business_members
+    const { error: memberError } = await supabase
+      .from('business_members')
+      .insert({
+        business_id: businessData.id,
+        user_id: userId,
+        role: 'owner',
+      });
+
+    if (memberError) {
+      console.error('❌ Failed to add user as owner:', memberError);
+      throw memberError;
+    }
+
+    console.log('✅ Business created successfully and user added as owner');
     return { user: authData.user, business: businessData };
   } catch (error) {
     console.error('❌ Failed to create business:', error);
-    // User is created but business failed - user can still log in
-    // Business will be created by AuthContext if missing
-    return { user: authData.user, business: null };
+    throw error;
   }
 }
 

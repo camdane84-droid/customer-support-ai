@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/context/AuthContext';
 
 export default function TestEmailPage() {
-  const { business } = useAuth();
+  const { currentBusiness: business } = useAuth();
   const [fromEmail, setFromEmail] = useState('customer@test.com');
   const [fromName, setFromName] = useState('Test Customer');
   const [subject, setSubject] = useState('Test Email Subject');

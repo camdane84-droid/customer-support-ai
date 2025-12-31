@@ -15,7 +15,7 @@ interface KnowledgeItem {
 }
 
 export default function KnowledgeBasePage() {
-  const { business } = useAuth();
+  const { currentBusiness: business } = useAuth();
   const [items, setItems] = useState<KnowledgeItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);

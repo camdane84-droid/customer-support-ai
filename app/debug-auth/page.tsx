@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/context/AuthContext';
 import { supabase } from '@/lib/api/supabase';
 
 export default function DebugAuthPage() {
-  const { user, business, loading } = useAuth();
+  const { user, currentBusiness: business, loading } = useAuth();
   const [debugInfo, setDebugInfo] = useState<any>(null);
   const [checking, setChecking] = useState(false);
 

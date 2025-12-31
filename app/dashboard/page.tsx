@@ -10,12 +10,12 @@ import { getConversations } from '@/lib/api/conversations';
 import { supabase } from '@/lib/api/supabase';
 import { useAuth } from '@/lib/context/AuthContext';
 import type { Conversation } from '@/lib/api/supabase';
-import { MessageSquare, Clock, TrendingUp, Zap, ArrowRight, Mail, Instagram, Phone } from 'lucide-react';
+import { MessageSquare, Clock, TrendingUp, Users, ArrowRight, Mail, Instagram, Phone } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { getCustomerDisplayName, getCustomerInitials } from '@/lib/utils/customerDisplay';
 
 export default function DashboardPage() {
-  const { business, loading: authLoading } = useAuth();
+  const { currentBusiness: business, loading: authLoading } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [totalConversationCount, setTotalConversationCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
@@ -263,13 +263,13 @@ export default function DashboardPage() {
         {totalConversations === 0 && (
           <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg p-6 text-white">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Welcome to {business.name}! 🎉</h2>
-            <p className="mb-4">Get started by testing your inbox with simulated messages.</p>
+            <p className="mb-4">Get started by connecting your social media accounts and inviting your team.</p>
             <div className="flex space-x-3">
               <Link
-                href="/test-email"
+                href="/dashboard/settings"
                 className="px-4 py-2 bg-white text-indigo-600 rounded-lg hover:bg-blue-50 transition-colors font-medium"
               >
-                Test Email Feature
+                Connect Accounts
               </Link>
               <Link
                 href="/dashboard/inbox"
@@ -341,13 +341,13 @@ export default function DashboardPage() {
             </Link>
 
             <Link
-              href="/test-email"
+              href="/dashboard/team"
               className="flex items-center space-x-3 p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:bg-slate-900 transition-colors"
             >
-              <Zap className="w-8 h-8 text-orange-600" />
+              <Users className="w-8 h-8 text-green-600" />
               <div>
-                <p className="font-medium text-gray-900 dark:text-white">Test Features</p>
-                <p className="text-sm text-gray-500 dark:text-slate-400">Simulate emails</p>
+                <p className="font-medium text-gray-900 dark:text-white">Manage Team</p>
+                <p className="text-sm text-gray-500 dark:text-slate-400">Invite members</p>
               </div>
             </Link>
           </div>

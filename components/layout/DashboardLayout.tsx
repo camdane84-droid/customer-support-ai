@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, MessageSquare, BookOpen, Settings, LayoutDashboard, TrendingUp, TestTube, Archive, Moon, Sun } from 'lucide-react';
+import { Menu, X, MessageSquare, BookOpen, Settings, LayoutDashboard, TrendingUp, Users, Archive, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from '@/lib/auth';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useTheme } from '@/lib/context/ThemeContext';
 import UsageDisplay from '@/components/ui/UsageDisplay';
+import { BusinessSwitcher } from '@/components/ui/BusinessSwitcher';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -16,14 +17,14 @@ const navigation = [
   { name: 'Analytics', href: '/dashboard/analytics', icon: TrendingUp },
   { name: 'Knowledge Base', href: '/dashboard/knowledge', icon: BookOpen },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
-  { name: 'Test Email', href: '/test-email', icon: TestTube },
+  { name: 'Team', href: '/dashboard/team', icon: Users },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-  const { user, business } = useAuth();
+  const { user, currentBusiness } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const router = useRouter();
 
@@ -105,6 +106,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </button>
         </div>
 
+        {/* Business Switcher (mobile) */}
+        <div className="p-2">
+          <BusinessSwitcher />
+        </div>
+
         <nav className="p-2 space-y-0.5">
           {navigation.map((item) => {
             const isActive = pathname === item.href;
@@ -134,12 +140,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="flex items-center space-x-2 min-w-0">
               <div className="w-8 h-8 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-xs font-medium text-purple-700 dark:text-white">
-                  {business?.name?.charAt(0).toUpperCase() || 'U'}
+                  {currentBusiness?.name?.charAt(0).toUpperCase() || 'U'}
                 </span>
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
-                  {business?.name || 'User'}
+                  {currentBusiness?.name || 'User'}
                 </p>
                 <p className="text-xs text-slate-600 dark:text-slate-400 truncate">
                   {user?.email || ''}
@@ -220,41 +226,54 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           })}
         </nav>
 
-        {/* User section at bottom */}
-        <div className="relative z-40 p-2 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-          <div className={`flex items-center ${sidebarExpanded ? 'justify-between' : 'justify-center'} px-2.5 py-2`}>
-            <div className={`flex items-center space-x-2 min-w-0 ${sidebarExpanded ? 'overflow-hidden' : ''}`}>
-              <div className="w-7 h-7 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-xs font-medium text-purple-700 dark:text-white">
-                  {business?.name?.charAt(0).toUpperCase() || 'U'}
-                </span>
-              </div>
-              <div
-                className={`
-                  min-w-0 transition-all duration-200
-                  ${sidebarExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0'}
-                `}
-              >
-                <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
-                  {business?.name || 'User'}
-                </p>
-                <p className="text-xs text-slate-600 dark:text-slate-400 truncate">
-                  {user?.email || ''}
-                </p>
-              </div>
+        {/* Business Switcher & User section at bottom */}
+        <div className="relative z-40 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+          {/* Business Switcher */}
+          <div className={`
+            transition-all duration-200
+            ${sidebarExpanded ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}
+          `}>
+            <div className="p-2">
+              <BusinessSwitcher />
             </div>
-            <button
-              onClick={handleLogout}
-              className={`
-                text-slate-400 hover:text-slate-600 p-1.5 transition-all duration-200
-                ${sidebarExpanded ? 'opacity-100' : 'opacity-0 w-0 p-0'}
-              `}
-              aria-label="Logout"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-            </button>
+          </div>
+
+          {/* User section */}
+          <div className="p-2">
+            <div className={`flex items-center ${sidebarExpanded ? 'justify-between' : 'justify-center'} px-2.5 py-2`}>
+              <div className={`flex items-center space-x-2 min-w-0 ${sidebarExpanded ? 'overflow-hidden' : ''}`}>
+                <div className="w-7 h-7 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs font-medium text-purple-700 dark:text-white">
+                    {user?.email?.charAt(0).toUpperCase() || 'U'}
+                  </span>
+                </div>
+                <div
+                  className={`
+                    min-w-0 transition-all duration-200
+                    ${sidebarExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0'}
+                  `}
+                >
+                  <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
+                    {user?.email?.split('@')[0] || 'User'}
+                  </p>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 truncate">
+                    {user?.email || ''}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleLogout}
+                className={`
+                  text-slate-400 hover:text-slate-600 p-1.5 transition-all duration-200
+                  ${sidebarExpanded ? 'opacity-100' : 'opacity-0 w-0 p-0'}
+                `}
+                aria-label="Logout"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </nav>
@@ -263,7 +282,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Desktop top bar - Usage display and dark mode toggle */}
         <div className="hidden lg:flex items-center justify-end gap-4 h-14 px-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
-          {business?.id && <UsageDisplay businessId={business.id} compact />}
+          {currentBusiness?.id && <UsageDisplay businessId={currentBusiness.id} compact />}
           <button
             onClick={toggleTheme}
             className="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"

@@ -10,7 +10,7 @@ import BillingSection from '@/components/ui/BillingSection';
 import { useRouter } from 'next/navigation';
 
 export default function SettingsPage() {
-  const { business, loading: authLoading, user } = useAuth();
+  const { currentBusiness: business, loading: authLoading, user } = useAuth();
   const router = useRouter();
   const [businessName, setBusinessName] = useState('');
   const [businessType, setBusinessType] = useState('');
