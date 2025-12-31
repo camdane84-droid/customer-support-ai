@@ -152,36 +152,76 @@ export default function BillingSection({
 
         {currentTier !== 'free' && (
           <>
-            <div className="grid grid-cols-2 gap-3">
-              {currentTier !== 'pro' && (
-                <Link
-                  href="/pricing"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold text-center"
+            {currentTier === 'pro' ? (
+              /* Pro plan - Only show manage billing */
+              <>
+                <div className="p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg mb-3">
+                  <div className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="text-purple-900 dark:text-purple-100 font-medium">
+                        You're on the Pro Plan!
+                      </p>
+                      <p className="text-purple-700 dark:text-purple-300 mt-1">
+                        You have access to all features and the highest limits.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={handleManageBilling}
+                  disabled={loading === 'portal'}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  Upgrade
-                </Link>
-              )}
-              <button
-                onClick={handleManageBilling}
-                disabled={loading === 'portal'}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {loading === 'portal' ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Loading...
-                  </>
-                ) : (
-                  <>
-                    Manage Billing
-                    <ExternalLink className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-            </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-              Manage your subscription, payment methods, and billing history in the Stripe portal
-            </p>
+                  {loading === 'portal' ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    <>
+                      Manage Billing
+                      <ExternalLink className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                  Manage your subscription, payment methods, and billing history in the Stripe portal
+                </p>
+              </>
+            ) : (
+              /* Starter plan - Show upgrade and manage billing */
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <Link
+                    href="/pricing"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold text-center"
+                  >
+                    Upgrade to Pro
+                  </Link>
+                  <button
+                    onClick={handleManageBilling}
+                    disabled={loading === 'portal'}
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {loading === 'portal' ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      <>
+                        Manage Billing
+                        <ExternalLink className="w-4 h-4" />
+                      </>
+                    )}
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                  Manage your subscription, payment methods, and billing history in the Stripe portal
+                </p>
+              </>
+            )}
           </>
         )}
       </div>
