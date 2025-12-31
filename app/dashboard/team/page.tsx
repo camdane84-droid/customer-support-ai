@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/context/AuthContext';
-import { Crown, Shield, Users, Eye, Mail, Trash2, X, Loader2, Link2, Edit3 } from 'lucide-react';
+import { Crown, Shield, Users, Eye, Mail, Trash2, X, Loader2, Link2, Edit3, AlertCircle } from 'lucide-react';
 import { hasPermission } from '@/lib/permissions';
 import type { Role } from '@/lib/permissions';
 
@@ -38,6 +38,7 @@ export default function TeamPage() {
   const [viewingInviteId, setViewingInviteId] = useState<string | null>(null);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [newRole, setNewRole] = useState<Role>('agent');
+  const [actionError, setActionError] = useState('');
 
   const currentMember = members.find(m => m.user_id === currentBusiness?.member_role);
   const canManageTeam = currentBusiness && hasPermission(currentBusiness.member_role, 'INVITE_MEMBERS');
@@ -47,6 +48,14 @@ export default function TeamPage() {
       fetchTeamData();
     }
   }, [currentBusiness]);
+
+  // Auto-dismiss action errors after 5 seconds
+  useEffect(() => {
+    if (actionError) {
+      const timer = setTimeout(() => setActionError(''), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [actionError]);
 
   async function fetchTeamData() {
     if (!currentBusiness) return;
@@ -117,13 +126,14 @@ export default function TeamPage() {
       );
 
       if (!response.ok) {
-        throw new Error('Failed to remove member');
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to remove member');
       }
 
       await fetchTeamData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to remove member:', error);
-      alert('Failed to remove team member');
+      setActionError(error.message || 'Failed to remove team member');
     }
   }
 
@@ -137,13 +147,14 @@ export default function TeamPage() {
       );
 
       if (!response.ok) {
-        throw new Error('Failed to revoke invitation');
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to revoke invitation');
       }
 
       await fetchTeamData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to revoke invitation:', error);
-      alert('Failed to revoke invitation');
+      setActionError(error.message || 'Failed to revoke invitation');
     }
   }
 
@@ -169,7 +180,7 @@ export default function TeamPage() {
       await fetchTeamData();
     } catch (error: any) {
       console.error('Failed to change role:', error);
-      alert(error.message || 'Failed to change member role');
+      setActionError(error.message || 'Failed to change member role');
     }
   }
 
@@ -202,6 +213,26 @@ export default function TeamPage() {
           Manage team members and invitations for {currentBusiness.name}
         </p>
       </div>
+
+      {/* Error Banner */}
+      {actionError && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-red-800">Error</p>
+              <p className="text-sm text-red-700 mt-1">{actionError}</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setActionError('')}
+            className="text-red-400 hover:text-red-600 transition-colors"
+            title="Dismiss"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      )}
 
       {canManageTeam && (
         <div className="mb-6">
