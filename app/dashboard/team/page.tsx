@@ -224,8 +224,8 @@ export default function TeamPage() {
     <DashboardLayout>
       <div className="p-6 max-w-6xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Team Management</h1>
-        <p className="text-gray-600 mt-1">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Team Management</h1>
+        <p className="text-gray-600 dark:text-slate-400 mt-1">
           Manage team members and invitations for {currentBusiness.name}
         </p>
       </div>
@@ -283,29 +283,29 @@ export default function TeamPage() {
       )}
 
       {/* Team Members */}
-      <div className="bg-white rounded-lg border border-gray-200 mb-6">
-        <div className="p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Team Members ({members.length})</h2>
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 mb-6">
+        <div className="p-4 border-b border-gray-200 dark:border-slate-700">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Team Members ({members.length})</h2>
         </div>
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-gray-200 dark:divide-slate-700">
           {loading ? (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center text-gray-500 dark:text-slate-400">
               <Loader2 className="w-6 h-6 animate-spin mx-auto" />
             </div>
           ) : members.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">No team members found</div>
+            <div className="p-8 text-center text-gray-500 dark:text-slate-400">No team members found</div>
           ) : (
             members.map((member) => (
-              <div key={member.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
+              <div key={member.id} className="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-700/50">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-medium text-purple-700">
+                  <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900 dark:to-indigo-900 rounded-full flex items-center justify-center">
+                    <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
                       {member.email.charAt(0).toUpperCase()}
                     </span>
                   </div>
                   <div>
-                    <div className="font-medium text-gray-900">{member.email}</div>
-                    <div className="text-sm text-gray-500 flex items-center gap-2">
+                    <div className="font-medium text-gray-900 dark:text-white">{member.email}</div>
+                    <div className="text-sm text-gray-500 dark:text-slate-400 flex items-center gap-2">
                       {getRoleIcon(member.role)}
                       <span className="capitalize">{member.role}</span>
                       <span>•</span>
@@ -321,7 +321,7 @@ export default function TeamPage() {
                         <select
                           value={newRole}
                           onChange={(e) => setNewRole(e.target.value as Role)}
-                          className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="px-3 py-1 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                         >
                           <option value="viewer">Viewer</option>
                           <option value="agent">Agent</option>
@@ -338,7 +338,7 @@ export default function TeamPage() {
                         </button>
                         <button
                           onClick={() => setEditingMemberId(null)}
-                          className="px-3 py-1 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                          className="px-3 py-1 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-sm"
                         >
                           Cancel
                         </button>
@@ -374,20 +374,20 @@ export default function TeamPage() {
 
       {/* Pending Invitations - Only for owners and admins */}
       {canManageTeam && invitations.length > 0 && (
-        <div className="bg-white rounded-lg border border-gray-200">
-          <div className="p-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
+          <div className="p-4 border-b border-gray-200 dark:border-slate-700">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
               Pending Invitations ({invitations.length})
             </h2>
           </div>
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y divide-gray-200 dark:divide-slate-700">
             {invitations.map((invitation) => (
-              <div key={invitation.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
+              <div key={invitation.id} className="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-700/50">
                 <div className="flex items-center gap-3">
-                  <Mail className="w-10 h-10 text-gray-400" />
+                  <Mail className="w-10 h-10 text-gray-400 dark:text-slate-500" />
                   <div>
-                    <div className="font-medium text-gray-900">{invitation.email}</div>
-                    <div className="text-sm text-gray-500 flex items-center gap-2">
+                    <div className="font-medium text-gray-900 dark:text-white">{invitation.email}</div>
+                    <div className="text-sm text-gray-500 dark:text-slate-400 flex items-center gap-2">
                       {getRoleIcon(invitation.role)}
                       <span className="capitalize">{invitation.role}</span>
                       <span>•</span>
@@ -425,16 +425,16 @@ export default function TeamPage() {
       {/* Invite Modal */}
       {showInviteModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+          <div className="bg-white dark:bg-slate-800 rounded-lg p-6 max-w-md w-full mx-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Invite Team Member</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Invite Team Member</h3>
               <button
                 onClick={() => {
                   setShowInviteModal(false);
                   setInviteUrl('');
                   setError('');
                 }}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-200"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -442,11 +442,11 @@ export default function TeamPage() {
 
             {inviteUrl ? (
               <div>
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-sm text-gray-600 dark:text-slate-300 mb-3">
                   Invitation sent! Share this link with the new team member:
                 </p>
-                <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 mb-4">
-                  <code className="text-sm text-gray-800 break-all">{inviteUrl}</code>
+                <div className="p-3 bg-gray-50 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600 mb-4">
+                  <code className="text-sm text-gray-800 dark:text-slate-200 break-all">{inviteUrl}</code>
                 </div>
                 <button
                   onClick={() => {
@@ -461,26 +461,26 @@ export default function TeamPage() {
             ) : (
               <div>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                     Email Address
                   </label>
                   <input
                     type="email"
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                     placeholder="colleague@example.com"
                   />
                 </div>
 
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                     Role
                   </label>
                   <select
                     value={inviteRole}
                     onChange={(e) => setInviteRole(e.target.value as Role)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                   >
                     <option value="viewer">Viewer (Read-only)</option>
                     <option value="agent">Agent (Handle messages)</option>
@@ -492,7 +492,7 @@ export default function TeamPage() {
                 </div>
 
                 {error && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                  <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-400">
                     {error}
                   </div>
                 )}
@@ -528,28 +528,28 @@ export default function TeamPage() {
 
         return (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="bg-white dark:bg-slate-800 rounded-lg p-6 max-w-md w-full mx-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Invitation Link</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Invitation Link</h3>
                 <button
                   onClick={() => setViewingInviteId(null)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-200"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="mb-4">
-                <p className="text-sm text-gray-600 mb-1">
-                  Invited: <span className="font-medium text-gray-900">{invitation.email}</span>
+                <p className="text-sm text-gray-600 dark:text-slate-300 mb-1">
+                  Invited: <span className="font-medium text-gray-900 dark:text-white">{invitation.email}</span>
                 </p>
-                <p className="text-sm text-gray-600">
-                  Role: <span className="font-medium text-gray-900 capitalize">{invitation.role}</span>
+                <p className="text-sm text-gray-600 dark:text-slate-300">
+                  Role: <span className="font-medium text-gray-900 dark:text-white capitalize">{invitation.role}</span>
                 </p>
               </div>
 
-              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 mb-4">
-                <code className="text-sm text-gray-800 break-all">{inviteLink}</code>
+              <div className="p-3 bg-gray-50 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600 mb-4">
+                <code className="text-sm text-gray-800 dark:text-slate-200 break-all">{inviteLink}</code>
               </div>
 
               <button
