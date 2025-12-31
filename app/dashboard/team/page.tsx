@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/context/AuthContext';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Crown, Shield, Users, Eye, Mail, Trash2, X, Loader2, Link2, Edit3, AlertCircle } from 'lucide-react';
 import { hasPermission } from '@/lib/permissions';
 import type { Role } from '@/lib/permissions';
@@ -199,14 +200,17 @@ export default function TeamPage() {
 
   if (!currentBusiness) {
     return (
-      <div className="p-6">
-        <div className="text-center text-gray-500">Loading...</div>
-      </div>
+      <DashboardLayout>
+        <div className="p-6">
+          <div className="text-center text-gray-500">Loading...</div>
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <DashboardLayout>
+      <div className="p-6 max-w-6xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Team Management</h1>
         <p className="text-gray-600 mt-1">
@@ -530,6 +534,7 @@ export default function TeamPage() {
           </div>
         );
       })()}
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
