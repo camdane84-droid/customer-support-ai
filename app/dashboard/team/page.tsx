@@ -227,8 +227,8 @@ export default function TeamPage() {
         </div>
       </div>
 
-      {/* Pending Invitations */}
-      {invitations.length > 0 && (
+      {/* Pending Invitations - Only for owners and admins */}
+      {canManageTeam && invitations.length > 0 && (
         <div className="bg-white rounded-lg border border-gray-200">
           <div className="p-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">
