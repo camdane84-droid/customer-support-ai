@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/context/AuthContext';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Crown, Shield, Users, Eye, Mail, Trash2, X, Loader2, Link2, Edit3, AlertCircle } from 'lucide-react';
+import { Crown, Shield, Users, Eye, Mail, Trash2, X, Loader2, Link2, Edit3, AlertCircle, CheckCircle } from 'lucide-react';
 import { hasPermission } from '@/lib/permissions';
 import type { Role } from '@/lib/permissions';
 
@@ -40,6 +40,7 @@ export default function TeamPage() {
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [newRole, setNewRole] = useState<Role>('agent');
   const [actionError, setActionError] = useState('');
+  const [actionSuccess, setActionSuccess] = useState('');
 
   const currentMember = members.find(m => m.user_id === currentBusiness?.member_role);
   const canManageTeam = currentBusiness && hasPermission(currentBusiness.member_role, 'INVITE_MEMBERS');
@@ -57,6 +58,14 @@ export default function TeamPage() {
       return () => clearTimeout(timer);
     }
   }, [actionError]);
+
+  // Auto-dismiss success messages after 5 seconds
+  useEffect(() => {
+    if (actionSuccess) {
+      const timer = setTimeout(() => setActionSuccess(''), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [actionSuccess]);
 
   async function fetchTeamData() {
     if (!currentBusiness) return;
@@ -131,6 +140,7 @@ export default function TeamPage() {
         throw new Error(data.error || 'Failed to remove member');
       }
 
+      setActionSuccess('Team member removed successfully');
       await fetchTeamData();
     } catch (error: any) {
       console.error('Failed to remove member:', error);
@@ -152,6 +162,7 @@ export default function TeamPage() {
         throw new Error(data.error || 'Failed to revoke invitation');
       }
 
+      setActionSuccess('Invitation revoked successfully');
       await fetchTeamData();
     } catch (error: any) {
       console.error('Failed to revoke invitation:', error);
@@ -177,6 +188,7 @@ export default function TeamPage() {
         throw new Error(data.error || 'Failed to update role');
       }
 
+      setActionSuccess(`Member role updated to ${role} successfully`);
       setEditingMemberId(null);
       await fetchTeamData();
     } catch (error: any) {
@@ -231,6 +243,26 @@ export default function TeamPage() {
           <button
             onClick={() => setActionError('')}
             className="text-red-400 hover:text-red-600 transition-colors"
+            title="Dismiss"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      )}
+
+      {/* Success Banner */}
+      {actionSuccess && (
+        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start justify-between">
+          <div className="flex items-start gap-3">
+            <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-green-800">Success</p>
+              <p className="text-sm text-green-700 mt-1">{actionSuccess}</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setActionSuccess('')}
+            className="text-green-400 hover:text-green-600 transition-colors"
             title="Dismiss"
           >
             <X className="w-5 h-5" />
