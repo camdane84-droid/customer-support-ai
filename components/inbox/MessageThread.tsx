@@ -673,9 +673,11 @@ export default function MessageThread({ conversation, businessId, onConversation
             </div>
           )}
 
-          {canSendMessages && <p className="text-xs text-gray-500 dark:text-slate-400">
-            💡 Tip: Press Enter to send, Shift+Enter for new line
-          </p>
+          {canSendMessages && (
+            <p className="text-xs text-gray-500 dark:text-slate-400">
+              💡 Tip: Press Enter to send, Shift+Enter for new line
+            </p>
+          )}
         </form>
       </div>
 
