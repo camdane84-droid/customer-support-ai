@@ -6,13 +6,13 @@ import type { Role } from '@/lib/permissions';
 // PATCH /api/team/members/[id] - Update member role
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const auth = await authenticateRequest(request, undefined, ['owner', 'admin']);
   if (!auth.success) return auth.response;
 
   const { userId, businessId, role: userRole } = auth.data;
-  const memberId = params.id;
+  const { id: memberId } = await params;
 
   try {
     const { role: newRole } = await request.json();
