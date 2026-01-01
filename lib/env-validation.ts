@@ -44,8 +44,9 @@ export function validateEnv() {
     missing.forEach(v => console.error(`   - ${v}`));
     console.error('\nThe application may not function correctly.\n');
 
-    // In production, fail fast
-    if (process.env.NODE_ENV === 'production') {
+    // Only fail at runtime, not during build
+    // This allows the build to complete so we can see the error in Vercel logs
+    if (process.env.NODE_ENV === 'production' && typeof window !== 'undefined') {
       throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
     }
   }
