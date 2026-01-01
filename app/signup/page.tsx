@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signUp } from '@/lib/auth';
+import { useAuth } from '@/lib/context/AuthContext';
 import { MessageSquare, Info } from 'lucide-react';
 import Link from 'next/link';
 
@@ -18,6 +19,7 @@ function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const urlInviteToken = searchParams.get('invite');
+  const { refreshBusinesses } = useAuth();
 
   // Extract invite token from URL parameter OR manual input
   const getInviteToken = () => {
@@ -91,10 +93,14 @@ function SignupForm() {
 
     try {
       await signUp(email, password, businessName, inviteToken || undefined);
-      console.log('✅ Signup successful, waiting for auth to propagate...');
+      console.log('✅ Signup successful, refreshing businesses...');
 
-      // Wait for auth state to propagate before redirecting
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Refresh businesses to get the newly created business
+      await refreshBusinesses();
+      console.log('✅ Businesses refreshed');
+
+      // Small delay to ensure state updates
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       console.log('🚀 Redirecting to dashboard...');
       router.push('/dashboard');
