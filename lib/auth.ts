@@ -86,14 +86,21 @@ export async function signUp(
 
     if (!response.ok) {
       const error = await response.json();
-      console.error('❌ Business creation error:', error);
+      console.error('❌ Business creation error:', {
+        status: response.status,
+        statusText: response.statusText,
+        error
+      });
 
       // The API already returns user-friendly error messages
       throw new Error(error.error || 'Unable to create your business. Please try again.');
     }
 
     const { business } = await response.json();
-    console.log('✅ Business created successfully and user added as owner');
+    console.log('✅ Business created successfully:', {
+      businessId: business.id,
+      businessName: business.name
+    });
 
     // Force session refresh to ensure auth state propagates
     await supabase.auth.getSession();
