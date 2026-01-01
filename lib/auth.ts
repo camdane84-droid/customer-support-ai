@@ -58,6 +58,10 @@ export async function signUp(
         .single();
 
       console.log('✅ Invitation accepted, joined business');
+
+      // Force session refresh to ensure auth state propagates
+      await supabase.auth.getSession();
+
       return { user: authData.user, business };
     } catch (error) {
       console.error('❌ Invitation acceptance failed:', error);
@@ -88,6 +92,10 @@ export async function signUp(
 
     const { business } = await response.json();
     console.log('✅ Business created successfully and user added as owner');
+
+    // Force session refresh to ensure auth state propagates
+    await supabase.auth.getSession();
+
     return { user: authData.user, business };
   } catch (error: any) {
     console.error('❌ Failed to create business:', error);
@@ -104,6 +112,10 @@ export async function signIn(email: string, password: string) {
   });
 
   if (error) throw error;
+
+  // Force session refresh to ensure auth state propagates
+  await supabase.auth.getSession();
+
   return data;
 }
 

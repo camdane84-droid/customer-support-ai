@@ -91,14 +91,19 @@ function SignupForm() {
 
     try {
       await signUp(email, password, businessName, inviteToken || undefined);
-      console.log('✅ Signup successful, redirecting...');
+      console.log('✅ Signup successful, waiting for auth to propagate...');
+
+      // Wait for auth state to propagate before redirecting
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      console.log('🚀 Redirecting to dashboard...');
       router.push('/dashboard');
     } catch (err: any) {
       console.error('❌ Signup error:', err);
       setError(err.message || 'Failed to sign up');
-    } finally {
       setLoading(false);
     }
+    // Don't set loading false here - let redirect happen
   }
 
   return (
