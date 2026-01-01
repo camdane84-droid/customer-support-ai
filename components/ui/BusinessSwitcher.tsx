@@ -92,7 +92,7 @@ export function BusinessSwitcher() {
             </div>
 
             {/* Divider */}
-            <div className="border-t border-gray-200" />
+            <div className="border-t border-gray-200 dark:border-slate-700" />
 
             {/* Manage Teams Button */}
             <button
@@ -100,9 +100,9 @@ export function BusinessSwitcher() {
                 router.push('/dashboard/team');
                 setIsOpen(false);
               }}
-              className="w-full px-3 py-2 text-sm hover:bg-gray-50 transition-colors flex items-center gap-2 text-gray-700"
+              className="w-full px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2 text-gray-700 dark:text-gray-300"
             >
-              <Users className="h-4 w-4 flex-shrink-0" />
+              <Users className="h-4 w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
               <span className="font-medium">Manage Team</span>
             </button>
           </div>
