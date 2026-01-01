@@ -16,6 +16,7 @@ function SignupForm() {
   const [error, setError] = useState('');
   const [businessNameError, setBusinessNameError] = useState('');
   const [checkingName, setCheckingName] = useState(false);
+  const [loadingInvite, setLoadingInvite] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const urlInviteToken = searchParams.get('invite');
@@ -37,6 +38,28 @@ function SignupForm() {
   };
 
   const inviteToken = getInviteToken();
+
+  // Fetch business name when invite token is present
+  useEffect(() => {
+    if (inviteToken) {
+      fetchInvitationDetails(inviteToken);
+    }
+  }, [inviteToken]);
+
+  async function fetchInvitationDetails(token: string) {
+    setLoadingInvite(true);
+    try {
+      const response = await fetch(`/api/team/invitations/${token}`);
+      if (response.ok) {
+        const data = await response.json();
+        setBusinessName(data.businessName);
+      }
+    } catch (error) {
+      console.error('Failed to fetch invitation details:', error);
+    } finally {
+      setLoadingInvite(false);
+    }
+  }
 
   // Check if business name is available
   const checkBusinessNameAvailability = async (name: string) => {
@@ -137,7 +160,7 @@ function SignupForm() {
 
             <div>
               <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-2">
-                {inviteToken ? 'Your Business Name' : 'Business Name'}
+                {inviteToken ? 'You\'re Joining' : 'Business Name'}
               </label>
               <input
                 id="businessName"
@@ -145,21 +168,30 @@ function SignupForm() {
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
                 required
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400 ${
-                  businessNameError
-                    ? 'border-red-300 focus:ring-red-500'
-                    : 'border-gray-300 focus:ring-blue-500'
+                readOnly={!!inviteToken}
+                disabled={!!inviteToken}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent bg-white placeholder:text-gray-400 ${
+                  inviteToken
+                    ? 'text-gray-900 opacity-90 cursor-not-allowed border-gray-300'
+                    : businessNameError
+                    ? 'border-red-300 focus:ring-red-500 text-gray-900'
+                    : 'border-gray-300 focus:ring-blue-500 text-gray-900'
                 }`}
-                placeholder="Acme Coffee Shop"
+                placeholder={inviteToken ? (loadingInvite ? 'Loading...' : 'Business name') : 'Acme Coffee Shop'}
               />
-              {checkingName && (
+              {!inviteToken && checkingName && (
                 <p className="text-xs text-gray-500 mt-1">Checking availability...</p>
               )}
-              {businessNameError && (
+              {!inviteToken && businessNameError && (
                 <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg flex gap-2">
                   <Info className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
                   <p className="text-xs text-red-700">{businessNameError}</p>
                 </div>
+              )}
+              {inviteToken && businessName && (
+                <p className="text-xs text-gray-500 mt-1">
+                  You'll be added to this team after creating your account
+                </p>
               )}
             </div>
 
