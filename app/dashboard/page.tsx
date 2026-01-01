@@ -23,7 +23,16 @@ export default function DashboardPage() {
 
   // Define loadData before useEffect that uses it
   const loadData = useCallback(async () => {
-    if (!business) return;
+    if (!business) {
+      console.warn('⚠️ [DASHBOARD] loadData called but no business');
+      return;
+    }
+
+    console.log('📊 [DASHBOARD] Loading data for business:', {
+      id: business.id,
+      name: business.name,
+      role: business.member_role
+    });
 
     try {
       const convos = await getConversations(business.id);
