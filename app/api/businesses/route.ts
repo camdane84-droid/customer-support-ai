@@ -94,13 +94,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Add user as owner using admin client (bypasses RLS)
-    const { error: memberError } = await supabaseAdmin
+    console.log('➕ Adding user as owner:', { userId, businessId: businessData.id });
+    const { data: memberData, error: memberError } = await supabaseAdmin
       .from('business_members')
       .insert({
         business_id: businessData.id,
         user_id: userId,
         role: 'owner',
-      });
+      })
+      .select()
+      .single();
 
     if (memberError) {
       console.error('❌ Failed to add user as owner:', memberError);
@@ -117,7 +120,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('✅ Business created successfully and user added as owner');
+    console.log('✅ Business created successfully and user added as owner:', memberData);
+
+    // Verify membership was created
+    const { data: verifyMember } = await supabaseAdmin
+      .from('business_members')
+      .select('*')
+      .eq('business_id', businessData.id)
+      .eq('user_id', userId)
+      .single();
+
+    console.log('🔍 Membership verification:', verifyMember);
+
     return NextResponse.json({ business: businessData });
   } catch (error: any) {
     console.error('Error creating business:', error);

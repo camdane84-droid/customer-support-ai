@@ -8,39 +8,57 @@ export async function getConversations(businessId: string): Promise<Conversation
     return [];
   }
 
-  try {
-    const response = await fetch(`/api/conversations?businessId=${businessId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+  // Retry logic for 403 errors (membership might not be propagated yet)
+  let retries = 3;
+  let lastError: any = null;
 
-    if (!response.ok) {
-      let errorData: any = {};
-      try {
-        errorData = await response.json();
-      } catch (parseError) {
-        console.error('❌ Failed to parse error response');
+  while (retries > 0) {
+    try {
+      const response = await fetch(`/api/conversations?businessId=${businessId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        let errorData: any = {};
+        try {
+          errorData = await response.json();
+        } catch (parseError) {
+          console.error('❌ Failed to parse error response');
+        }
+
+        if (response.status === 401) {
+          console.error('❌ Unauthorized - User not signed in');
+          return [];
+        } else if (response.status === 403) {
+          lastError = errorData;
+          console.warn(`⚠️ Forbidden (attempt ${4 - retries}/3) - Retrying in 1s...`);
+          retries--;
+          if (retries > 0) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            continue;
+          } else {
+            console.error('❌ Forbidden after 3 retries - User does not have access to this business');
+            return [];
+          }
+        } else {
+          console.error('❌ API error fetching conversations:', errorData);
+          return [];
+        }
       }
 
-      if (response.status === 401) {
-        console.error('❌ Unauthorized - User not signed in');
-      } else if (response.status === 403) {
-        console.error('❌ Forbidden - User does not have access to this business');
-      } else {
-        console.error('❌ API error fetching conversations:', errorData);
-      }
+      const { conversations } = await response.json();
+      console.log('✅ Fetched', conversations?.length || 0, 'conversations');
+      return conversations || [];
+    } catch (error: any) {
+      console.error('❌ Failed to fetch conversations:', error?.message || error);
       return [];
     }
-
-    const { conversations } = await response.json();
-    console.log('✅ Fetched', conversations?.length || 0, 'conversations');
-    return conversations || [];
-  } catch (error: any) {
-    console.error('❌ Failed to fetch conversations:', error?.message || error);
-    return [];
   }
+
+  return [];
 }
 
 export async function getConversationMessages(conversationId: string): Promise<Message[]> {
