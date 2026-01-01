@@ -31,6 +31,7 @@ export async function signUp(
       const response = await fetch('/api/team/join', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ token: invitationToken }),
       });
 
@@ -76,6 +77,7 @@ export async function signUp(
     const response = await fetch('/api/businesses', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({
         name: businessName,
         email: email
