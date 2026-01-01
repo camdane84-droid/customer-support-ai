@@ -3,6 +3,11 @@ import { supabase, type Conversation, type Message } from '@/lib/api/supabase';
 export async function getConversations(businessId: string): Promise<Conversation[]> {
   console.log('📞 Fetching conversations for business:', businessId);
 
+  if (!businessId) {
+    console.warn('⚠️ No businessId provided to getConversations');
+    return [];
+  }
+
   try {
     const response = await fetch(`/api/conversations?businessId=${businessId}`, {
       method: 'GET',
@@ -12,8 +17,20 @@ export async function getConversations(businessId: string): Promise<Conversation
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('❌ API error fetching conversations:', errorData);
+      let errorData: any = {};
+      try {
+        errorData = await response.json();
+      } catch (parseError) {
+        console.error('❌ Failed to parse error response');
+      }
+
+      if (response.status === 401) {
+        console.error('❌ Unauthorized - User not signed in');
+      } else if (response.status === 403) {
+        console.error('❌ Forbidden - User does not have access to this business');
+      } else {
+        console.error('❌ API error fetching conversations:', errorData);
+      }
       return [];
     }
 

@@ -227,17 +227,36 @@ export default function DashboardPage() {
     return (
       <DashboardLayout>
         <div className="p-6 flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Unable to Load Business Data</h2>
-            <p className="text-gray-600 dark:text-slate-300 mb-4">
-              We couldn't find your business account.
+          <div className="max-w-md text-center">
+            <div className="mb-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-100 dark:bg-yellow-900/30 rounded-full mb-4">
+                <MessageSquare className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">No Business Found</h2>
+            <p className="text-gray-600 dark:text-slate-300 mb-6">
+              Your account was created, but you're not associated with any business workspace yet.
             </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-            >
-              Refresh Page
-            </button>
+            <div className="space-y-3">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-left">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Want to create a business?</h3>
+                <p className="text-sm text-gray-600 dark:text-slate-300 mb-3">
+                  Contact support to set up your business workspace.
+                </p>
+              </div>
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-left">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Have an invitation link?</h3>
+                <p className="text-sm text-gray-600 dark:text-slate-300 mb-3">
+                  Ask your team admin to send you an invitation link to join their workspace.
+                </p>
+              </div>
+              <button
+                onClick={() => window.location.reload()}
+                className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              >
+                Refresh Page
+              </button>
+            </div>
           </div>
         </div>
       </DashboardLayout>
