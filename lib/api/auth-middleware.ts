@@ -65,6 +65,8 @@ export async function authenticateRequest(
     }
 
     // Check if user is a member of this business (using admin client to bypass RLS)
+    console.log('🔍 [AUTH] Checking membership for:', { userId: user.id, businessId, email: user.email });
+
     const { data: membership, error: membershipError } = await supabaseAdmin
       .from('business_members')
       .select('role')
@@ -72,7 +74,25 @@ export async function authenticateRequest(
       .eq('user_id', user.id)
       .single();
 
+    console.log('🔍 [AUTH] Membership check result:', {
+      found: !!membership,
+      error: membershipError?.message,
+      errorCode: membershipError?.code,
+      role: membership?.role
+    });
+
     if (membershipError || !membership) {
+      // Check if ANY memberships exist for this user
+      const { data: allMemberships } = await supabaseAdmin
+        .from('business_members')
+        .select('business_id, role')
+        .eq('user_id', user.id);
+
+      console.error('❌ [AUTH] Membership not found.');
+      console.error('   User ID:', user.id);
+      console.error('   Requested businessId:', businessId);
+      console.error('   User has', allMemberships?.length || 0, 'total memberships:', allMemberships);
+
       return {
         success: false,
         response: NextResponse.json(
