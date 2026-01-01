@@ -552,17 +552,26 @@ export default function TeamPage() {
                     className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
                   >
                     <Copy className="w-4 h-4" />
-                    Copy Link
+                    Copy
                   </button>
+                  {createdInvitationId && (
+                    <button
+                      onClick={() => handleResendInvite(createdInvitationId)}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Send className="w-4 h-4" />
+                      Resend
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       setShowInviteModal(false);
                       setInviteUrl('');
                       setError('');
                     }}
-                    className="px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                    className="px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-2"
                   >
-                    Close
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
               </div>
