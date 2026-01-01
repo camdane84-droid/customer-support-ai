@@ -44,7 +44,9 @@ function SignupForm() {
             <MessageSquare className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900">InboxForge</h1>
-          <p className="text-gray-600 mt-2">Create your account</p>
+          <p className="text-gray-600 mt-2">
+            {inviteToken ? 'Join your team' : 'Create your account'}
+          </p>
         </div>
 
         {/* Signup Form */}
@@ -58,7 +60,7 @@ function SignupForm() {
 
             <div>
               <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-2">
-                Business Name
+                {inviteToken ? 'Your Business Name' : 'Business Name'}
               </label>
               <input
                 id="businessName"
@@ -73,7 +75,7 @@ function SignupForm() {
                 <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg flex gap-2">
                   <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
                   <p className="text-xs text-blue-700">
-                    <strong>Joining a team?</strong> Enter your team's exact business name to automatically join their inbox.
+                    <strong>Creating a new business.</strong> This will set up a new InboxForge workspace for your business. Want to join an existing team? Ask your admin for an invitation link.
                   </p>
                 </div>
               )}
@@ -81,7 +83,7 @@ function SignupForm() {
                 <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg flex gap-2">
                   <Info className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
                   <p className="text-xs text-green-700">
-                    <strong>Invitation detected!</strong> You'll automatically join the team after signing up.
+                    <strong>Invitation detected!</strong> You'll be added to your team's workspace after creating your account.
                   </p>
                 </div>
               )}
@@ -124,7 +126,10 @@ function SignupForm() {
               disabled={loading}
               className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              {loading ? 'Creating account...' : 'Sign Up'}
+              {loading
+                ? (inviteToken ? 'Joining team...' : 'Creating account...')
+                : (inviteToken ? 'Join Team' : 'Create Account')
+              }
             </button>
           </form>
 

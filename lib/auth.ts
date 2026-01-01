@@ -37,7 +37,15 @@ export async function signUp(
       if (!response.ok) {
         const error = await response.json();
         console.error('❌ Failed to accept invitation:', error);
-        throw new Error(error.error || 'Failed to accept invitation');
+
+        // User-friendly error messages
+        if (response.status === 404) {
+          throw new Error('This invitation link is invalid or has expired. Please ask your team admin for a new invite.');
+        } else if (response.status === 400) {
+          throw new Error('This invitation link has already been used. Please ask your team admin for a new invite.');
+        } else {
+          throw new Error('Unable to join the team. Please contact your team admin for help.');
+        }
       }
 
       const { businessId } = await response.json();
@@ -57,51 +65,8 @@ export async function signUp(
     }
   }
 
-  // Option 2: Try to join existing business by name
-  if (businessName) {
-    console.log('✅ User created, checking for existing business...');
-    try {
-      // Search for businesses with matching name_slug
-      const { data: slugData } = await supabase.rpc('slugify', {
-        text: businessName,
-      });
-
-      if (slugData) {
-        const { data: matchingBusiness } = await supabase
-          .from('businesses')
-          .select('*')
-          .eq('name_slug', slugData)
-          .maybeSingle();
-
-        // If exact match found, join it
-        if (matchingBusiness) {
-          console.log('✅ Found matching business, joining as agent...');
-
-          // Add user to business_members
-          const { error: memberError } = await supabase
-            .from('business_members')
-            .insert({
-              business_id: matchingBusiness.id,
-              user_id: userId,
-              role: 'agent',
-            });
-
-          if (memberError && memberError.code !== '23505') {
-            // Ignore duplicate constraint errors
-            throw memberError;
-          }
-
-          console.log('✅ Joined existing business');
-          return { user: authData.user, business: matchingBusiness };
-        }
-      }
-    } catch (error) {
-      console.error('⚠️ Error checking for existing business:', error);
-      // Continue to create new business
-    }
-  }
-
-  // Option 3: Create new business
+  // Option 2: Create new business (ONLY if no invitation token)
+  // Security: Users can ONLY join existing businesses via invitation links
   console.log('✅ User created, creating new business...');
   try {
     const { data: businessData, error: businessError } = await supabase
@@ -115,7 +80,13 @@ export async function signUp(
 
     if (businessError) {
       console.error('❌ Business creation error:', businessError);
-      throw businessError;
+
+      // User-friendly error messages
+      if (businessError.code === '23505') {
+        throw new Error('A business with this name already exists. Please choose a different name or ask the business owner for an invitation link.');
+      } else {
+        throw new Error('Unable to create your business. Please try again or contact support.');
+      }
     }
 
     // Add user as owner in business_members
@@ -129,14 +100,20 @@ export async function signUp(
 
     if (memberError) {
       console.error('❌ Failed to add user as owner:', memberError);
-      throw memberError;
+      throw new Error('Your account was created but there was an issue setting up your business. Please contact support.');
     }
 
     console.log('✅ Business created successfully and user added as owner');
     return { user: authData.user, business: businessData };
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Failed to create business:', error);
-    throw error;
+
+    // Re-throw with user-friendly message if it's already a user-friendly error
+    if (error.message && !error.code) {
+      throw error;
+    }
+
+    throw new Error('Unable to complete signup. Please try again or contact support.');
   }
 }
 
