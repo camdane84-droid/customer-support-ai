@@ -16,7 +16,7 @@ interface CannedResponse {
 }
 
 export default function CannedResponsesPage() {
-  const { business } = useAuth();
+  const { currentBusiness: business } = useAuth();
   const [responses, setResponses] = useState<CannedResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);

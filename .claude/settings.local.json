@@ -70,7 +70,8 @@
       "Bash(git stash:*)",
       "Bash(node scripts/check-usage-data.js:*)",
       "Bash(node scripts/check-all-businesses-usage.js:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "WebFetch(domain:customer-support-4gn738214-cams-projects-17bec3e7.vercel.app)"
     ],
     "deny": [],
     "ask": []

@@ -10,12 +10,12 @@ import { getConversations } from '@/lib/api/conversations';
 import { supabase } from '@/lib/api/supabase';
 import { useAuth } from '@/lib/context/AuthContext';
 import type { Conversation } from '@/lib/api/supabase';
-import { MessageSquare, Clock, TrendingUp, Zap, ArrowRight, Mail, Instagram, Phone } from 'lucide-react';
+import { MessageSquare, Clock, TrendingUp, Users, ArrowRight, Mail, Instagram, Phone } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { getCustomerDisplayName, getCustomerInitials } from '@/lib/utils/customerDisplay';
 
 export default function DashboardPage() {
-  const { business, loading: authLoading } = useAuth();
+  const { currentBusiness: business, loading: authLoading } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [totalConversationCount, setTotalConversationCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
@@ -227,17 +227,36 @@ export default function DashboardPage() {
     return (
       <DashboardLayout>
         <div className="p-6 flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Unable to Load Business Data</h2>
-            <p className="text-gray-600 dark:text-slate-300 mb-4">
-              We couldn't find your business account.
+          <div className="max-w-md text-center">
+            <div className="mb-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-100 dark:bg-yellow-900/30 rounded-full mb-4">
+                <MessageSquare className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">No Business Found</h2>
+            <p className="text-gray-600 dark:text-slate-300 mb-6">
+              Your account was created, but you're not associated with any business workspace yet.
             </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-            >
-              Refresh Page
-            </button>
+            <div className="space-y-3">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-left">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Want to create a business?</h3>
+                <p className="text-sm text-gray-600 dark:text-slate-300 mb-3">
+                  Contact support to set up your business workspace.
+                </p>
+              </div>
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-left">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Have an invitation link?</h3>
+                <p className="text-sm text-gray-600 dark:text-slate-300 mb-3">
+                  Ask your team admin to send you an invitation link to join their workspace.
+                </p>
+              </div>
+              <button
+                onClick={() => window.location.reload()}
+                className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              >
+                Refresh Page
+              </button>
+            </div>
           </div>
         </div>
       </DashboardLayout>
@@ -263,13 +282,13 @@ export default function DashboardPage() {
         {totalConversations === 0 && (
           <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg p-6 text-white">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Welcome to {business.name}! 🎉</h2>
-            <p className="mb-4">Get started by testing your inbox with simulated messages.</p>
+            <p className="mb-4">Get started by connecting your social media accounts and inviting your team.</p>
             <div className="flex space-x-3">
               <Link
-                href="/test-email"
+                href="/dashboard/settings"
                 className="px-4 py-2 bg-white text-indigo-600 rounded-lg hover:bg-blue-50 transition-colors font-medium"
               >
-                Test Email Feature
+                Connect Accounts
               </Link>
               <Link
                 href="/dashboard/inbox"
@@ -341,13 +360,13 @@ export default function DashboardPage() {
             </Link>
 
             <Link
-              href="/test-email"
+              href="/dashboard/team"
               className="flex items-center space-x-3 p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:bg-slate-900 transition-colors"
             >
-              <Zap className="w-8 h-8 text-orange-600" />
+              <Users className="w-8 h-8 text-green-600" />
               <div>
-                <p className="font-medium text-gray-900 dark:text-white">Test Features</p>
-                <p className="text-sm text-gray-500 dark:text-slate-400">Simulate emails</p>
+                <p className="font-medium text-gray-900 dark:text-white">Manage Team</p>
+                <p className="text-sm text-gray-500 dark:text-slate-400">Invite members</p>
               </div>
             </Link>
           </div>

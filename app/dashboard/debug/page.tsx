@@ -6,7 +6,7 @@ import { supabase } from '@/lib/api/supabase';
 import { useState } from 'react';
 
 export default function DebugPage() {
-  const { user, business, loading } = useAuth();
+  const { user, currentBusiness: business, loading } = useAuth();
   const [businesses, setBusinesses] = useState<any[]>([]);
   const [loadingBusinesses, setLoadingBusinesses] = useState(false);
 

@@ -8,9 +8,10 @@ import { Save, Building, Clock, Share2, Mail, MessageCircle, Instagram, Facebook
 import TikTokIcon from '@/components/icons/TikTokIcon';
 import BillingSection from '@/components/ui/BillingSection';
 import { useRouter } from 'next/navigation';
+import { hasPermission } from '@/lib/permissions';
 
 export default function SettingsPage() {
-  const { business, loading: authLoading, user } = useAuth();
+  const { currentBusiness: business, loading: authLoading, user } = useAuth();
   const router = useRouter();
   const [businessName, setBusinessName] = useState('');
   const [businessType, setBusinessType] = useState('');
@@ -83,12 +84,20 @@ export default function SettingsPage() {
   }
 
   async function handleDeleteAccount() {
-    if (!business || !user) return;
+    if (!user) return;
 
-    // Verify confirmation matches business name
-    if (deleteConfirmation !== business.name) {
-      alert('Business name does not match. Please type your business name exactly to confirm deletion.');
-      return;
+    // If business exists, verify confirmation matches business name
+    if (business) {
+      if (deleteConfirmation !== business.name) {
+        alert('Business name does not match. Please type your business name exactly to confirm deletion.');
+        return;
+      }
+    } else {
+      // No business - just confirm with user email
+      if (deleteConfirmation !== 'DELETE') {
+        alert('Please type "DELETE" to confirm account deletion.');
+        return;
+      }
     }
 
     setDeleting(true);
@@ -98,7 +107,7 @@ export default function SettingsPage() {
       const response = await fetch('/api/account/delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ businessName: business.name }),
+        body: JSON.stringify({ businessName: business?.name || '' }),
       });
 
       if (!response.ok) {
@@ -161,7 +170,8 @@ export default function SettingsPage() {
           stripeCustomerId={business.stripe_customer_id}
         />
 
-        {/* Social Media Connections */}
+        {/* Social Media Connections - Only for owners and admins */}
+        {business && hasPermission(business.member_role, 'MANAGE_SOCIAL_CONNECTIONS') && (
         <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
           <div className="flex items-center space-x-2 mb-4">
             <Share2 className="w-5 h-5 text-gray-500 dark:text-slate-400" />
@@ -214,6 +224,7 @@ export default function SettingsPage() {
             />
           </div>
         </div>
+        )}
 
         {/* AI Features */}
         <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
@@ -425,14 +436,18 @@ export default function SettingsPage() {
               </ul>
 
               <p className="text-gray-900 dark:text-white font-medium mb-2">
-                Please type <span className="font-bold text-red-600 dark:text-red-400">{business?.name}</span> to confirm:
+                {business ? (
+                  <>Please type <span className="font-bold text-red-600 dark:text-red-400">{business.name}</span> to confirm:</>
+                ) : (
+                  <>Please type <span className="font-bold text-red-600 dark:text-red-400">DELETE</span> to confirm:</>
+                )}
               </p>
 
               <input
                 type="text"
                 value={deleteConfirmation}
                 onChange={(e) => setDeleteConfirmation(e.target.value)}
-                placeholder={business?.name}
+                placeholder={business?.name || 'DELETE'}
                 className="w-full px-4 py-2 border-2 border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 mb-4 placeholder:text-red-400 placeholder:opacity-50"
               />
 
@@ -449,7 +464,7 @@ export default function SettingsPage() {
                 </button>
                 <button
                   onClick={handleDeleteAccount}
-                  disabled={deleting || deleteConfirmation !== business?.name}
+                  disabled={deleting || deleteConfirmation !== (business?.name || 'DELETE')}
                   className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {deleting ? 'Deleting...' : 'Delete Forever'}

@@ -307,6 +307,11 @@ async function handleInstagramMessage(event: any) {
         });
 
       if (messageError) {
+        // Check if this is a duplicate constraint violation (PostgreSQL error code 23505)
+        if (messageError.code === '23505' || messageError.message?.includes('duplicate') || messageError.message?.includes('idx_messages_instagram_message_id')) {
+          console.log('⚠️ Duplicate message blocked by database constraint (expected for race conditions):', messageId);
+          return; // Silently ignore duplicates
+        }
         console.error('❌ Failed to save message:', messageError);
       } else {
         if (isEcho) {

@@ -14,7 +14,7 @@ import { useAuth } from '@/lib/context/AuthContext';
 import type { Conversation } from '@/lib/api/supabase';
 
 export default function InboxPage() {
-  const { business, user, loading: authLoading } = useAuth();
+  const { currentBusiness: business, user, loading: authLoading } = useAuth();
   const searchParams = useSearchParams();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);

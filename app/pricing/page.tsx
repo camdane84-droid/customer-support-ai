@@ -68,7 +68,7 @@ const plans = [
 ];
 
 export default function PricingPage() {
-  const { user, business } = useAuth();
+  const { user, currentBusiness: business } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
   const currentTier = business?.subscription_tier || 'free';

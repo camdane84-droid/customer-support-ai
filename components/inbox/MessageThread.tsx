@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Send, Loader2, Archive, Trash2, StickyNote, CheckCircle, RotateCcw } from 'lucide-react';
+import { Send, Loader2, Archive, Trash2, StickyNote, CheckCircle, RotateCcw, Eye } from 'lucide-react';
 import type { Conversation, Message } from '@/lib/api/supabase';
 import { getConversationMessages, createMessage, retryFailedMessage } from '@/lib/api/conversations';
 import { supabase } from '@/lib/api/supabase';
@@ -14,6 +14,8 @@ import Tag from '@/components/ui/Tag';
 import Toast from '@/components/ui/Toast';
 import { detectTags, type Tag as TagType } from '@/lib/utils/auto-tagging';
 import { getCustomerDisplayName, getCustomerInitials } from '@/lib/utils/customerDisplay';
+import { useAuth } from '@/lib/context/AuthContext';
+import { hasPermission } from '@/lib/permissions';
 
 interface MessageThreadProps {
   conversation: Conversation;
@@ -22,6 +24,7 @@ interface MessageThreadProps {
 }
 
 export default function MessageThread({ conversation, businessId, onConversationDeleted }: MessageThreadProps) {
+  const { currentBusiness } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [replyText, setReplyText] = useState('');
@@ -41,6 +44,9 @@ export default function MessageThread({ conversation, businessId, onConversation
   const [notes, setNotes] = useState(conversation.notes || '');
   const [tags, setTags] = useState<TagType[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Check if user can send messages (agents, admins, and owners can)
+  const canSendMessages = currentBusiness ? hasPermission(currentBusiness.member_role, 'SEND_MESSAGES') : false;
 
   console.log('[MessageThread] Rendered with businessId:', businessId);
 
@@ -601,15 +607,30 @@ export default function MessageThread({ conversation, businessId, onConversation
         <div ref={messagesEndRef} />
       </div>
 
-      {/* AI Suggestion */}
-      <AISuggestion
-        conversationId={conversation.id}
-        businessId={businessId}
-        onUseSuggestion={(suggestion) => setReplyText(suggestion)}
-      />
+      {/* AI Suggestion - Only show if user can send messages */}
+      {canSendMessages && (
+        <AISuggestion
+          conversationId={conversation.id}
+          businessId={businessId}
+          onUseSuggestion={(suggestion) => setReplyText(suggestion)}
+        />
+      )}
 
       {/* Reply Box */}
       <div className="border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+        {!canSendMessages && (
+          <div className="mb-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg flex items-start space-x-2">
+            <Eye className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                View-Only Access
+              </p>
+              <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                You have viewer permissions and cannot send messages. Contact your team admin or owner to upgrade your role.
+              </p>
+            </div>
+          </div>
+        )}
         <form onSubmit={handleSendMessage} className="space-y-3">
           <div className="flex space-x-3">
             <textarea
@@ -621,14 +642,14 @@ export default function MessageThread({ conversation, businessId, onConversation
                   handleSendMessage(e);
                 }
               }}
-              placeholder="Type your reply... (Press Enter to send, Shift+Enter for new line)"
+              placeholder={canSendMessages ? "Type your reply... (Press Enter to send, Shift+Enter for new line)" : "You don't have permission to send messages"}
               rows={3}
-              className="flex-1 px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-purple-500 focus:border-transparent resize-none text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-400"
-              disabled={sending}
+              className="flex-1 px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-purple-500 focus:border-transparent resize-none text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-400 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={sending || !canSendMessages}
             />
             <button
               type="submit"
-              disabled={!replyText.trim() || sending}
+              disabled={!replyText.trim() || sending || !canSendMessages}
               className="px-6 py-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center space-x-2 h-fit"
             >
               {sending ? (
@@ -642,17 +663,21 @@ export default function MessageThread({ conversation, businessId, onConversation
             </button>
           </div>
 
-          {/* Quick Reply Button */}
-          <div className="relative">
-            <CannedResponsePicker
-              businessId={businessId}
-              onSelect={(content) => setReplyText(content)}
-            />
-          </div>
+          {/* Quick Reply Button - Only show if user can send messages */}
+          {canSendMessages && (
+            <div className="relative">
+              <CannedResponsePicker
+                businessId={businessId}
+                onSelect={(content) => setReplyText(content)}
+              />
+            </div>
+          )}
 
-          <p className="text-xs text-gray-500 dark:text-slate-400">
-            💡 Tip: Press Enter to send, Shift+Enter for new line
-          </p>
+          {canSendMessages && (
+            <p className="text-xs text-gray-500 dark:text-slate-400">
+              💡 Tip: Press Enter to send, Shift+Enter for new line
+            </p>
+          )}
         </form>
       </div>
 

@@ -48,7 +48,7 @@ interface ArchivedConversation {
 }
 
 export default function ArchivesPage() {
-  const { business } = useAuth();
+  const { currentBusiness: business } = useAuth();
   const [currentLevel, setCurrentLevel] = useState<ViewLevel>('categories');
   const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([
     { level: 'categories', label: 'Archives' }

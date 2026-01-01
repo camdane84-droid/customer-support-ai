@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { supabaseAdmin } from '@/lib/api/supabase-admin';
+import type { Role } from '@/lib/permissions';
 
 export interface AuthenticatedRequest {
   userId: string;
   businessId: string;
+  role: Role;
 }
 
 /**
@@ -12,10 +15,10 @@ export interface AuthenticatedRequest {
  */
 export async function authenticateRequest(
   request: NextRequest,
-  businessIdParam?: string
+  businessIdParam?: string,
+  requiredPermissions?: Role[]
 ): Promise<{ success: true; data: AuthenticatedRequest } | { success: false; response: NextResponse }> {
   try {
-    // Create Supabase client with cookies
     const cookieStore = await cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -61,28 +64,15 @@ export async function authenticateRequest(
       };
     }
 
-    // Verify user owns this business (check both user_id and email for legacy accounts)
-    let { data: business, error: businessError } = await supabase
-      .from('businesses')
-      .select('id, email, user_id')
-      .eq('id', businessId)
+    // Check if user is a member of this business (using admin client to bypass RLS)
+    const { data: membership, error: membershipError } = await supabaseAdmin
+      .from('business_members')
+      .select('role')
+      .eq('business_id', businessId)
+      .eq('user_id', user.id)
       .single();
 
-    if (businessError || !business) {
-      return {
-        success: false,
-        response: NextResponse.json(
-          { error: 'Forbidden - Business not found' },
-          { status: 403 }
-        ),
-      };
-    }
-
-    // Check if user owns this business (by user_id OR email for legacy accounts)
-    const ownsBusinessByUserId = business.user_id === user.id;
-    const ownsBusinessByEmail = business.email === user.email;
-
-    if (!ownsBusinessByUserId && !ownsBusinessByEmail) {
+    if (membershipError || !membership) {
       return {
         success: false,
         response: NextResponse.json(
@@ -92,11 +82,23 @@ export async function authenticateRequest(
       };
     }
 
+    // Check role permissions if required
+    if (requiredPermissions && !requiredPermissions.includes(membership.role)) {
+      return {
+        success: false,
+        response: NextResponse.json(
+          { error: 'Forbidden - Insufficient permissions' },
+          { status: 403 }
+        ),
+      };
+    }
+
     return {
       success: true,
       data: {
         userId: user.id,
-        businessId: business.id,
+        businessId: businessId,
+        role: membership.role,
       },
     };
   } catch (error: any) {

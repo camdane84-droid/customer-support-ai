@@ -1,6 +1,11 @@
 import { supabase } from '@/lib/api/supabase';
 
-export async function signUp(email: string, password: string, businessName: string) {
+export async function signUp(
+  email: string,
+  password: string,
+  businessName: string,
+  invitationToken?: string
+) {
   console.log('🔐 Starting signup for:', email);
 
   // Sign up the user
@@ -17,43 +22,78 @@ export async function signUp(email: string, password: string, businessName: stri
   // Wait a moment for session to settle
   await new Promise(resolve => setTimeout(resolve, 500));
 
-  // Create business record
-  console.log('✅ User created, now creating business...');
+  const userId = authData.user.id;
 
-  try {
-    const { data: businessData, error: businessError } = await supabase
-      .from('businesses')
-      .insert({
-        name: businessName,
-        email: email,
-      })
-      .select()
-      .single();
+  // Option 1: Accept invitation if token provided
+  if (invitationToken) {
+    console.log('✅ User created, accepting invitation...');
+    try {
+      const response = await fetch('/api/team/join', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: invitationToken }),
+      });
 
-    if (businessError) {
-      // If it's a duplicate error, that's okay - business already exists
-      if (businessError.code === '23505') {
-        console.log('⚠️ Business already exists, fetching it...');
-        const { data: existingBiz } = await supabase
-          .from('businesses')
-          .select('*')
-          .eq('email', email)
-          .single();
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('❌ Failed to accept invitation:', error);
 
-        return { user: authData.user, business: existingBiz };
+        // User-friendly error messages
+        if (response.status === 404) {
+          throw new Error('This invitation link is invalid or has expired. Please ask your team admin for a new invite.');
+        } else if (response.status === 400) {
+          throw new Error('This invitation link has already been used. Please ask your team admin for a new invite.');
+        } else {
+          throw new Error('Unable to join the team. Please contact your team admin for help.');
+        }
       }
 
-      console.error('❌ Business creation error:', businessError);
-      throw businessError;
+      const { businessId } = await response.json();
+
+      // Fetch the business details
+      const { data: business } = await supabase
+        .from('businesses')
+        .select('*')
+        .eq('id', businessId)
+        .single();
+
+      console.log('✅ Invitation accepted, joined business');
+      return { user: authData.user, business };
+    } catch (error) {
+      console.error('❌ Invitation acceptance failed:', error);
+      throw error;
+    }
+  }
+
+  // Option 2: Create new business (ONLY if no invitation token)
+  // Security: Users can ONLY join existing businesses via invitation links
+  console.log('✅ User created, creating new business via API...');
+  try {
+    const response = await fetch('/api/businesses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: businessName,
+        email: email
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('❌ Business creation error:', error);
+
+      // The API already returns user-friendly error messages
+      throw new Error(error.error || 'Unable to create your business. Please try again.');
     }
 
-    console.log('✅ Business created successfully');
-    return { user: authData.user, business: businessData };
-  } catch (error) {
+    const { business } = await response.json();
+    console.log('✅ Business created successfully and user added as owner');
+    return { user: authData.user, business };
+  } catch (error: any) {
     console.error('❌ Failed to create business:', error);
-    // User is created but business failed - user can still log in
-    // Business will be created by AuthContext if missing
-    return { user: authData.user, business: null };
+
+    // Re-throw the error as-is (already user-friendly from API)
+    throw error;
   }
 }
 
