@@ -50,8 +50,15 @@ export async function GET(request: NextRequest) {
 
 // POST /api/businesses - Create a new business and add user as owner
 export async function POST(request: NextRequest) {
+  console.log('🏢 [POST /api/businesses] Business creation request received');
+
   const auth = await authenticateUser(request);
-  if (!auth.success) return auth.response;
+  console.log('🔐 [POST /api/businesses] Auth result:', { success: auth.success, userId: auth.success ? auth.userId : 'N/A' });
+
+  if (!auth.success) {
+    console.error('❌ [POST /api/businesses] Authentication failed');
+    return auth.response;
+  }
 
   const { userId } = auth;
 

@@ -19,8 +19,18 @@ export async function signUp(
   if (authError) throw authError;
   if (!authData.user) throw new Error('No user returned from signup');
 
-  // Wait a moment for session to settle
-  await new Promise(resolve => setTimeout(resolve, 500));
+  // Wait for session and cookies to settle
+  console.log('⏳ Waiting for session to settle...');
+  await new Promise(resolve => setTimeout(resolve, 1000));
+
+  // Verify session is actually set
+  const { data: sessionData } = await supabase.auth.getSession();
+  console.log('📋 Session check:', { hasSession: !!sessionData.session, hasUser: !!sessionData.session?.user });
+
+  if (!sessionData.session) {
+    console.error('❌ Session not set after signup!');
+    throw new Error('Authentication session was not established. Please try signing in.');
+  }
 
   const userId = authData.user.id;
 
@@ -73,6 +83,7 @@ export async function signUp(
   // Option 2: Create new business (ONLY if no invitation token)
   // Security: Users can ONLY join existing businesses via invitation links
   console.log('✅ User created, creating new business via API...');
+  console.log('📤 Sending business creation request:', { name: businessName, email });
   try {
     const response = await fetch('/api/businesses', {
       method: 'POST',
@@ -82,6 +93,12 @@ export async function signUp(
         name: businessName,
         email: email
       }),
+    });
+
+    console.log('📥 Business creation response:', {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok
     });
 
     if (!response.ok) {

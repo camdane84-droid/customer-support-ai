@@ -140,6 +140,15 @@ export async function authenticateUser(
 ): Promise<{ success: true; userId: string } | { success: false; response: NextResponse }> {
   try {
     const cookieStore = await cookies();
+    const allCookies = cookieStore.getAll();
+    const supabaseCookies = allCookies.filter(c => c.name.includes('supabase') || c.name.includes('sb-'));
+
+    console.log('🍪 [authenticateUser] Cookies:', {
+      total: allCookies.length,
+      supabase: supabaseCookies.length,
+      names: supabaseCookies.map(c => c.name)
+    });
+
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -159,7 +168,15 @@ export async function authenticateUser(
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
+    console.log('👤 [authenticateUser] Auth check:', {
+      hasUser: !!user,
+      userId: user?.id,
+      email: user?.email,
+      error: authError?.message
+    });
+
     if (authError || !user) {
+      console.error('❌ [authenticateUser] No authenticated user');
       return {
         success: false,
         response: NextResponse.json(
