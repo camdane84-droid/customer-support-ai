@@ -97,20 +97,42 @@ export async function PATCH(request: NextRequest) {
     const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${invitation.token}`;
     const businessName = (invitation.businesses as any)?.name || 'the team';
 
+    // Calculate expiration date (7 days from now)
+    const expiresAt = new Date(invitation.expires_at);
+    const expirationDate = expiresAt.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
     // Send email
     await sendEmail({
       to: invitation.email,
       from: process.env.SENDGRID_FROM_EMAIL || 'noreply@inbox-forge.com',
       subject: `You've been invited to join ${businessName} on InboxForge`,
-      text: `You've been invited to join ${businessName} on InboxForge!\n\nClick the link below to accept the invitation:\n${inviteUrl}\n\nThis invitation will expire in 7 days.`,
+      text: `You've been invited to join ${businessName} on InboxForge!\n\nClick the link below to accept the invitation:\n${inviteUrl}\n\n⏰ This invitation will expire on ${expirationDate}.\n\nIf you can't find this email later, ask your team admin to resend the invitation.`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #2563eb;">You've been invited!</h2>
-          <p>You've been invited to join <strong>${businessName}</strong> on InboxForge.</p>
-          <p>Click the button below to accept the invitation:</p>
-          <a href="${inviteUrl}" style="display: inline-block; padding: 12px 24px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 8px; margin: 16px 0;">Accept Invitation</a>
-          <p style="color: #6b7280; font-size: 14px;">This invitation will expire in 7 days.</p>
-          <p style="color: #6b7280; font-size: 14px;">If the button doesn't work, copy and paste this link into your browser:<br>${inviteUrl}</p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #2563eb; margin-bottom: 16px;">You've been invited!</h2>
+          <p style="font-size: 16px; color: #374151; margin-bottom: 12px;">You've been invited to join <strong>${businessName}</strong> on InboxForge.</p>
+          <p style="font-size: 16px; color: #374151; margin-bottom: 24px;">Click the button below to accept the invitation:</p>
+
+          <a href="${inviteUrl}" style="display: inline-block; padding: 14px 28px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Accept Invitation</a>
+
+          <div style="margin-top: 32px; padding: 16px; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+            <p style="margin: 0; color: #92400e; font-size: 14px;">
+              <strong>⏰ Expires:</strong> ${expirationDate}
+            </p>
+            <p style="margin: 8px 0 0 0; color: #92400e; font-size: 14px;">
+              Can't find this email later? Ask your team admin to resend the invitation.
+            </p>
+          </div>
+
+          <p style="color: #6b7280; font-size: 14px; margin-top: 32px;">
+            If the button doesn't work, copy and paste this link into your browser:<br>
+            <span style="color: #2563eb; word-break: break-all;">${inviteUrl}</span>
+          </p>
         </div>
       `,
     });

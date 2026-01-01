@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/context/AuthContext';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Crown, Shield, Users, Eye, Mail, Trash2, X, Loader2, Link2, Edit3, AlertCircle, CheckCircle, Copy } from 'lucide-react';
+import { Crown, Shield, Users, Eye, Mail, Trash2, X, Loader2, Link2, Edit3, AlertCircle, CheckCircle, Copy, Send } from 'lucide-react';
 import { hasPermission } from '@/lib/permissions';
 import type { Role } from '@/lib/permissions';
 
@@ -220,6 +220,28 @@ export default function TeamPage() {
       setActionError(error.message || 'Failed to send invitation email');
     } finally {
       setSendingEmail(false);
+    }
+  }
+
+  async function handleResendInvite(invitationId: string) {
+    if (!currentBusiness) return;
+
+    try {
+      const response = await fetch(
+        `/api/team/invitations?businessId=${currentBusiness.id}&invitationId=${invitationId}`,
+        { method: 'PATCH' }
+      );
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to resend invitation');
+      }
+
+      setActionSuccess('Invitation email resent successfully!');
+      await fetchTeamData();
+    } catch (error: any) {
+      console.error('Failed to resend invitation:', error);
+      setActionError(error.message || 'Failed to resend invitation');
     }
   }
 
@@ -459,6 +481,15 @@ export default function TeamPage() {
                       <Link2 className="w-4 h-4 transition-transform group-hover:scale-110" />
                     </button>
 
+                    {/* Resend Button */}
+                    <button
+                      onClick={() => handleResendInvite(invitation.id)}
+                      className="group text-green-600 hover:text-white p-2 hover:bg-green-600 rounded-lg transition-all duration-200 hover:scale-110 hover:shadow-md active:scale-95"
+                      title="Resend invitation email"
+                    >
+                      <Send className="w-4 h-4 transition-transform group-hover:scale-110" />
+                    </button>
+
                     {/* Revoke Button */}
                     <button
                       onClick={() => handleRevokeInvitation(invitation.id)}
@@ -497,9 +528,14 @@ export default function TeamPage() {
               <div>
                 <div className="flex items-center gap-2 mb-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                   <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
-                  <p className="text-sm text-green-800 dark:text-green-200 font-medium">
-                    Invitation email sent successfully!
-                  </p>
+                  <div>
+                    <p className="text-sm text-green-800 dark:text-green-200 font-medium">
+                      Invitation email sent successfully!
+                    </p>
+                    <p className="text-xs text-green-700 dark:text-green-300 mt-1">
+                      This invitation will expire in 7 days
+                    </p>
+                  </div>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-slate-300 mb-3">
                   Backup invitation link (in case the email doesn't arrive):
