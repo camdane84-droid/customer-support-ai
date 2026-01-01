@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/context/AuthContext';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Crown, Shield, Users, Eye, Mail, Trash2, X, Loader2, Link2, Edit3, AlertCircle, CheckCircle } from 'lucide-react';
+import { Crown, Shield, Users, Eye, Mail, Trash2, X, Loader2, Link2, Edit3, AlertCircle, CheckCircle, Copy } from 'lucide-react';
 import { hasPermission } from '@/lib/permissions';
 import type { Role } from '@/lib/permissions';
 
@@ -101,6 +101,7 @@ export default function TeamPage() {
     setError('');
 
     try {
+      // Create the invitation
       const response = await fetch(`/api/team/invitations?businessId=${currentBusiness.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -116,6 +117,28 @@ export default function TeamPage() {
       }
 
       const { inviteUrl: url, invitation } = await response.json();
+
+      // Automatically send the email
+      setSendingEmail(true);
+      try {
+        const emailResponse = await fetch(
+          `/api/team/invitations?businessId=${currentBusiness.id}&invitationId=${invitation.id}`,
+          { method: 'PATCH' }
+        );
+
+        if (!emailResponse.ok) {
+          const emailError = await emailResponse.json();
+          throw new Error(emailError.error || 'Failed to send email');
+        }
+
+        setActionSuccess(`Invitation sent to ${inviteEmail}!`);
+      } catch (emailError: any) {
+        console.error('Failed to send email:', emailError);
+        setActionError(`Invitation created but email failed to send: ${emailError.message}`);
+      } finally {
+        setSendingEmail(false);
+      }
+
       setInviteUrl(url);
       setCreatedInvitationId(invitation.id);
       setInviteEmail('');
@@ -472,40 +495,38 @@ export default function TeamPage() {
 
             {inviteUrl ? (
               <div>
+                <div className="flex items-center gap-2 mb-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                  <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                  <p className="text-sm text-green-800 dark:text-green-200 font-medium">
+                    Invitation email sent successfully!
+                  </p>
+                </div>
                 <p className="text-sm text-gray-600 dark:text-slate-300 mb-3">
-                  Invitation sent! Share this link with the new team member:
+                  Backup invitation link (in case the email doesn't arrive):
                 </p>
                 <div className="p-3 bg-gray-50 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600 mb-4">
                   <code className="text-sm text-gray-800 dark:text-slate-200 break-all">{inviteUrl}</code>
                 </div>
-                <div className="space-y-2">
-                  {createdInvitationId && (
-                    <button
-                      onClick={() => handleSendInviteEmail(createdInvitationId)}
-                      disabled={sendingEmail}
-                      className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors flex items-center justify-center gap-2 font-medium"
-                    >
-                      {sendingEmail ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          Sending Email...
-                        </>
-                      ) : (
-                        <>
-                          <Mail className="w-4 h-4" />
-                          Send Invitation via Email
-                        </>
-                      )}
-                    </button>
-                  )}
+                <div className="flex gap-2">
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(inviteUrl);
                       setActionSuccess('Invitation link copied to clipboard!');
                     }}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
                   >
-                    Copy Link (Backup)
+                    <Copy className="w-4 h-4" />
+                    Copy Link
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowInviteModal(false);
+                      setInviteUrl('');
+                      setError('');
+                    }}
+                    className="px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    Close
                   </button>
                 </div>
               </div>
