@@ -37,15 +37,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('📡 [FETCH] Fetching businesses for user');
 
     try {
-      const response = await fetch('/api/businesses');
+      const response = await fetch('/api/businesses', {
+        credentials: 'include', // Include cookies
+      });
 
       if (!response.ok) {
-        console.error('❌ [FETCH] Failed to fetch businesses:', response.statusText);
+        console.error('❌ [FETCH] Failed to fetch businesses:', response.status, response.statusText);
         return [];
       }
 
       const { businesses: bizList } = await response.json();
-      console.log('✅ [FETCH] Found', bizList?.length || 0, 'businesses');
+      console.log('✅ [FETCH] Found', bizList?.length || 0, 'businesses:', bizList);
       return bizList || [];
     } catch (err: any) {
       console.error('❌ [FETCH] Exception:', err.message);
