@@ -19,6 +19,7 @@ export async function getConversations(businessId: string): Promise<Conversation
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Critical: Include cookies with request
       });
 
       if (!response.ok) {
