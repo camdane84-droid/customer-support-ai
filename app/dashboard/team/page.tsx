@@ -43,6 +43,11 @@ export default function TeamPage() {
   const [newRole, setNewRole] = useState<Role>('agent');
   const [actionError, setActionError] = useState('');
   const [actionSuccess, setActionSuccess] = useState('');
+  const [bulkInviteResults, setBulkInviteResults] = useState<{
+    successful: string[];
+    failed: { email: string; error: string }[];
+  } | null>(null);
+  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
 
   const currentMember = members.find(m => m.user_id === currentBusiness?.member_role);
   const canManageTeam = currentBusiness && hasPermission(currentBusiness.member_role, 'INVITE_MEMBERS');
@@ -99,48 +104,94 @@ export default function TeamPage() {
 
     setInviting(true);
     setError('');
+    setBulkInviteResults(null);
 
     try {
-      // Create the invitation
-      const response = await fetch(`/api/team/invitations?businessId=${currentBusiness.id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: inviteEmail,
-          role: inviteRole,
-        }),
-      });
+      // Parse multiple emails (comma or newline separated)
+      const emails = inviteEmail
+        .split(/[,\n]/)
+        .map(e => e.trim().toLowerCase())
+        .filter(e => e.length > 0);
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to send invitation');
+      if (emails.length === 0) {
+        throw new Error('Please enter at least one email address');
       }
 
-      const { inviteUrl: url, invitation } = await response.json();
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const invalidEmails = emails.filter(e => !emailRegex.test(e));
+      if (invalidEmails.length > 0) {
+        throw new Error(`Invalid email format: ${invalidEmails.join(', ')}`);
+      }
 
-      // Automatically send the email
-      setSendingEmail(true);
-      try {
-        const emailResponse = await fetch(
-          `/api/team/invitations?businessId=${currentBusiness.id}&invitationId=${invitation.id}`,
-          { method: 'PATCH' }
-        );
+      const successful: string[] = [];
+      const failed: { email: string; error: string }[] = [];
 
-        if (!emailResponse.ok) {
-          const emailError = await emailResponse.json();
-          throw new Error(emailError.error || 'Failed to send email');
+      // Process each email
+      for (const email of emails) {
+        try {
+          // Create the invitation
+          const response = await fetch(`/api/team/invitations?businessId=${currentBusiness.id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email,
+              role: inviteRole,
+            }),
+          });
+
+          if (!response.ok) {
+            const data = await response.json();
+            failed.push({ email, error: data.error || 'Failed to create invitation' });
+            continue;
+          }
+
+          const { inviteUrl: url, invitation } = await response.json();
+
+          // Automatically send the email
+          try {
+            const emailResponse = await fetch(
+              `/api/team/invitations?businessId=${currentBusiness.id}&invitationId=${invitation.id}`,
+              { method: 'PATCH' }
+            );
+
+            if (!emailResponse.ok) {
+              const emailError = await emailResponse.json();
+              failed.push({ email, error: emailError.error || 'Failed to send email' });
+              continue;
+            }
+
+            successful.push(email);
+
+            // Store the last successful invitation for the modal
+            if (emails.length === 1) {
+              setInviteUrl(url);
+              setCreatedInvitationId(invitation.id);
+            }
+          } catch (emailError: any) {
+            failed.push({ email, error: emailError.message || 'Failed to send email' });
+          }
+        } catch (inviteError: any) {
+          failed.push({ email, error: inviteError.message || 'Failed to create invitation' });
         }
-
-        setActionSuccess(`Invitation sent to ${inviteEmail}!`);
-      } catch (emailError: any) {
-        console.error('Failed to send email:', emailError);
-        setActionError(`Invitation created but email failed to send: ${emailError.message}`);
-      } finally {
-        setSendingEmail(false);
       }
 
-      setInviteUrl(url);
-      setCreatedInvitationId(invitation.id);
+      // Set results
+      setBulkInviteResults({ successful, failed });
+
+      // Show appropriate message
+      if (successful.length > 0) {
+        if (emails.length === 1) {
+          setActionSuccess(`Invitation sent to ${successful[0]}!`);
+        } else {
+          setActionSuccess(`Successfully sent ${successful.length} invitation(s)!`);
+        }
+      }
+
+      if (failed.length > 0 && successful.length === 0) {
+        setError(`Failed to send all invitations. Check the results below.`);
+      }
+
       setInviteEmail('');
       setInviteRole('agent');
       await fetchTeamData();
@@ -148,6 +199,7 @@ export default function TeamPage() {
       setError(error.message);
     } finally {
       setInviting(false);
+      setSendingEmail(false);
     }
   }
 
@@ -282,6 +334,15 @@ export default function TeamPage() {
       case 'admin': return <Shield className="w-4 h-4 text-blue-600" />;
       case 'agent': return <Users className="w-4 h-4 text-green-600" />;
       case 'viewer': return <Eye className="w-4 h-4 text-gray-600" />;
+    }
+  }
+
+  function getRoleLabel(role: Role) {
+    switch (role) {
+      case 'owner': return 'Owner (Full control)';
+      case 'admin': return 'Admin (Manage team)';
+      case 'agent': return 'Agent (Handle messages)';
+      case 'viewer': return 'Viewer (Read-only)';
     }
   }
 
@@ -524,54 +585,105 @@ export default function TeamPage() {
               </button>
             </div>
 
-            {inviteUrl ? (
+            {inviteUrl || bulkInviteResults ? (
               <div>
-                <div className="flex items-center gap-2 mb-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                  <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm text-green-800 dark:text-green-200 font-medium">
-                      Invitation email sent successfully!
+                {/* Single invitation success */}
+                {inviteUrl && (
+                  <>
+                    <div className="flex items-center gap-2 mb-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                      <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm text-green-800 dark:text-green-200 font-medium">
+                          Invitation email sent successfully!
+                        </p>
+                        <p className="text-xs text-green-700 dark:text-green-300 mt-1">
+                          This invitation will expire in 7 days
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-slate-300 mb-3">
+                      Backup invitation link (in case the email doesn't arrive):
                     </p>
-                    <p className="text-xs text-green-700 dark:text-green-300 mt-1">
-                      This invitation will expire in 7 days
-                    </p>
+                    <div className="p-3 bg-gray-50 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600 mb-4">
+                      <code className="text-sm text-gray-800 dark:text-slate-200 break-all">{inviteUrl}</code>
+                    </div>
+                  </>
+                )}
+
+                {/* Bulk invitation results */}
+                {bulkInviteResults && bulkInviteResults.successful.length > 1 && (
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 mb-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                      <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm text-green-800 dark:text-green-200 font-medium">
+                          Successfully sent {bulkInviteResults.successful.length} invitation(s)!
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="max-h-40 overflow-y-auto bg-gray-50 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600 p-3">
+                      <p className="text-xs font-medium text-gray-600 dark:text-slate-400 mb-2">Successful:</p>
+                      <ul className="space-y-1">
+                        {bulkInviteResults.successful.map((email) => (
+                          <li key={email} className="text-sm text-gray-800 dark:text-slate-200 flex items-center gap-2">
+                            <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400 flex-shrink-0" />
+                            {email}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {bulkInviteResults.failed.length > 0 && (
+                      <div className="mt-3 max-h-40 overflow-y-auto bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 p-3">
+                        <p className="text-xs font-medium text-red-600 dark:text-red-400 mb-2">Failed:</p>
+                        <ul className="space-y-1">
+                          {bulkInviteResults.failed.map(({ email, error }) => (
+                            <li key={email} className="text-sm text-red-800 dark:text-red-200">
+                              <span className="font-medium">{email}:</span> {error}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
-                </div>
-                <p className="text-sm text-gray-600 dark:text-slate-300 mb-3">
-                  Backup invitation link (in case the email doesn't arrive):
-                </p>
-                <div className="p-3 bg-gray-50 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600 mb-4">
-                  <code className="text-sm text-gray-800 dark:text-slate-200 break-all">{inviteUrl}</code>
-                </div>
+                )}
+
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(inviteUrl);
-                      setActionSuccess('Invitation link copied to clipboard!');
-                    }}
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-                  >
-                    <Copy className="w-4 h-4" />
-                    Copy
-                  </button>
-                  {createdInvitationId && (
-                    <button
-                      onClick={() => handleResendInvite(createdInvitationId)}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
-                    >
-                      <Send className="w-4 h-4" />
-                      Resend
-                    </button>
+                  {inviteUrl && (
+                    <>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(inviteUrl);
+                          setActionSuccess('Invitation link copied to clipboard!');
+                        }}
+                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Copy className="w-4 h-4" />
+                        Copy
+                      </button>
+                      {createdInvitationId && (
+                        <button
+                          onClick={() => handleResendInvite(createdInvitationId)}
+                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                        >
+                          <Send className="w-4 h-4" />
+                          Resend
+                        </button>
+                      )}
+                    </>
                   )}
                   <button
                     onClick={() => {
                       setShowInviteModal(false);
                       setInviteUrl('');
                       setError('');
+                      setBulkInviteResults(null);
                     }}
-                    className="px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-2"
+                    className={`${inviteUrl ? '' : 'flex-1'} px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-2`}
                   >
                     <X className="w-4 h-4" />
+                    Close
                   </button>
                 </div>
               </div>
@@ -579,33 +691,76 @@ export default function TeamPage() {
               <div>
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                    Email Address
+                    Email Addresses
                   </label>
-                  <input
-                    type="email"
+                  <p className="text-xs text-gray-500 dark:text-slate-400 mb-2">
+                    Enter one or more emails (separated by commas or new lines)
+                  </p>
+                  <textarea
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
-                    placeholder="colleague@example.com"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white resize-none"
+                    placeholder="colleague@example.com, teammate@example.com"
+                    rows={3}
                   />
                 </div>
 
-                <div className="mb-4">
+                <div className="mb-4 relative">
                   <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                     Role
                   </label>
-                  <select
-                    value={inviteRole}
-                    onChange={(e) => setInviteRole(e.target.value as Role)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                  <button
+                    type="button"
+                    onClick={() => setShowRoleDropdown(!showRoleDropdown)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white flex items-center justify-between"
                   >
-                    <option value="viewer">👁️ Viewer (Read-only)</option>
-                    <option value="agent">👥 Agent (Handle messages)</option>
-                    <option value="admin">🛡️ Admin (Manage team)</option>
-                    {currentBusiness.member_role === 'owner' && (
-                      <option value="owner">👑 Owner (Full control)</option>
-                    )}
-                  </select>
+                    <div className="flex items-center gap-2">
+                      {getRoleIcon(inviteRole)}
+                      <span>{getRoleLabel(inviteRole)}</span>
+                    </div>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {showRoleDropdown && (
+                    <div className="absolute z-10 w-full mt-1 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg shadow-lg overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => { setInviteRole('viewer'); setShowRoleDropdown(false); }}
+                        className="w-full px-3 py-2 flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-slate-600 text-left text-gray-900 dark:text-white"
+                      >
+                        <Eye className="w-4 h-4 text-gray-600" />
+                        <span>Viewer (Read-only)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setInviteRole('agent'); setShowRoleDropdown(false); }}
+                        className="w-full px-3 py-2 flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-slate-600 text-left text-gray-900 dark:text-white"
+                      >
+                        <Users className="w-4 h-4 text-green-600" />
+                        <span>Agent (Handle messages)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setInviteRole('admin'); setShowRoleDropdown(false); }}
+                        className="w-full px-3 py-2 flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-slate-600 text-left text-gray-900 dark:text-white"
+                      >
+                        <Shield className="w-4 h-4 text-blue-600" />
+                        <span>Admin (Manage team)</span>
+                      </button>
+                      {currentBusiness.member_role === 'owner' && (
+                        <button
+                          type="button"
+                          onClick={() => { setInviteRole('owner'); setShowRoleDropdown(false); }}
+                          className="w-full px-3 py-2 flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-slate-600 text-left text-gray-900 dark:text-white"
+                        >
+                          <Crown className="w-4 h-4 text-yellow-600" />
+                          <span>Owner (Full control)</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {error && (
