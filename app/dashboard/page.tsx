@@ -19,7 +19,60 @@ export default function DashboardPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [totalConversationCount, setTotalConversationCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
   const router = useRouter();
+
+  // Check if we should show the welcome banner
+  const checkWelcomeBanner = useCallback(async () => {
+    if (!business) return;
+
+    // Only show for owners
+    if (business.member_role !== 'owner') {
+      setShowWelcomeBanner(false);
+      return;
+    }
+
+    try {
+      // Check if business was created recently (within last 7 days) and has no setup
+      const businessAge = new Date().getTime() - new Date(business.created_at).getTime();
+      const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+
+      if (businessAge > sevenDaysInMs) {
+        setShowWelcomeBanner(false);
+        return;
+      }
+
+      // Check if they have any social connections
+      const { data: socialConnections } = await supabase
+        .from('businesses')
+        .select('instagram_access_token, facebook_page_id, email')
+        .eq('id', business.id)
+        .single();
+
+      const hasSocialConnections =
+        socialConnections?.instagram_access_token ||
+        socialConnections?.facebook_page_id;
+
+      // Check if they have invited any team members
+      const { count: inviteCount } = await supabase
+        .from('team_invitations')
+        .select('*', { count: 'exact', head: true })
+        .eq('business_id', business.id);
+
+      // Check if they have more than one team member (just themselves)
+      const { count: memberCount } = await supabase
+        .from('business_members')
+        .select('*', { count: 'exact', head: true })
+        .eq('business_id', business.id);
+
+      // Show banner if: no social connections AND (no invites OR only one member)
+      const shouldShow = !hasSocialConnections && (inviteCount === 0 || memberCount === 1);
+      setShowWelcomeBanner(shouldShow);
+    } catch (error) {
+      console.error('Failed to check welcome banner:', error);
+      setShowWelcomeBanner(false);
+    }
+  }, [business]);
 
   // Define loadData before useEffect that uses it
   const loadData = useCallback(async () => {
@@ -49,12 +102,15 @@ export default function DashboardPage() {
         .eq('business_id', business.id);
 
       setTotalConversationCount(count || 0);
+
+      // Check if we should show welcome banner
+      await checkWelcomeBanner();
     } catch (error) {
       console.error('Failed to load data:', error);
     } finally {
       setLoading(false);
     }
-  }, [business]);
+  }, [business, checkWelcomeBanner]);
 
   useEffect(() => {
     if (business) {
@@ -287,23 +343,23 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {/* Welcome Banner for New Users */}
-        {totalConversations === 0 && (
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg p-6 text-white">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Welcome to {business.name}! 🎉</h2>
-            <p className="mb-4">Get started by connecting your social media accounts and inviting your team.</p>
-            <div className="flex space-x-3">
+        {/* Welcome Banner for New Business Owners */}
+        {showWelcomeBanner && (
+          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg p-6 text-white shadow-lg">
+            <h2 className="text-2xl font-bold mb-2">Welcome to {business.name}! 🎉</h2>
+            <p className="mb-4 text-indigo-50">Get started by connecting your social media accounts and inviting your team.</p>
+            <div className="flex flex-wrap gap-3">
               <Link
                 href="/dashboard/settings"
-                className="px-4 py-2 bg-white text-indigo-600 rounded-lg hover:bg-blue-50 transition-colors font-medium"
+                className="px-4 py-2 bg-white text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors font-medium"
               >
-                Connect Accounts
+                Link Social
               </Link>
               <Link
-                href="/dashboard/inbox"
+                href="/dashboard/team"
                 className="px-4 py-2 bg-indigo-600 border-2 border-white text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
               >
-                Go to Inbox
+                Invite Team Members
               </Link>
             </div>
           </div>
