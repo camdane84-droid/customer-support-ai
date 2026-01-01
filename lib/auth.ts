@@ -67,53 +67,33 @@ export async function signUp(
 
   // Option 2: Create new business (ONLY if no invitation token)
   // Security: Users can ONLY join existing businesses via invitation links
-  console.log('✅ User created, creating new business...');
+  console.log('✅ User created, creating new business via API...');
   try {
-    const { data: businessData, error: businessError } = await supabase
-      .from('businesses')
-      .insert({
+    const response = await fetch('/api/businesses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         name: businessName,
-        email: email,
-      })
-      .select()
-      .single();
+        email: email
+      }),
+    });
 
-    if (businessError) {
-      console.error('❌ Business creation error:', businessError);
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('❌ Business creation error:', error);
 
-      // User-friendly error messages
-      if (businessError.code === '23505') {
-        throw new Error('A business with this name already exists. Please choose a different name or ask the business owner for an invitation link.');
-      } else {
-        throw new Error('Unable to create your business. Please try again or contact support.');
-      }
+      // The API already returns user-friendly error messages
+      throw new Error(error.error || 'Unable to create your business. Please try again.');
     }
 
-    // Add user as owner in business_members
-    const { error: memberError } = await supabase
-      .from('business_members')
-      .insert({
-        business_id: businessData.id,
-        user_id: userId,
-        role: 'owner',
-      });
-
-    if (memberError) {
-      console.error('❌ Failed to add user as owner:', memberError);
-      throw new Error('Your account was created but there was an issue setting up your business. Please contact support.');
-    }
-
+    const { business } = await response.json();
     console.log('✅ Business created successfully and user added as owner');
-    return { user: authData.user, business: businessData };
+    return { user: authData.user, business };
   } catch (error: any) {
     console.error('❌ Failed to create business:', error);
 
-    // Re-throw with user-friendly message if it's already a user-friendly error
-    if (error.message && !error.code) {
-      throw error;
-    }
-
-    throw new Error('Unable to complete signup. Please try again or contact support.');
+    // Re-throw the error as-is (already user-friendly from API)
+    throw error;
   }
 }
 
