@@ -41,15 +41,13 @@ export async function POST(request: NextRequest) {
         .digest('hex');
 
       if (`sha256=${expectedSignature}` !== signature) {
-        console.log('❌ Invalid signature');
-        console.log('   Expected: sha256=' + expectedSignature);
-        console.log('   Received:', signature);
-        console.log('⚠️  Signature mismatch - processing anyway for debugging');
-        // Don't return 403 for now - let's see if the message gets saved
-        // return NextResponse.json({ error: 'Invalid signature' }, { status: 403 });
-      } else {
-        console.log('✅ Signature verified');
+        console.error('❌ Invalid webhook signature - rejecting request');
+        console.error('   Expected: sha256=' + expectedSignature);
+        console.error('   Received:', signature);
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 403 });
       }
+
+      console.log('✅ Signature verified');
     }
 
     // Process webhook events
@@ -320,12 +318,16 @@ async function handleInstagramMessage(event: any) {
           console.log('✅ Customer message saved to database');
 
           // Trigger auto-notes for customer messages (fire and forget)
-          fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/conversations/${conversationId}/auto-notes`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-          }).catch(err => {
-            console.log('Auto-notes failed (non-critical):', err.message);
-          });
+          if (process.env.NEXT_PUBLIC_APP_URL) {
+            fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/conversations/${conversationId}/auto-notes`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' }
+            }).catch(err => {
+              console.log('Auto-notes failed (non-critical):', err.message);
+            });
+          } else {
+            console.warn('⚠️ NEXT_PUBLIC_APP_URL not set - skipping auto-notes');
+          }
         }
       }
     }

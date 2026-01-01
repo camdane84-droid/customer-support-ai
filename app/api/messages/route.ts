@@ -45,9 +45,9 @@ export async function POST(request: NextRequest) {
       .eq('id', message.conversation_id);
 
     // If this is a customer message, trigger auto-notes (fire and forget)
-    if (message.sender_type === 'customer') {
+    if (message.sender_type === 'customer' && process.env.NEXT_PUBLIC_APP_URL) {
       // Don't await - let it run in background
-      fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/conversations/${message.conversation_id}/auto-notes`, {
+      fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/conversations/${message.conversation_id}/auto-notes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       }).catch(() => {
