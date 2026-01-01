@@ -94,8 +94,18 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Invitation not found' }, { status: 404 });
     }
 
+    // Fetch business name separately if the join didn't work
+    let businessName = (invitation.businesses as any)?.name;
+    if (!businessName) {
+      const { data: business } = await supabaseAdmin
+        .from('businesses')
+        .select('name')
+        .eq('id', businessId)
+        .single();
+      businessName = business?.name || 'the team';
+    }
+
     const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${invitation.token}`;
-    const businessName = (invitation.businesses as any)?.name || 'the team';
 
     // Calculate expiration date (7 days from now)
     const expiresAt = new Date(invitation.expires_at);

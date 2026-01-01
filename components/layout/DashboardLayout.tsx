@@ -140,12 +140,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="flex items-center space-x-2 min-w-0">
               <div className="w-8 h-8 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-xs font-medium text-purple-700 dark:text-white">
-                  {currentBusiness?.name?.charAt(0).toUpperCase() || 'U'}
+                  {user?.email?.charAt(0).toUpperCase() || 'U'}
                 </span>
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
-                  {currentBusiness?.name || 'User'}
+                  {user?.email?.split('@')[0] || 'User'}
                 </p>
                 <p className="text-xs text-slate-600 dark:text-slate-400 truncate">
                   {user?.email || ''}

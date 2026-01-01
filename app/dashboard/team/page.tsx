@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/context/AuthContext';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Crown, Shield, Users, Eye, Mail, Trash2, X, Loader2, Link2, Edit3, AlertCircle, CheckCircle, Copy, Send } from 'lucide-react';
+import { Crown, Shield, Users, Eye, Mail, Trash2, X, Loader2, Link2, Edit3, AlertCircle, CheckCircle, Copy, Send, RefreshCw } from 'lucide-react';
 import { hasPermission } from '@/lib/permissions';
 import type { Role } from '@/lib/permissions';
 
@@ -30,6 +30,7 @@ export default function TeamPage() {
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [invitations, setInvitations] = useState<TeamInvitation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<Role>('agent');
@@ -55,6 +56,13 @@ export default function TeamPage() {
   useEffect(() => {
     if (currentBusiness) {
       fetchTeamData();
+
+      // Poll for new members every 10 seconds to catch accepted invitations
+      const pollInterval = setInterval(() => {
+        fetchTeamData();
+      }, 10000); // 10 seconds
+
+      return () => clearInterval(pollInterval);
     }
   }, [currentBusiness]);
 
@@ -74,8 +82,10 @@ export default function TeamPage() {
     }
   }, [actionSuccess]);
 
-  async function fetchTeamData() {
+  async function fetchTeamData(isManualRefresh = false) {
     if (!currentBusiness) return;
+
+    if (isManualRefresh) setRefreshing(true);
 
     try {
       const [membersRes, invitationsRes] = await Promise.all([
@@ -96,6 +106,7 @@ export default function TeamPage() {
       console.error('Failed to fetch team data:', error);
     } finally {
       setLoading(false);
+      if (isManualRefresh) setRefreshing(false);
     }
   }
 
@@ -420,8 +431,16 @@ export default function TeamPage() {
 
       {/* Team Members */}
       <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 mb-6">
-        <div className="p-4 border-b border-gray-200 dark:border-slate-700">
+        <div className="p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Team Members ({members.length})</h2>
+          <button
+            onClick={() => fetchTeamData(true)}
+            disabled={refreshing}
+            className="p-2 text-gray-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50"
+            title="Refresh team list"
+          >
+            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+          </button>
         </div>
         <div className="divide-y divide-gray-200 dark:divide-slate-700">
           {loading ? (
