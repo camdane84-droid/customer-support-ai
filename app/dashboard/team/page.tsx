@@ -333,7 +333,7 @@ export default function TeamPage() {
       case 'owner': return <Crown className="w-4 h-4 text-yellow-600" />;
       case 'admin': return <Shield className="w-4 h-4 text-blue-600" />;
       case 'agent': return <Users className="w-4 h-4 text-green-600" />;
-      case 'viewer': return <Eye className="w-4 h-4 text-gray-600" />;
+      case 'viewer': return <Eye className="w-4 h-4 text-slate-700 dark:text-slate-400" />;
     }
   }
 
@@ -730,7 +730,7 @@ export default function TeamPage() {
                         onClick={() => { setInviteRole('viewer'); setShowRoleDropdown(false); }}
                         className="w-full px-3 py-2 flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-slate-600 text-left text-gray-900 dark:text-white"
                       >
-                        <Eye className="w-4 h-4 text-gray-600" />
+                        <Eye className="w-4 h-4 text-slate-700 dark:text-slate-400" />
                         <span>Viewer (Read-only)</span>
                       </button>
                       <button
