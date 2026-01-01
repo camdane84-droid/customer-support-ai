@@ -24,17 +24,13 @@ export async function GET(
     }
 
     // Check if invitation is expired
-    if (new Date(invitation.expires_at) < new Date()) {
-      return NextResponse.json(
-        { error: 'Invitation has expired' },
-        { status: 410 }
-      );
-    }
+    const expired = new Date(invitation.expires_at) < new Date();
 
     return NextResponse.json({
       businessName: (invitation.businesses as any)?.name || 'Unknown Business',
       email: invitation.email,
       role: invitation.role,
+      expired,
     });
   } catch (error: any) {
     return NextResponse.json(
