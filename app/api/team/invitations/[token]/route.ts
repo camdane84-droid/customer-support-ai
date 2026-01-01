@@ -4,9 +4,9 @@ import { supabaseAdmin } from '@/lib/api/supabase-admin';
 // GET /api/team/invitations/[token] - Get invitation details by token (public, no auth required)
 export async function GET(
   request: NextRequest,
-  { params }: { params: { token: string } }
+  { params }: { params: Promise<{ token: string }> }
 ) {
-  const { token } = params;
+  const { token } = await params;
 
   try {
     const { data: invitation, error } = await supabaseAdmin
