@@ -13,6 +13,8 @@ function SignupForm() {
   const [inviteInput, setInviteInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [businessNameError, setBusinessNameError] = useState('');
+  const [checkingName, setCheckingName] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const urlInviteToken = searchParams.get('invite');
@@ -34,9 +36,55 @@ function SignupForm() {
 
   const inviteToken = getInviteToken();
 
+  // Check if business name is available
+  const checkBusinessNameAvailability = async (name: string) => {
+    if (!name.trim() || inviteToken) {
+      setBusinessNameError('');
+      return;
+    }
+
+    setCheckingName(true);
+    try {
+      const response = await fetch(`/api/businesses/check-name?name=${encodeURIComponent(name)}`);
+      const data = await response.json();
+
+      if (!data.available) {
+        setBusinessNameError(
+          `A business named "${data.existingName}" already exists. Please choose a different name, or if you want to join this team, please request an invitation link from the business owner and enter it below.`
+        );
+      } else {
+        setBusinessNameError('');
+      }
+    } catch (error) {
+      console.error('Error checking business name:', error);
+      // Don't block signup on check error
+      setBusinessNameError('');
+    } finally {
+      setCheckingName(false);
+    }
+  };
+
+  // Debounced business name check
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (businessName) {
+        checkBusinessNameAvailability(businessName);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [businessName, inviteToken]);
+
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+
+    // Block signup if business name is taken and no invite provided
+    if (businessNameError && !inviteToken) {
+      setError('Please resolve the business name conflict before continuing.');
+      return;
+    }
+
     setLoading(true);
 
     console.log('Attempting signup with:', { email, businessName, hasInvite: !!inviteToken });
@@ -86,9 +134,22 @@ function SignupForm() {
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent ${
+                  businessNameError
+                    ? 'border-red-300 focus:ring-red-500'
+                    : 'border-gray-300 focus:ring-blue-500'
+                }`}
                 placeholder="Acme Coffee Shop"
               />
+              {checkingName && (
+                <p className="text-xs text-gray-500 mt-1">Checking availability...</p>
+              )}
+              {businessNameError && (
+                <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg flex gap-2">
+                  <Info className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-red-700">{businessNameError}</p>
+                </div>
+              )}
             </div>
 
             {/* Invite Link Input - Only show if no URL invite token */}
@@ -168,11 +229,13 @@ function SignupForm() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || (businessNameError && !inviteToken) || checkingName}
               className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {loading
                 ? (inviteToken ? 'Joining team...' : 'Creating account...')
+                : checkingName
+                ? 'Checking...'
                 : (inviteToken ? 'Join Team' : 'Create Account')
               }
             </button>
