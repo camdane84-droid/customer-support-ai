@@ -10,11 +10,29 @@ function SignupForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [businessName, setBusinessName] = useState('');
+  const [inviteInput, setInviteInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
   const searchParams = useSearchParams();
-  const inviteToken = searchParams.get('invite');
+  const urlInviteToken = searchParams.get('invite');
+
+  // Extract invite token from URL parameter OR manual input
+  const getInviteToken = () => {
+    if (urlInviteToken) return urlInviteToken;
+    if (!inviteInput.trim()) return null;
+
+    // If user pasted a full URL, extract the token
+    try {
+      const url = new URL(inviteInput);
+      return url.searchParams.get('invite');
+    } catch {
+      // Not a URL, treat as direct token
+      return inviteInput.trim();
+    }
+  };
+
+  const inviteToken = getInviteToken();
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
@@ -71,23 +89,50 @@ function SignupForm() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Acme Coffee Shop"
               />
-              {!inviteToken && (
-                <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg flex gap-2">
-                  <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-blue-700">
-                    <strong>Creating a new business.</strong> This will set up a new InboxForge workspace for your business. Want to join an existing team? Ask your admin for an invitation link.
-                  </p>
-                </div>
-              )}
-              {inviteToken && (
-                <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg flex gap-2">
-                  <Info className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-green-700">
-                    <strong>Invitation detected!</strong> You'll be added to your team's workspace after creating your account.
-                  </p>
-                </div>
-              )}
             </div>
+
+            {/* Invite Link Input - Only show if no URL invite token */}
+            {!urlInviteToken && (
+              <div>
+                <label htmlFor="inviteLink" className="block text-sm font-medium text-gray-700 mb-2">
+                  Team Invitation Link <span className="text-gray-400 font-normal">(Optional)</span>
+                </label>
+                <input
+                  id="inviteLink"
+                  type="text"
+                  value={inviteInput}
+                  onChange={(e) => setInviteInput(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Paste your invitation link here..."
+                />
+                {!inviteToken && (
+                  <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg flex gap-2">
+                    <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-blue-700">
+                      <strong>Creating a new business?</strong> Leave this field empty to set up your own workspace. <strong>Joining a team?</strong> Paste the invitation link your admin sent you.
+                    </p>
+                  </div>
+                )}
+                {inviteToken && (
+                  <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg flex gap-2">
+                    <Info className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-green-700">
+                      <strong>Invitation link accepted!</strong> You'll be added to your team's workspace after creating your account.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Show confirmation when invite comes from URL */}
+            {urlInviteToken && (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-lg flex gap-2">
+                <Info className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-green-700">
+                  <strong>Invitation link detected!</strong> You'll be added to your team's workspace after creating your account.
+                </p>
+              </div>
+            )}
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
