@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
 
@@ -18,7 +19,7 @@ export async function PUT(
     );
   }
 
-  console.log('✏️ Updating canned response:', responseId);
+  logger.info('Updating canned response', { responseId });
 
   const { data, error } = await supabaseAdmin
     .from('canned_responses')
@@ -33,14 +34,14 @@ export async function PUT(
     .single();
 
   if (error) {
-    console.error('❌ Error updating canned response:', error);
+    logger.error('Error updating canned response', error);
     return NextResponse.json(
       { error: 'Failed to update canned response', details: error.message },
       { status: 500 }
     );
   }
 
-  console.log('✅ Updated canned response:', responseId);
+  logger.success('Updated canned response', { responseId });
 
   return NextResponse.json({ response: data });
 }
@@ -53,7 +54,7 @@ export async function DELETE(
   const params = await context.params;
   const responseId = params.id;
 
-  console.log('🗑️ Deleting canned response:', responseId);
+  logger.info('Deleting canned response', { responseId });
 
   const { error } = await supabaseAdmin
     .from('canned_responses')
@@ -61,14 +62,14 @@ export async function DELETE(
     .eq('id', responseId);
 
   if (error) {
-    console.error('❌ Error deleting canned response:', error);
+    logger.error('Error deleting canned response', error);
     return NextResponse.json(
       { error: 'Failed to delete canned response', details: error.message },
       { status: 500 }
     );
   }
 
-  console.log('✅ Deleted canned response:', responseId);
+  logger.success('Deleted canned response', { responseId });
 
   return NextResponse.json({ success: true, message: 'Canned response deleted' });
 }

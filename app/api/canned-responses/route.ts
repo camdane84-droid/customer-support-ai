@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
 
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  console.log('📋 Fetching canned responses for business:', businessId);
+  logger.debug('Fetching canned responses for business', { businessId });
 
   const { data, error } = await supabaseAdmin
     .from('canned_responses')
@@ -22,14 +23,14 @@ export async function GET(request: NextRequest) {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('❌ Error fetching canned responses:', error);
+    logger.error('Error fetching canned responses', error);
     return NextResponse.json(
       { error: 'Failed to fetch canned responses', details: error.message },
       { status: 500 }
     );
   }
 
-  console.log('✅ Fetched', data?.length || 0, 'canned responses');
+  logger.debug('Fetched canned responses', { count: data?.length || 0 });
 
   return NextResponse.json({ responses: data || [] });
 }
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  console.log('📝 Creating canned response:', title);
+  logger.info('Creating canned response', { title });
 
   const { data, error } = await supabaseAdmin
     .from('canned_responses')
@@ -62,14 +63,14 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    console.error('❌ Error creating canned response:', error);
+    logger.error('Error creating canned response', error);
     return NextResponse.json(
       { error: 'Failed to create canned response', details: error.message },
       { status: 500 }
     );
   }
 
-  console.log('✅ Created canned response:', data.id);
+  logger.success('Created canned response', { id: data.id });
 
   return NextResponse.json({ response: data });
 }
