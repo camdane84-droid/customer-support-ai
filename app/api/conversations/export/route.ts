@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
     const { data: conversations, error: conversationsError } = await query;
 
     if (conversationsError) {
-      console.error('Error fetching conversations:', conversationsError);
+      logger.error('Error fetching conversations', conversationsError);
       return NextResponse.json({
         error: 'Failed to fetch conversations',
         details: conversationsError.message,
@@ -138,7 +139,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Export error:', error);
+    logger.error('Export error', error);
     return NextResponse.json({ error: 'Export failed' }, { status: 500 });
   }
 }
