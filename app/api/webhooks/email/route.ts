@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase-server';
 import { canCreateConversation, incrementConversationUsage } from '@/lib/usage/tracker';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,12 +14,12 @@ export async function POST(request: NextRequest) {
     const text = formData.get('text') as string;
     const html = formData.get('html') as string;
 
-    console.log('📧 Email received:', { from, to, subject });
-
     // Extract sender email and name
     const fromMatch = from.match(/(.*?)\s*<(.+?)>/) || [null, from, from];
     const senderName = fromMatch[1]?.trim() || fromMatch[2];
     const senderEmail = fromMatch[2] || from;
+
+    logger.info('Email received', { from: senderEmail, to, subject });
 
     // Get business by support email (the "to" address)
     const businessEmail = to.match(/<(.+?)>/)?.[1] || to;
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (!business) {
-      console.error('❌ No business found for email:', businessEmail);
+      logger.error('No business found for email', undefined, { businessEmail });
       return NextResponse.json({ error: 'Business not found' }, { status: 404 });
     }
 
@@ -65,14 +66,14 @@ export async function POST(request: NextRequest) {
         })
         .eq('id', conversationId);
 
-      console.log('📝 Updated existing conversation:', conversationId, 'Unread count:', currentUnreadCount + 1);
+      logger.debug('Updated existing conversation', { conversationId, unreadCount: currentUnreadCount + 1 });
     } else {
-      console.log('📝 Creating new conversation for:', senderEmail);
+      logger.debug('Creating new conversation', { senderEmail });
 
       // Check conversation usage limit before creating
       const canCreate = await canCreateConversation(business.id);
       if (!canCreate) {
-        console.log('⚠️ Conversation limit reached for business:', business.id);
+        logger.warn('Conversation limit reached for business', { businessId: business.id });
         // Return error response - the email won't be processed
         return NextResponse.json(
           {
@@ -103,14 +104,14 @@ export async function POST(request: NextRequest) {
       // Increment conversation usage counter
       const incrementSuccess = await incrementConversationUsage(business.id);
       if (!incrementSuccess) {
-        console.warn('⚠️ Failed to increment conversation usage counter');
+        logger.warn('Failed to increment conversation usage counter');
       } else {
-        console.log('✓ Conversation usage incremented');
+        logger.debug('Conversation usage incremented');
       }
     }
 
     if (!conversationId) {
-      console.log('❌ Failed to create/find conversation');
+      logger.error('Failed to create/find conversation');
       throw new Error('Failed to create/find conversation');
     }
 
@@ -129,10 +130,10 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.log('✅ Email message saved');
+    logger.success('Email message saved');
     return NextResponse.json({ status: 'ok' });
   } catch (error: any) {
-    console.error('❌ Email webhook error:', error);
+    logger.error('Email webhook error', error);
     return NextResponse.json(
       { error: error.message || 'Internal error' },
       { status: 500 }
