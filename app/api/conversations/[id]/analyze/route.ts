@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
 import { detectTags } from '@/lib/utils/auto-tagging';
@@ -11,7 +12,7 @@ export async function POST(
     const params = await context.params;
     const conversationId = params.id;
 
-    console.log('🔍 Analyzing conversation:', conversationId);
+    logger.debug('Analyzing conversation', { conversationId });
 
     // Fetch all messages for this conversation
     const { data: messages, error: messagesError } = await supabaseAdmin
@@ -21,7 +22,7 @@ export async function POST(
       .order('created_at', { ascending: true });
 
     if (messagesError) {
-      console.error('❌ Failed to fetch messages:', messagesError);
+      logger.error('Failed to fetch messages', messagesError);
       return NextResponse.json(
         { error: 'Failed to fetch messages' },
         { status: 500 }
@@ -37,7 +38,7 @@ export async function POST(
 
     // Detect tags from messages
     const tags = detectTags(messages);
-    console.log('🏷️ Detected tags:', tags.map(t => t.label));
+    logger.debug('Detected tags', { tags: tags.map(t => t.label) });
 
     // Update conversation with detected tags
     const { error: updateError } = await supabaseAdmin
@@ -49,21 +50,21 @@ export async function POST(
       .eq('id', conversationId);
 
     if (updateError) {
-      console.error('❌ Failed to update conversation tags:', updateError);
+      logger.error('Failed to update conversation tags', updateError);
       return NextResponse.json(
         { error: 'Failed to update tags' },
         { status: 500 }
       );
     }
 
-    console.log('✅ Successfully analyzed and tagged conversation');
+    logger.success('Successfully analyzed and tagged conversation');
 
     return NextResponse.json(
       { tags, message: 'Conversation analyzed successfully' },
       { status: 200 }
     );
   } catch (error: any) {
-    console.error('❌ Error analyzing conversation:', error);
+    logger.error('Error analyzing conversation', error);
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
       { status: 500 }
