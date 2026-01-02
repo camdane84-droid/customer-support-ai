@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
 import Anthropic from '@anthropic-ai/sdk';
+import { logger } from '@/lib/logger';
 
 const anthropic = process.env.ANTHROPIC_API_KEY ? new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -18,11 +19,11 @@ export async function POST(
     const params = await context.params;
     const conversationId = params.id;
 
-    console.log('🤖 Auto-generating notes for conversation:', conversationId);
+    logger.debug('Auto-generating notes for conversation', { conversationId });
 
     // Check if Anthropic API key is configured
     if (!anthropic) {
-      console.warn('⚠️ Anthropic API key not configured');
+      logger.warn('Anthropic API key not configured');
       return NextResponse.json({
         success: false,
         message: 'AI not available - API key not configured'
@@ -81,7 +82,7 @@ export async function POST(
     ).join('\n');
 
     // Use Claude to extract key points
-    console.log('🤖 Calling Claude API to generate notes...');
+    logger.debug('Calling Claude API to generate notes');
     const response = await anthropic.messages.create({
       model: 'claude-3-haiku-20240307',
       max_tokens: 500,
@@ -119,7 +120,7 @@ If there's nothing notable to add, return "SKIP"`
 
     // Skip if AI says there's nothing to add
     if (aiResponse === 'SKIP' || aiResponse.length === 0) {
-      console.log('✓ No notable information to add to notes');
+      logger.debug('No notable information to add to notes');
       return NextResponse.json({
         success: true,
         notesAdded: false,
@@ -145,11 +146,11 @@ If there's nothing notable to add, return "SKIP"`
       .eq('id', conversationId);
 
     if (updateError) {
-      console.error('Failed to update notes:', updateError);
+      logger.error('Failed to update notes', updateError);
       throw new Error('Failed to update notes');
     }
 
-    console.log('✅ Auto-notes generated and saved');
+    logger.success('Auto-notes generated and saved');
 
     return NextResponse.json({
       success: true,
@@ -159,7 +160,7 @@ If there's nothing notable to add, return "SKIP"`
     });
 
   } catch (error: any) {
-    console.error('❌ Error generating auto-notes:', error);
+    logger.error('Error generating auto-notes', error);
     return NextResponse.json(
       {
         error: error.message || 'Internal server error',
