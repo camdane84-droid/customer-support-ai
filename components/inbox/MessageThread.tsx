@@ -72,28 +72,38 @@ export default function MessageThread({ conversation, businessId, onConversation
         },
         (payload) => {
           const newMessage = payload.new as Message;
+          console.log('📨 [REALTIME] Received INSERT:', newMessage.id, 'Content:', newMessage.content.substring(0, 50));
 
           // Check if this is a confirmation of an optimistic message
-          // by comparing content and timestamp (within 5 seconds)
-          let isOptimisticConfirmation = false;
+          // Use setState callback to access current optimistic messages (avoid stale closure)
+          setOptimisticMessages((currentOptimistic) => {
+            console.log('🔍 [REALTIME] Checking', currentOptimistic.size, 'optimistic messages for match');
+            let foundMatch = false;
+            const next = new Map(currentOptimistic);
 
-          optimisticMessages.forEach((optMsg, tempId) => {
-            if (
-              optMsg.content === newMessage.content &&
-              optMsg.sender_type === newMessage.sender_type &&
-              Math.abs(new Date(optMsg.created_at).getTime() - new Date(newMessage.created_at).getTime()) < 5000
-            ) {
-              // This is the DB confirmation - remove optimistic version
-              setOptimisticMessages((prev) => {
-                const next = new Map(prev);
+            // Check each optimistic message for a match
+            currentOptimistic.forEach((optMsg, tempId) => {
+              if (
+                optMsg.content === newMessage.content &&
+                optMsg.sender_type === newMessage.sender_type &&
+                Math.abs(new Date(optMsg.created_at).getTime() - new Date(newMessage.created_at).getTime()) < 5000
+              ) {
+                // This is the DB confirmation - remove optimistic version
+                console.log('✅ [REALTIME] Found matching optimistic message:', tempId, '- removing it');
                 next.delete(tempId);
-                return next;
-              });
-              isOptimisticConfirmation = true;
+                foundMatch = true;
+              }
+            });
+
+            if (!foundMatch && currentOptimistic.size > 0) {
+              console.log('⚠️ [REALTIME] No matching optimistic message found');
             }
+
+            return next;
           });
 
           // Always add to messages (whether optimistic confirmation or new customer message)
+          console.log('➕ [REALTIME] Adding message to confirmed messages');
           setMessages((prev) => [...prev, newMessage]);
 
           // Mark as read again when new messages arrive while viewing
@@ -199,20 +209,32 @@ export default function MessageThread({ conversation, businessId, onConversation
     try {
       setSending(true);
 
+      console.log('🚀 [SEND] Creating optimistic message:', tempId);
+
       // 1. Add to optimistic messages immediately (instant UI update)
-      setOptimisticMessages((prev) => new Map(prev).set(tempId, optimisticMessage));
+      setOptimisticMessages((prev) => {
+        const next = new Map(prev).set(tempId, optimisticMessage);
+        console.log('✅ [SEND] Added optimistic message. Total optimistic:', next.size);
+        return next;
+      });
 
       // 2. Mark as animating for entrance animation
-      setAnimatingMessageIds((prev) => new Set(prev).add(tempId));
+      setAnimatingMessageIds((prev) => {
+        const next = new Set(prev).add(tempId);
+        console.log('🎬 [SEND] Marked as animating. Total animating:', next.size);
+        return next;
+      });
 
       // 3. Clear input immediately for better UX
       setReplyText('');
+      console.log('🧹 [SEND] Cleared input field');
 
       // 4. Remove animation state after animation completes (400ms)
       setTimeout(() => {
         setAnimatingMessageIds((prev) => {
           const next = new Set(prev);
           next.delete(tempId);
+          console.log('🎬 [SEND] Animation complete, removed from animating set');
           return next;
         });
       }, 400);
@@ -229,13 +251,15 @@ export default function MessageThread({ conversation, businessId, onConversation
 
       // Success - realtime subscription will handle adding the confirmed message
       // Remove optimistic message (will be replaced by real one from DB)
+      console.log('✅ [SEND] API success, removing optimistic message:', tempId);
       setOptimisticMessages((prev) => {
         const next = new Map(prev);
         next.delete(tempId);
+        console.log('✅ [SEND] Removed optimistic. Remaining:', next.size);
         return next;
       });
     } catch (error) {
-      console.error('Failed to send message:', error);
+      console.error('❌ [SEND] Failed to send message:', error);
 
       // Update optimistic message to failed status
       setOptimisticMessages((prev) => {
