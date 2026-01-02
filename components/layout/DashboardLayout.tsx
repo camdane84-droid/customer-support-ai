@@ -9,6 +9,7 @@ import { useAuth } from '@/lib/context/AuthContext';
 import { useTheme } from '@/lib/context/ThemeContext';
 import UsageDisplay from '@/components/ui/UsageDisplay';
 import { BusinessSwitcher } from '@/components/ui/BusinessSwitcher';
+import DashboardSkeleton from './DashboardSkeleton';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -24,9 +25,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-  const { user, currentBusiness } = useAuth();
+  const { user, currentBusiness, loading } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const router = useRouter();
+
+  // Show skeleton while auth and businesses are loading
+  if (loading || (user && !currentBusiness)) {
+    return <DashboardSkeleton />;
+  }
 
   async function handleLogout() {
     try {

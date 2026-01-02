@@ -149,11 +149,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log('👤 [AUTH] Found session for:', session.user.email);
           console.log('🔧 [AUTH] Setting user (mounted:', mounted, ')...');
           setUser(session.user);
-          // Load businesses in background, don't block on it
-          console.log('🔧 [AUTH] Loading businesses in background...');
-          loadUserAndBusinesses(session.user).catch(err => {
-            console.error('❌ [AUTH] Background business load failed:', err);
-          });
+          // Wait for businesses to load before setting loading=false
+          console.log('🔧 [AUTH] Loading businesses...');
+          await loadUserAndBusinesses(session.user);
+          console.log('✅ [AUTH] Businesses loaded');
         } else {
           console.log('❌ [AUTH] No active session');
           setUser(null);
@@ -188,11 +187,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (event === 'SIGNED_IN' && session?.user) {
         console.log('✅ [AUTH] SIGNED_IN - Setting user:', session.user.email);
         setUser(session.user);
+        // Load businesses before setting loading=false
+        await loadUserAndBusinesses(session.user);
         setLoading(false);
-        // Load businesses in background, don't block
-        loadUserAndBusinesses(session.user).catch(err => {
-          console.error('❌ [AUTH] Background business load failed:', err);
-        });
       }
       // Handle sign out
       else if (event === 'SIGNED_OUT') {
