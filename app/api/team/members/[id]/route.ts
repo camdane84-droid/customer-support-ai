@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
 import { authenticateRequest } from '@/lib/api/auth-middleware';
 import type { Role } from '@/lib/permissions';
+import { logger } from '@/lib/logger';
 
 // PATCH /api/team/members/[id] - Update member role
 export async function PATCH(
@@ -83,7 +84,7 @@ export async function PATCH(
 
     return NextResponse.json({ member: updatedMember });
   } catch (error: any) {
-    console.error('Error updating member role:', error);
+    logger.error('Error updating member role', error);
     return NextResponse.json(
       { error: error.message || 'Failed to update member role' },
       { status: 500 }

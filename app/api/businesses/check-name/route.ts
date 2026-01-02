@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
+import { logger } from '@/lib/logger';
 
 // GET /api/businesses/check-name?name=Business+Name
 // Check if a business name is already taken
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ available: true });
   } catch (error: any) {
-    console.error('Error checking business name:', error);
+    logger.error('Error checking business name', error);
     // On error, assume available to not block signup
     return NextResponse.json({ available: true });
   }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateUser } from '@/lib/api/auth-middleware';
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   // Authenticate user
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      console.log('🗑️ Deleting business and related data for:', business.name);
+      logger.info('Deleting business and related data', { businessName: business.name });
 
       // Delete all related data
       await supabaseAdmin.from('messages').delete().eq('business_id', business.id);
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
     } else {
       // Business doesn't exist (might have been merged/deleted)
       // Just clean up user's memberships
-      console.log('⚠️ Business not found, cleaning up user memberships for:', userId);
+      logger.warn('Business not found, cleaning up user memberships', { userId });
       await supabaseAdmin.from('business_members').delete().eq('user_id', userId);
     }
 
@@ -80,10 +81,10 @@ export async function POST(request: NextRequest) {
       throw deleteError;
     }
 
-    console.log('✅ Account deleted successfully for user:', userEmail);
+    logger.success('Account deleted successfully', { userEmail });
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('❌ Error deleting account:', error);
+    logger.error('Error deleting account', error);
     return NextResponse.json(
       { error: error.message || 'Failed to delete account' },
       { status: 500 }
