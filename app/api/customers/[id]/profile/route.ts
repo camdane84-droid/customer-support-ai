@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
 import Anthropic from '@anthropic-ai/sdk';
+import { logger } from '@/lib/logger';
 
 const anthropic = process.env.ANTHROPIC_API_KEY ? new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -30,11 +31,11 @@ export async function POST(
     const params = await context.params;
     const conversationId = params.id;
 
-    console.log('👤 Extracting customer profile for conversation:', conversationId);
+    logger.debug('Extracting customer profile for conversation', { conversationId });
 
     // Check if Anthropic API key is configured
     if (!anthropic) {
-      console.warn('⚠️ Anthropic API key not configured, returning empty profile');
+      logger.warn('Anthropic API key not configured, returning empty profile');
       return NextResponse.json({
         profile: {
           past_orders: [],
@@ -71,7 +72,7 @@ export async function POST(
       .single();
 
     if (!business?.auto_generate_notes) {
-      console.log('⚠️ AI Customer Insights not enabled for this business');
+      logger.warn('AI Customer Insights not enabled for this business');
       return NextResponse.json({
         profile: {
           past_orders: [],
@@ -121,7 +122,7 @@ export async function POST(
     ).join('\n');
 
     // Use Claude to extract structured data
-    console.log('🤖 Calling Claude API to extract profile...');
+    logger.debug('Calling Claude API to extract profile');
     const response = await anthropic.messages.create({
       model: 'claude-3-haiku-20240307',
       max_tokens: 2000,
@@ -179,7 +180,7 @@ If information is not mentioned, use empty arrays/objects/null. Do not infer or 
       }
       profile = JSON.parse(jsonMatch[0]);
     } catch (parseError) {
-      console.error('Failed to parse AI response:', parseError);
+      logger.error('Failed to parse AI response', parseError);
       throw new Error('Failed to parse profile data');
     }
 
@@ -205,10 +206,10 @@ If information is not mentioned, use empty arrays/objects/null. Do not infer or 
       .eq('id', conversationId);
 
     if (updateError) {
-      console.error('Failed to save profile:', updateError);
+      logger.error('Failed to save profile', updateError);
     }
 
-    console.log('✅ Customer profile extracted successfully');
+    logger.success('Customer profile extracted successfully');
 
     return NextResponse.json({
       profile,
@@ -219,8 +220,7 @@ If information is not mentioned, use empty arrays/objects/null. Do not infer or 
     });
 
   } catch (error: any) {
-    console.error('❌ Error extracting customer profile:', error);
-    console.error('Error details:', {
+    logger.error('Error extracting customer profile', error, {
       message: error.message,
       status: error.status,
       type: error.type,
