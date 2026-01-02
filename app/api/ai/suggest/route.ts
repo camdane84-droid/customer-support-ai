@@ -3,6 +3,7 @@ import { generateResponseSuggestion } from '@/lib/ai/claude';
 import { supabaseServer } from '@/lib/supabase-server';
 import { rateLimitMiddleware } from '@/lib/middleware/rateLimit';
 import { canUseAiSuggestion, incrementAiUsage, getUsageStatus } from '@/lib/usage/tracker';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   // Rate limit: 20 requests per minute per IP
@@ -12,8 +13,8 @@ export async function POST(request: NextRequest) {
   try {
     const { conversationId, businessId } = await request.json();
 
-    console.log('[AI Suggest] Request:', { conversationId, businessId });
-    console.log('[AI Suggest] BusinessId type:', typeof businessId, 'length:', businessId?.length);
+    logger.debug('[AI Suggest] Request:', { conversationId, businessId });
+    logger.debug('[AI Suggest] BusinessId type:', typeof businessId, 'length:', businessId?.length);
 
     if (!conversationId || !businessId) {
       return NextResponse.json(
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
       .from('businesses')
       .select('id, name, email');
 
-    console.log('[AI Suggest] All businesses:', allBusinesses);
+    logger.debug('[AI Suggest] All businesses:', allBusinesses);
 
     // Get business info
     const { data: business, error: businessError } = await supabaseServer
@@ -36,10 +37,10 @@ export async function POST(request: NextRequest) {
       .eq('id', businessId)
       .maybeSingle();
 
-    console.log('[AI Suggest] Query result:', { business, businessError });
+    logger.debug('[AI Suggest] Query result:', { business, businessError });
 
     if (businessError) {
-      console.error('[AI Suggest] Business query error:', businessError);
+      logger.error('[AI Suggest] Business query error:', businessError);
       return NextResponse.json(
         { error: `Database error: ${businessError.message}` },
         { status: 500 }
@@ -47,20 +48,20 @@ export async function POST(request: NextRequest) {
     }
 
     if (!business) {
-      console.error('[AI Suggest] Business not found. Looking for ID:', businessId);
-      console.error('[AI Suggest] Available business IDs:', allBusinesses?.map(b => b.id));
+      logger.error('[AI Suggest] Business not found. Looking for ID:', businessId);
+      logger.error('[AI Suggest] Available business IDs:', allBusinesses?.map(b => b.id));
       return NextResponse.json(
         { error: 'Business not found', debug: { businessId, availableIds: allBusinesses?.map(b => b.id) } },
         { status: 404 }
       );
     }
 
-    console.log('[AI Suggest] Business found:', business.name);
+    logger.debug('[AI Suggest] Business found:', business.name);
 
     // Check usage limits
     const canUse = await canUseAiSuggestion(businessId);
     if (!canUse) {
-      console.log('[AI Suggest] Usage limit reached for business:', businessId);
+      logger.debug('[AI Suggest] Usage limit reached for business:', businessId);
       const usageStatus = await getUsageStatus(businessId);
 
       return NextResponse.json(
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('[AI Suggest] Usage check passed');
+    logger.debug('[AI Suggest] Usage check passed');
 
     // Get conversation messages
     const { data: messages, error: messagesError } = await supabaseServer
@@ -89,7 +90,7 @@ export async function POST(request: NextRequest) {
       .order('created_at', { ascending: true });
 
     if (messagesError) {
-      console.error('[AI Suggest] Messages query error:', messagesError);
+      logger.error('[AI Suggest] Messages query error:', messagesError);
       return NextResponse.json(
         { error: `Database error: ${messagesError.message}` },
         { status: 500 }
@@ -97,14 +98,14 @@ export async function POST(request: NextRequest) {
     }
 
     if (!messages || messages.length === 0) {
-      console.error('[AI Suggest] No messages found for conversation:', conversationId);
+      logger.error('[AI Suggest] No messages found for conversation:', conversationId);
       return NextResponse.json(
         { error: 'No messages found' },
         { status: 404 }
       );
     }
 
-    console.log('[AI Suggest] Messages found:', messages.length);
+    logger.debug('[AI Suggest] Messages found:', messages.length);
 
     // Get last customer message
     const lastCustomerMessage = messages
@@ -112,14 +113,14 @@ export async function POST(request: NextRequest) {
       .slice(-1)[0];
 
     if (!lastCustomerMessage) {
-      console.error('[AI Suggest] No customer message found in conversation');
+      logger.error('[AI Suggest] No customer message found in conversation');
       return NextResponse.json(
         { error: 'No customer message to respond to' },
         { status: 400 }
       );
     }
 
-    console.log('[AI Suggest] Last customer message:', lastCustomerMessage.content.substring(0, 50));
+    logger.debug('[AI Suggest] Last customer message:', lastCustomerMessage.content.substring(0, 50));
 
     // Get knowledge base
     const { data: knowledgeBase, error: kbError } = await supabaseServer
@@ -128,10 +129,10 @@ export async function POST(request: NextRequest) {
       .eq('business_id', businessId);
 
     if (kbError) {
-      console.warn('[AI Suggest] Knowledge base query error (continuing anyway):', kbError);
+      logger.warn('[AI Suggest] Knowledge base query error (continuing anyway):', kbError);
     }
 
-    console.log('[AI Suggest] Knowledge base entries:', knowledgeBase?.length || 0);
+    logger.debug('[AI Suggest] Knowledge base entries:', knowledgeBase?.length || 0);
 
     // Build context
     const conversationHistory = messages.map(m => ({
@@ -141,7 +142,7 @@ export async function POST(request: NextRequest) {
 
     const businessInfo = buildBusinessInfo(business);
 
-    console.log('[AI Suggest] Calling Claude API...');
+    logger.debug('[AI Suggest] Calling Claude API...');
 
     // Generate suggestion
     const suggestion = await generateResponseSuggestion(
@@ -154,20 +155,20 @@ export async function POST(request: NextRequest) {
       }
     );
 
-    console.log('[AI Suggest] Claude API response received');
+    logger.debug('[AI Suggest] Claude API response received');
 
     // Increment AI usage counter
     const incrementSuccess = await incrementAiUsage(businessId);
     if (!incrementSuccess) {
-      console.warn('[AI Suggest] Failed to increment usage counter');
+      logger.warn('[AI Suggest] Failed to increment usage counter');
     } else {
-      console.log('[AI Suggest] Usage counter incremented');
+      logger.debug('[AI Suggest] Usage counter incremented');
     }
 
     return NextResponse.json({ suggestion });
   } catch (error: any) {
-    console.error('[AI Suggest] Error:', error);
-    console.error('[AI Suggest] Error stack:', error.stack);
+    logger.error('[AI Suggest] Error:', error);
+    logger.error('[AI Suggest] Error stack:', error.stack);
     return NextResponse.json(
       { error: error.message || 'Failed to generate suggestion' },
       { status: 500 }
