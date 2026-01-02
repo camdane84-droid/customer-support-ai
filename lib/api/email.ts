@@ -1,6 +1,5 @@
 import sgMail from '@sendgrid/mail';
-
-sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
+import { logger } from '@/lib/logger';
 
 export async function sendEmail(params: {
   to: string;
@@ -9,6 +8,14 @@ export async function sendEmail(params: {
   text: string;
   html?: string;
 }) {
+  // Set API key before each send to ensure it's properly initialized
+  // This is important in serverless environments where env vars may not be available at module load time
+  if (!process.env.SENDGRID_API_KEY) {
+    throw new Error('SENDGRID_API_KEY environment variable is not set');
+  }
+
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
   try {
     await sgMail.send({
       to: params.to,
@@ -18,10 +25,13 @@ export async function sendEmail(params: {
       html: params.html || params.text,
     });
 
-    console.log('✅ Email sent to:', params.to);
+    logger.success('Email sent successfully', { to: params.to });
     return { success: true };
   } catch (error: any) {
-    console.error('❌ SendGrid error:', error?.response?.body || error);
+    logger.error('SendGrid error', error, {
+      to: params.to,
+      responseBody: error?.response?.body
+    });
     throw new Error('Failed to send email');
   }
 }

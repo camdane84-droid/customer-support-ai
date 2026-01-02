@@ -26,9 +26,7 @@ class Logger {
    * Log informational messages
    */
   info(message: string, context?: LogContext) {
-    if (!this.isProduction) {
-      console.log(`ℹ️  ${message}`, context || '');
-    }
+    console.log(`ℹ️  ${message}`, context || '');
   }
 
   /**
@@ -61,9 +59,7 @@ class Logger {
    * Log successful operations
    */
   success(message: string, context?: LogContext) {
-    if (!this.isProduction) {
-      console.log(`✅ ${message}`, context || '');
-    }
+    console.log(`✅ ${message}`, context || '');
   }
 }
 
