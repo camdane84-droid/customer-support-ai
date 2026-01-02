@@ -179,7 +179,7 @@ async function handleInstagramSend(message: Message, businessId: string) {
     throw new Error('Instagram access token missing');
   }
 
-  logger.info('Using access token from:', connection.access_token ? 'database' : 'environment');
+  logger.info('Using access token', { source: connection.access_token ? 'database' : 'environment' });
 
   // Get conversation for recipient Instagram ID
   const { data: conversation } = await supabaseServer

@@ -12,7 +12,7 @@ export async function PUT(
     const conversationId = params.id;
     const body = await request.json();
 
-    logger.debug('✏️ Updating conversation:', conversationId, body);
+    logger.debug('Updating conversation', { conversationId, body });
 
     // Build update object based on what's provided
     const updates: any = {};
@@ -43,7 +43,7 @@ export async function PUT(
 
     // If archived_at column doesn't exist, try without it
     if (result.error && result.error.message?.includes('archived_at')) {
-      logger.debug('⚠️ archived_at column not found, updating without it');
+      logger.debug('archived_at column not found, updating without it');
       delete updates.archived_at;
       result = await supabaseAdmin
         .from('conversations')
@@ -54,21 +54,21 @@ export async function PUT(
     }
 
     if (result.error) {
-      logger.error('❌ Failed to update conversation:', result.error);
+      logger.error('Failed to update conversation', result.error);
       return NextResponse.json(
         { error: 'Failed to update conversation', details: result.error.message },
         { status: 500 }
       );
     }
 
-    logger.debug('✅ Successfully updated conversation');
+    logger.debug('Successfully updated conversation');
 
     return NextResponse.json(
       { success: true, message: 'Conversation updated', conversation: result.data },
       { status: 200 }
     );
   } catch (error: any) {
-    logger.error('❌ Error updating conversation:', error);
+    logger.error('Error updating conversation', error);
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
       { status: 500 }
@@ -87,7 +87,7 @@ export async function PATCH(
     const body = await request.json();
     const archiveType = body.archive_type || 'archived'; // Default to 'archived' if not specified
 
-    logger.debug('📦 Archiving conversation:', conversationId, 'Type:', archiveType);
+    logger.debug('Archiving conversation', { conversationId, archiveType });
 
     // First, try to update with archived_at and archive_type (if columns exist)
     let result = await supabaseAdmin
@@ -103,7 +103,7 @@ export async function PATCH(
 
     // If archived_at column doesn't exist, try without it but keep archive_type
     if (result.error && result.error.message?.includes('archived_at')) {
-      logger.debug('⚠️ archived_at column not found, updating without it');
+      logger.debug('archived_at column not found, updating without it');
       result = await supabaseAdmin
         .from('conversations')
         .update({
@@ -117,7 +117,7 @@ export async function PATCH(
 
     // If archive_type column also doesn't exist, try without both
     if (result.error && result.error.message?.includes('archive_type')) {
-      logger.debug('⚠️ archive_type column not found, updating without optional columns');
+      logger.debug('archive_type column not found, updating without optional columns');
       result = await supabaseAdmin
         .from('conversations')
         .update({
@@ -129,7 +129,7 @@ export async function PATCH(
     }
 
     if (result.error) {
-      logger.error('❌ Failed to archive conversation:', result.error);
+      logger.error('Failed to archive conversation', result.error);
       return NextResponse.json(
         {
           error: 'Failed to archive conversation',
@@ -140,14 +140,14 @@ export async function PATCH(
       );
     }
 
-    logger.debug('✅ Successfully archived conversation:', conversationId);
+    logger.debug('Successfully archived conversation', { conversationId });
 
     return NextResponse.json(
       { success: true, message: 'Conversation archived successfully', conversation: result.data },
       { status: 200 }
     );
   } catch (error: any) {
-    logger.error('❌ Error archiving conversation:', error);
+    logger.error('Error archiving conversation', error);
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
       { status: 500 }
@@ -164,7 +164,7 @@ export async function DELETE(
     const params = await context.params;
     const conversationId = params.id;
 
-    logger.debug('🗑️ Deleting conversation:', conversationId);
+    logger.debug('Deleting conversation', { conversationId });
 
     // First, delete all messages in the conversation
     const { error: messagesError } = await supabaseAdmin
@@ -173,14 +173,14 @@ export async function DELETE(
       .eq('conversation_id', conversationId);
 
     if (messagesError) {
-      logger.error('❌ Failed to delete messages:', messagesError);
+      logger.error('Failed to delete messages', messagesError);
       return NextResponse.json(
         { error: 'Failed to delete messages' },
         { status: 500 }
       );
     }
 
-    logger.debug('✅ Deleted messages for conversation:', conversationId);
+    logger.debug('Deleted messages for conversation', { conversationId });
 
     // Then, delete the conversation itself
     const { error: conversationError } = await supabaseAdmin
@@ -189,21 +189,21 @@ export async function DELETE(
       .eq('id', conversationId);
 
     if (conversationError) {
-      logger.error('❌ Failed to delete conversation:', conversationError);
+      logger.error('Failed to delete conversation', conversationError);
       return NextResponse.json(
         { error: 'Failed to delete conversation' },
         { status: 500 }
       );
     }
 
-    logger.debug('✅ Successfully deleted conversation:', conversationId);
+    logger.debug('Successfully deleted conversation', { conversationId });
 
     return NextResponse.json(
       { success: true, message: 'Conversation deleted successfully' },
       { status: 200 }
     );
   } catch (error: any) {
-    logger.error('❌ Error deleting conversation:', error);
+    logger.error('Error deleting conversation', error);
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
       { status: 500 }
