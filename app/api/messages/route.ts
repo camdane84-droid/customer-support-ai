@@ -13,8 +13,16 @@ export async function POST(request: NextRequest) {
     // Authenticate and authorize - verify user owns this business
     const auth = await authenticateRequest(request, message.business_id);
     if (!auth.success) {
+      logger.error('[MESSAGES] Authentication failed', undefined, { businessId: message.business_id });
       return auth.response;
     }
+
+    logger.info('[MESSAGES] User authenticated', {
+      userId: auth.data.userId,
+      businessId: auth.data.businessId,
+      role: auth.data.role,
+      channel: message.channel
+    });
 
     // Save message to database with 'sending' status if it's a business reply
     const messageData = {

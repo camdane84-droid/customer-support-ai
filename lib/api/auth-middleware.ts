@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
 import type { Role } from '@/lib/permissions';
+import { logger } from '@/lib/logger';
 
 export interface AuthenticatedRequest {
   userId: string;
@@ -65,7 +66,7 @@ export async function authenticateRequest(
     }
 
     // Check if user is a member of this business (using admin client to bypass RLS)
-    console.log('🔍 [AUTH] Checking membership for:', { userId: user.id, businessId, email: user.email });
+    logger.debug('[AUTH] Checking membership', { userId: user.id, businessId, email: user.email });
 
     const { data: membership, error: membershipError } = await supabaseAdmin
       .from('business_members')
@@ -74,7 +75,7 @@ export async function authenticateRequest(
       .eq('user_id', user.id)
       .single();
 
-    console.log('🔍 [AUTH] Membership check result:', {
+    logger.debug('[AUTH] Membership check result', {
       found: !!membership,
       error: membershipError?.message,
       errorCode: membershipError?.code,
@@ -88,10 +89,12 @@ export async function authenticateRequest(
         .select('business_id, role')
         .eq('user_id', user.id);
 
-      console.error('❌ [AUTH] Membership not found.');
-      console.error('   User ID:', user.id);
-      console.error('   Requested businessId:', businessId);
-      console.error('   User has', allMemberships?.length || 0, 'total memberships:', allMemberships);
+      logger.error('[AUTH] Membership not found', undefined, {
+        userId: user.id,
+        requestedBusinessId: businessId,
+        totalMemberships: allMemberships?.length || 0,
+        memberships: allMemberships
+      });
 
       return {
         success: false,
@@ -104,6 +107,13 @@ export async function authenticateRequest(
 
     // Check role permissions if required
     if (requiredPermissions && !requiredPermissions.includes(membership.role)) {
+      logger.warn('[AUTH] Insufficient permissions', {
+        userId: user.id,
+        role: membership.role,
+        requiredPermissions,
+        businessId
+      });
+
       return {
         success: false,
         response: NextResponse.json(
@@ -143,7 +153,7 @@ export async function authenticateUser(
     const allCookies = cookieStore.getAll();
     const supabaseCookies = allCookies.filter(c => c.name.includes('supabase') || c.name.includes('sb-'));
 
-    console.log('🍪 [authenticateUser] Cookies:', {
+    logger.debug('[authenticateUser] Cookies', {
       total: allCookies.length,
       supabase: supabaseCookies.length,
       names: supabaseCookies.map(c => c.name)
@@ -168,7 +178,7 @@ export async function authenticateUser(
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    console.log('👤 [authenticateUser] Auth check:', {
+    logger.debug('[authenticateUser] Auth check', {
       hasUser: !!user,
       userId: user?.id,
       email: user?.email,
@@ -176,7 +186,7 @@ export async function authenticateUser(
     });
 
     if (authError || !user) {
-      console.error('❌ [authenticateUser] No authenticated user');
+      logger.error('[authenticateUser] No authenticated user', authError);
       return {
         success: false,
         response: NextResponse.json(

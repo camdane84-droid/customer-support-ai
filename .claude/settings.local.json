@@ -74,7 +74,15 @@
       "WebFetch(domain:customer-support-4gn738214-cams-projects-17bec3e7.vercel.app)",
       "Bash(ls:*)",
       "Bash(nslookup:*)",
-      "WebFetch(domain:app.sendgrid.com)"
+      "WebFetch(domain:app.sendgrid.com)",
+      "Bash(for file in \"app/api/canned-responses/route.ts\" \"app/api/canned-responses/[id]/route.ts\" \"app/api/conversations/[id]/analyze/route.ts\")",
+      "Bash(do sed -i \"1s/^/import { logger } from ''@\\\\/lib\\\\/logger'';\\\\n/\" \"$file\")",
+      "Bash(done)",
+      "Bash(for file in \"app/api/customers/[id]/profile/route.ts\" \"app/api/conversations/[id]/route.ts\" \"app/api/messages/retry/route.ts\" \"app/api/ai/suggest/route.ts\")",
+      "Bash(do if ! grep -q \"import { logger }\" \"$file\")",
+      "Bash(then sed -i \"1i import { logger } from ''@/lib/logger'';\" \"$file\")",
+      "Bash(fi)",
+      "Bash(git log:*)"
     ],
     "deny": [],
     "ask": []

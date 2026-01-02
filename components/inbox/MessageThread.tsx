@@ -49,6 +49,7 @@ export default function MessageThread({ conversation, businessId, onConversation
   const canSendMessages = currentBusiness ? hasPermission(currentBusiness.member_role, 'SEND_MESSAGES') : false;
 
   console.log('[MessageThread] Rendered with businessId:', businessId);
+  console.log('[MessageThread] Current business:', currentBusiness?.name, 'Role:', currentBusiness?.member_role, 'Can send:', canSendMessages);
 
   useEffect(() => {
     loadMessages();
