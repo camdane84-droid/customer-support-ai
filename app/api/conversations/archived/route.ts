@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
+import { logger } from '@/lib/logger';
 
 // GET /api/conversations/archived - Get all archived conversations for a business
 export async function GET(request: NextRequest) {
@@ -14,7 +15,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log('📦 Fetching archived conversations for business:', businessId);
+    logger.debug('Fetching archived conversations for business', { businessId });
 
     // Try to fetch with archived_at ordering first
     let result = await supabaseAdmin
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     // If archived_at column doesn't exist, try ordering by last_message_at instead
     if (result.error && result.error.message?.includes('archived_at')) {
-      console.log('⚠️ archived_at column not found, using last_message_at for ordering');
+      logger.warn('archived_at column not found, using last_message_at for ordering');
       result = await supabaseAdmin
         .from('conversations')
         .select('*')
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (result.error) {
-      console.error('❌ Failed to fetch archived conversations:', result.error);
+      logger.error('Failed to fetch archived conversations', result.error);
       return NextResponse.json(
         { error: 'Failed to fetch archived conversations', details: result.error.message },
         { status: 500 }
@@ -45,14 +46,14 @@ export async function GET(request: NextRequest) {
 
     const conversations = result.data;
 
-    console.log(`✅ Found ${conversations.length} archived conversations`);
+    logger.debug('Found archived conversations', { count: conversations.length });
 
     return NextResponse.json(
       { conversations },
       { status: 200 }
     );
   } catch (error: any) {
-    console.error('❌ Error fetching archived conversations:', error);
+    logger.error('Error fetching archived conversations', error);
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
       { status: 500 }
