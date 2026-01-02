@@ -138,7 +138,7 @@ async function handleEmailSend(message: Message, businessId: string) {
     throw new Error('Business email not found');
   }
 
-  console.log(`📧 Sending email from ${business.email} to ${conversation.customer_email}`);
+  logger.info(`📧 Sending email from ${business.email} to ${conversation.customer_email}`);
 
   try {
     await sendEmail({
@@ -155,7 +155,7 @@ async function handleEmailSend(message: Message, businessId: string) {
 }
 
 async function handleInstagramSend(message: Message, businessId: string) {
-  console.log('📸 Sending Instagram message...');
+  logger.info('📸 Sending Instagram message...');
 
   // Get the Instagram connection with access token
   const { data: connection, error: connError } = await supabaseServer
@@ -179,7 +179,7 @@ async function handleInstagramSend(message: Message, businessId: string) {
     throw new Error('Instagram access token missing');
   }
 
-  console.log('Using access token from:', connection.access_token ? 'database' : 'environment');
+  logger.info('Using access token from:', connection.access_token ? 'database' : 'environment');
 
   // Get conversation for recipient Instagram ID
   const { data: conversation } = await supabaseServer
@@ -192,9 +192,9 @@ async function handleInstagramSend(message: Message, businessId: string) {
     throw new Error('Customer Instagram ID not found');
   }
 
-  console.log('📤 Sending Instagram DM...');
-  console.log('To Instagram ID:', conversation.customer_instagram_id);
-  console.log('From Account ID:', connection.platform_user_id);
+  logger.info('📤 Sending Instagram DM...');
+  logger.info('To Instagram ID:', conversation.customer_instagram_id);
+  logger.info('From Account ID:', connection.platform_user_id);
 
   // Use Facebook Graph API for Instagram Business messaging
   const url = `https://graph.facebook.com/v21.0/${connection.platform_user_id}/messages?access_token=${accessToken}`;
@@ -215,12 +215,12 @@ async function handleInstagramSend(message: Message, businessId: string) {
   });
 
   const responseData = await response.json();
-  console.log('Instagram API response:', responseData);
+  logger.info('Instagram API response:', responseData);
 
   if (!response.ok) {
     logger.error('❌ Instagram send failed:', responseData);
     throw new Error(responseData.error?.message || 'Failed to send Instagram message');
   }
 
-  console.log('✅ Instagram message sent!');
+  logger.info('✅ Instagram message sent!');
 }
