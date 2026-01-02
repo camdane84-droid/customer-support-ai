@@ -45,6 +45,10 @@ export default function MessageThread({ conversation, businessId, onConversation
   const [tags, setTags] = useState<TagType[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Optimistic message state for instant UI updates
+  const [optimisticMessages, setOptimisticMessages] = useState<Map<string, Message>>(new Map());
+  const [animatingMessageIds, setAnimatingMessageIds] = useState<Set<string>>(new Set());
+
   // Check if user can send messages (agents, admins, and owners can)
   const canSendMessages = currentBusiness ? hasPermission(currentBusiness.member_role, 'SEND_MESSAGES') : false;
 
@@ -68,7 +72,30 @@ export default function MessageThread({ conversation, businessId, onConversation
         },
         (payload) => {
           const newMessage = payload.new as Message;
+
+          // Check if this is a confirmation of an optimistic message
+          // by comparing content and timestamp (within 5 seconds)
+          let isOptimisticConfirmation = false;
+
+          optimisticMessages.forEach((optMsg, tempId) => {
+            if (
+              optMsg.content === newMessage.content &&
+              optMsg.sender_type === newMessage.sender_type &&
+              Math.abs(new Date(optMsg.created_at).getTime() - new Date(newMessage.created_at).getTime()) < 5000
+            ) {
+              // This is the DB confirmation - remove optimistic version
+              setOptimisticMessages((prev) => {
+                const next = new Map(prev);
+                next.delete(tempId);
+                return next;
+              });
+              isOptimisticConfirmation = true;
+            }
+          });
+
+          // Always add to messages (whether optimistic confirmation or new customer message)
           setMessages((prev) => [...prev, newMessage]);
+
           // Mark as read again when new messages arrive while viewing
           markConversationAsRead();
         }
@@ -97,7 +124,7 @@ export default function MessageThread({ conversation, businessId, onConversation
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, optimisticMessages]);
 
   async function loadMessages() {
     try {
@@ -136,29 +163,100 @@ export default function MessageThread({ conversation, businessId, onConversation
   }
 
   function scrollToBottom() {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+      });
+    });
   }
 
   async function handleSendMessage(e: React.FormEvent) {
     e.preventDefault();
     if (!replyText.trim() || sending) return;
 
+    const messageContent = replyText;
+    const tempId = `temp-${crypto.randomUUID()}`;
+
+    // Create optimistic message for instant UI feedback
+    const optimisticMessage: Message = {
+      id: tempId,
+      conversation_id: conversation.id,
+      business_id: businessId,
+      sender_type: 'business',
+      sender_name: 'Support Team',
+      content: messageContent,
+      channel: conversation.channel,
+      is_ai_suggested: false,
+      metadata: null,
+      created_at: new Date().toISOString(),
+      status: 'sending',
+      sent_at: null,
+      failed_at: null,
+      error_message: null,
+    };
+
     try {
       setSending(true);
+
+      // 1. Add to optimistic messages immediately (instant UI update)
+      setOptimisticMessages((prev) => new Map(prev).set(tempId, optimisticMessage));
+
+      // 2. Mark as animating for entrance animation
+      setAnimatingMessageIds((prev) => new Set(prev).add(tempId));
+
+      // 3. Clear input immediately for better UX
+      setReplyText('');
+
+      // 4. Remove animation state after animation completes (400ms)
+      setTimeout(() => {
+        setAnimatingMessageIds((prev) => {
+          const next = new Set(prev);
+          next.delete(tempId);
+          return next;
+        });
+      }, 400);
+
+      // 5. Send to API (background operation)
       await createMessage({
         conversation_id: conversation.id,
         business_id: businessId,
         sender_type: 'business',
         sender_name: 'Support Team',
-        content: replyText,
+        content: messageContent,
         channel: conversation.channel,
       });
 
-      // Message will be added via realtime subscription
-      setReplyText('');
+      // Success - realtime subscription will handle adding the confirmed message
+      // Remove optimistic message (will be replaced by real one from DB)
+      setOptimisticMessages((prev) => {
+        const next = new Map(prev);
+        next.delete(tempId);
+        return next;
+      });
     } catch (error) {
       console.error('Failed to send message:', error);
-      alert('Failed to send message. Please try again.');
+
+      // Update optimistic message to failed status
+      setOptimisticMessages((prev) => {
+        const next = new Map(prev);
+        const msg = next.get(tempId);
+        if (msg) {
+          next.set(tempId, {
+            ...msg,
+            status: 'failed',
+            failed_at: new Date().toISOString(),
+            error_message: 'Failed to send message',
+          });
+        }
+        return next;
+      });
+
+      // Show error toast
+      setToast({
+        type: 'error',
+        message: 'Failed to send message. Click retry to try again.',
+      });
     } finally {
       setSending(false);
     }
@@ -536,74 +634,132 @@ export default function MessageThread({ conversation, businessId, onConversation
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-slate-900">
-        {messages.length === 0 ? (
+        {messages.length === 0 && optimisticMessages.size === 0 ? (
           <div className="text-center text-gray-500 mt-8">
             No messages yet
           </div>
         ) : (
-          messages.map((message) => {
-            const isCustomer = message.sender_type === 'customer';
+          <>
+            {/* Render confirmed messages */}
+            {messages.map((message) => {
+              const isCustomer = message.sender_type === 'customer';
+              const shouldAnimate = animatingMessageIds.has(message.id);
 
-            // Get proper display name for customer messages
-            let senderDisplayName = message.sender_name || (isCustomer ? 'Customer' : 'You');
-            if (isCustomer && conversation.channel === 'instagram') {
-              // For Instagram, use the conversation's display name instead of numeric ID
-              // Check if sender_name is all digits (Instagram ID)
-              const isNumericId = /^\d+$/.test(message.sender_name || '');
-              if (isNumericId) {
-                senderDisplayName = displayName; // Use the conversation's display name
+              // Get proper display name for customer messages
+              let senderDisplayName = message.sender_name || (isCustomer ? 'Customer' : 'You');
+              if (isCustomer && conversation.channel === 'instagram') {
+                // For Instagram, use the conversation's display name instead of numeric ID
+                // Check if sender_name is all digits (Instagram ID)
+                const isNumericId = /^\d+$/.test(message.sender_name || '');
+                if (isNumericId) {
+                  senderDisplayName = displayName; // Use the conversation's display name
+                }
               }
-            }
 
-            return (
-              <div
-                key={message.id}
-                className={`flex ${isCustomer ? 'justify-start' : 'justify-end'}`}
-              >
+              return (
                 <div
-                  className={`
-                    max-w-xs lg:max-w-md px-4 py-3 rounded-lg shadow-sm
-                    ${isCustomer
-                      ? 'bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-900 dark:text-white'
-                      : 'bg-indigo-500 text-white'
-                    }
-                  `}
+                  key={message.id}
+                  className={`flex ${isCustomer ? 'justify-start' : 'justify-end'}`}
                 >
-                  <p className="text-xs font-medium mb-1 opacity-75">
-                    {senderDisplayName}
-                  </p>
-                  <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
-                  <div className={`flex items-center justify-between mt-2 ${isCustomer ? 'text-gray-500' : 'text-blue-100'}`}>
-                    <p className="text-xs">
-                      {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
+                  <div
+                    className={`
+                      max-w-xs lg:max-w-md px-4 py-3 rounded-lg shadow-sm
+                      ${isCustomer
+                        ? 'bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-900 dark:text-white'
+                        : 'bg-indigo-500 text-white'
+                      }
+                      ${shouldAnimate ? 'animate-message-in' : ''}
+                    `}
+                  >
+                    <p className="text-xs font-medium mb-1 opacity-75">
+                      {senderDisplayName}
                     </p>
-                    {!isCustomer && message.status && (
-                      <MessageStatusBadge
-                        status={message.status}
-                        errorMessage={message.error_message}
-                      />
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                    <div className={`flex items-center justify-between mt-2 ${isCustomer ? 'text-gray-500' : 'text-blue-100'}`}>
+                      <p className="text-xs">
+                        {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
+                      </p>
+                      {!isCustomer && message.status && (
+                        <MessageStatusBadge
+                          status={message.status}
+                          errorMessage={message.error_message}
+                        />
+                      )}
+                    </div>
+                    {!isCustomer && message.status === 'failed' && (
+                      <button
+                        onClick={() => handleRetryMessage(message.id)}
+                        disabled={retryingMessageId === message.id}
+                        className="mt-2 text-xs text-blue-200 hover:text-white underline disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                      >
+                        {retryingMessageId === message.id ? (
+                          <>
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            <span>Retrying...</span>
+                          </>
+                        ) : (
+                          <span>Retry</span>
+                        )}
+                      </button>
                     )}
                   </div>
-                  {!isCustomer && message.status === 'failed' && (
-                    <button
-                      onClick={() => handleRetryMessage(message.id)}
-                      disabled={retryingMessageId === message.id}
-                      className="mt-2 text-xs text-blue-200 hover:text-white underline disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
-                    >
-                      {retryingMessageId === message.id ? (
-                        <>
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                          <span>Retrying...</span>
-                        </>
-                      ) : (
-                        <span>Retry</span>
-                      )}
-                    </button>
-                  )}
                 </div>
-              </div>
-            );
-          })
+              );
+            })}
+
+            {/* Render optimistic messages */}
+            {Array.from(optimisticMessages.values()).map((message) => {
+              const shouldAnimate = animatingMessageIds.has(message.id);
+
+              return (
+                <div
+                  key={message.id}
+                  className="flex justify-end"
+                >
+                  <div
+                    className={`
+                      max-w-xs lg:max-w-md px-4 py-3 rounded-lg shadow-sm
+                      bg-indigo-500 text-white
+                      ${shouldAnimate ? 'animate-message-in' : ''}
+                    `}
+                  >
+                    <p className="text-xs font-medium mb-1 opacity-75">
+                      You
+                    </p>
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                    <div className="flex items-center justify-between mt-2 text-blue-100">
+                      <p className="text-xs">
+                        Just now
+                      </p>
+                      {message.status && (
+                        <MessageStatusBadge
+                          status={message.status}
+                          errorMessage={message.error_message}
+                        />
+                      )}
+                    </div>
+                    {message.status === 'failed' && (
+                      <button
+                        onClick={() => {
+                          // Retry logic for optimistic messages
+                          // Remove failed optimistic message and re-populate input
+                          setOptimisticMessages((prev) => {
+                            const next = new Map(prev);
+                            next.delete(message.id);
+                            return next;
+                          });
+                          setReplyText(message.content);
+                        }}
+                        className="mt-2 text-xs text-blue-200 hover:text-white underline flex items-center space-x-1"
+                      >
+                        <span>Retry</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </>
         )}
         <div ref={messagesEndRef} />
       </div>
