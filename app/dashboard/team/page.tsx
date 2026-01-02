@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/context/AuthContext';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Crown, Shield, Users, Eye, Mail, Trash2, X, Loader2, Link2, Edit3, AlertCircle, CheckCircle, Copy, Send, RefreshCw } from 'lucide-react';
-import { hasPermission } from '@/lib/permissions';
+import { hasPermission, canChangeRole } from '@/lib/permissions';
 import type { Role } from '@/lib/permissions';
 
 interface TeamMember {
@@ -52,6 +52,7 @@ export default function TeamPage() {
 
   const currentMember = members.find(m => m.user_id === currentBusiness?.member_role);
   const canManageTeam = currentBusiness && hasPermission(currentBusiness.member_role, 'INVITE_MEMBERS');
+  const canRemoveMembers = currentBusiness && hasPermission(currentBusiness.member_role, 'REMOVE_MEMBERS');
 
   useEffect(() => {
     if (currentBusiness) {
@@ -470,55 +471,72 @@ export default function TeamPage() {
                 </div>
                 {canManageTeam && member.role !== 'owner' && (
                   <div className="flex items-center gap-2">
-                    {/* Change Role Button */}
-                    {editingMemberId === member.id ? (
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={newRole}
-                          onChange={(e) => setNewRole(e.target.value as Role)}
-                          className="px-3 py-1 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
-                        >
-                          <option value="viewer">Viewer</option>
-                          <option value="agent">Agent</option>
-                          <option value="admin">Admin</option>
-                          {currentBusiness.member_role === 'owner' && (
-                            <option value="owner">Owner</option>
-                          )}
-                        </select>
-                        <button
-                          onClick={() => handleChangeRole(member.id, newRole)}
-                          className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                        >
-                          Save
-                        </button>
-                        <button
-                          onClick={() => setEditingMemberId(null)}
-                          className="px-3 py-1 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-sm"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setEditingMemberId(member.id);
-                          setNewRole(member.role);
-                        }}
-                        className="group text-blue-600 hover:text-white p-2 hover:bg-blue-600 rounded-lg transition-all duration-200 hover:scale-110 hover:shadow-md active:scale-95"
-                        title="Change role"
-                      >
-                        <Edit3 className="w-4 h-4 transition-transform group-hover:scale-110" />
-                      </button>
+                    {/* Change Role Button - Only show if user can change this member's role */}
+                    {hasPermission(currentBusiness.member_role, 'UPDATE_MEMBER_ROLES') && (
+                      <>
+                        {editingMemberId === member.id ? (
+                          <div className="flex items-center gap-2">
+                            <select
+                              value={newRole}
+                              onChange={(e) => setNewRole(e.target.value as Role)}
+                              className="px-3 py-1 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                            >
+                              {/* Viewer option - available if admin can change to viewer or owner can */}
+                              {canChangeRole(currentBusiness.member_role, member.role, 'viewer') && (
+                                <option value="viewer">Viewer</option>
+                              )}
+                              {/* Agent option - available if admin can change to agent or owner can */}
+                              {canChangeRole(currentBusiness.member_role, member.role, 'agent') && (
+                                <option value="agent">Agent</option>
+                              )}
+                              {/* Admin option - only owner can assign/demote admins */}
+                              {canChangeRole(currentBusiness.member_role, member.role, 'admin') && (
+                                <option value="admin">Admin</option>
+                              )}
+                              {/* Owner option - only owner can assign owner role */}
+                              {canChangeRole(currentBusiness.member_role, member.role, 'owner') && (
+                                <option value="owner">Owner</option>
+                              )}
+                            </select>
+                            <button
+                              onClick={() => handleChangeRole(member.id, newRole)}
+                              disabled={!canChangeRole(currentBusiness.member_role, member.role, newRole)}
+                              className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={() => setEditingMemberId(null)}
+                              className="px-3 py-1 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-sm"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setEditingMemberId(member.id);
+                              setNewRole(member.role);
+                            }}
+                            className="group text-blue-600 hover:text-white p-2 hover:bg-blue-600 rounded-lg transition-all duration-200 hover:scale-110 hover:shadow-md active:scale-95"
+                            title="Change role"
+                          >
+                            <Edit3 className="w-4 h-4 transition-transform group-hover:scale-110" />
+                          </button>
+                        )}
+                      </>
                     )}
 
-                    {/* Remove Member Button */}
-                    <button
-                      onClick={() => handleRemoveMember(member.id)}
-                      className="group text-red-600 hover:text-white p-2 hover:bg-red-600 rounded-lg transition-all duration-200 hover:scale-110 hover:shadow-md active:scale-95"
-                      title="Remove member"
-                    >
-                      <Trash2 className="w-4 h-4 transition-transform group-hover:scale-110" />
-                    </button>
+                    {/* Remove Member Button - Only owners can delete members */}
+                    {canRemoveMembers && (
+                      <button
+                        onClick={() => handleRemoveMember(member.id)}
+                        className="group text-red-600 hover:text-white p-2 hover:bg-red-600 rounded-lg transition-all duration-200 hover:scale-110 hover:shadow-md active:scale-95"
+                        title="Remove member"
+                      >
+                        <Trash2 className="w-4 h-4 transition-transform group-hover:scale-110" />
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
