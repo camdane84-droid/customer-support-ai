@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
+import { logger } from '@/lib/logger';
 
 // POST /api/conversations/[id]/notes - Save notes for a conversation
 export async function POST(
@@ -12,7 +13,7 @@ export async function POST(
     const body = await request.json();
     const { notes } = body;
 
-    console.log('📝 Saving notes for conversation:', conversationId);
+    logger.debug('Saving notes for conversation', { conversationId });
 
     const { error } = await supabaseAdmin
       .from('conversations')
@@ -20,18 +21,18 @@ export async function POST(
       .eq('id', conversationId);
 
     if (error) {
-      console.error('❌ Failed to save notes:', error);
+      logger.error('Failed to save notes', error);
       return NextResponse.json(
         { error: 'Failed to save notes', details: error.message },
         { status: 500 }
       );
     }
 
-    console.log('✅ Notes saved successfully');
+    logger.success('Notes saved successfully');
 
     return NextResponse.json({ success: true, message: 'Notes saved successfully' });
   } catch (error: any) {
-    console.error('❌ Error saving notes:', error);
+    logger.error('Error saving notes', error);
     return NextResponse.json(
       { error: 'Internal server error', details: error.message },
       { status: 500 }
