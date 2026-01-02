@@ -4,6 +4,7 @@ import { sendEmail } from '@/lib/api/email';
 import { logError } from '@/lib/services/errorLogger';
 import { authenticateRequest } from '@/lib/api/auth-middleware';
 import type { Message } from '@/lib/api/supabase';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {

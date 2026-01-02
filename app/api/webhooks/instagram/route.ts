@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
 import crypto from 'crypto';
 import { canCreateConversation, incrementConversationUsage } from '@/lib/usage/tracker';
+import { logger } from '@/lib/logger';
 
 // GET - Webhook verification
 export async function GET(request: NextRequest) {
@@ -15,10 +16,10 @@ export async function GET(request: NextRequest) {
   const VERIFY_TOKEN = process.env.INSTAGRAM_WEBHOOK_VERIFY_TOKEN || 'inboxforge_webhook_token_2025';
 
   if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-    console.log('✅ Webhook verified');
+    logger.success('Webhook verified');
     return new NextResponse(challenge, { status: 200 });
   } else {
-    console.log('❌ Webhook verification failed');
+    logger.error('Webhook verification failed', undefined, { mode, token: token?.substring(0, 10) + '...' });
     return NextResponse.json({ error: 'Verification failed' }, { status: 403 });
   }
 }
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
     const rawBody = await request.text();
     const body = JSON.parse(rawBody);
 
-    console.log('📨 Instagram webhook received:', JSON.stringify(body, null, 2));
+    logger.info('Instagram webhook received', { body });
 
     // Verify signature (optional but recommended)
     const signature = request.headers.get('x-hub-signature-256');
@@ -41,13 +42,14 @@ export async function POST(request: NextRequest) {
         .digest('hex');
 
       if (`sha256=${expectedSignature}` !== signature) {
-        console.error('❌ Invalid webhook signature - rejecting request');
-        console.error('   Expected: sha256=' + expectedSignature);
-        console.error('   Received:', signature);
+        logger.error('Invalid webhook signature - rejecting request', undefined, {
+          expected: 'sha256=' + expectedSignature,
+          received: signature
+        });
         return NextResponse.json({ error: 'Invalid signature' }, { status: 403 });
       }
 
-      console.log('✅ Signature verified');
+      logger.success('Signature verified');
     }
 
     // Process webhook events
@@ -65,7 +67,7 @@ export async function POST(request: NextRequest) {
     // Always return 200 to acknowledge receipt
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: any) {
-    console.error('❌ Webhook error:', error);
+    logger.error('Webhook error', error);
     // Still return 200 to prevent Facebook from retrying
     return NextResponse.json({ success: true }, { status: 200 });
   }
@@ -73,7 +75,7 @@ export async function POST(request: NextRequest) {
 
 async function handleInstagramMessage(event: any) {
   try {
-    console.log('📦 Full webhook event:', JSON.stringify(event, null, 2));
+    logger.debug('Full webhook event', { event });
 
     const senderId = event.sender.id;
     const recipientId = event.recipient.id; // Your Instagram account ID
@@ -84,7 +86,7 @@ async function handleInstagramMessage(event: any) {
       const messageText = event.message.text || '[Media]';
       const messageId = event.message.mid;
 
-      console.log(`💬 New message from ${senderId} to ${recipientId}: ${messageText}`);
+      logger.info('New Instagram message', { senderId, recipientId, messageText: messageText.substring(0, 100) });
 
       // Determine if this is an incoming message or an echo (message sent by business through Instagram)
       // For incoming: sender = customer, recipient = business
@@ -94,7 +96,7 @@ async function handleInstagramMessage(event: any) {
       // 2. Check if sender matches our business account (we'll verify after looking up connection)
       const hasEchoFlag = event.message.is_echo === true;
 
-      console.log(`📍 Checking message direction... (has is_echo flag: ${hasEchoFlag})`);
+      logger.debug('Checking message direction', { hasEchoFlag });
 
       // First, try to find business connection assuming this is an incoming message (recipient = business)
       let { data: connection, error: connectionError } = await supabaseAdmin
@@ -107,7 +109,7 @@ async function handleInstagramMessage(event: any) {
 
       // If not found, try assuming this is an echo (sender = business)
       if (!connection) {
-        console.log('   → Not found as incoming, trying as echo...');
+        logger.debug('Not found as incoming, trying as echo');
         const result = await supabaseAdmin
           .from('social_connections')
           .select('business_id, platform_username, access_token, platform_user_id')
@@ -120,16 +122,16 @@ async function handleInstagramMessage(event: any) {
         connectionError = result.error;
 
         if (connection) {
-          console.log('   ✓ Found as echo message (sender is business)');
+          logger.debug('Found as echo message (sender is business)');
         }
       } else {
-        console.log('   ✓ Found as incoming message (recipient is business)');
+        logger.debug('Found as incoming message (recipient is business)');
       }
 
       if (!connection) {
-        console.log('⚠️ No business found for Instagram accounts:', senderId, recipientId);
+        logger.warn('No business found for Instagram accounts', { senderId, recipientId });
         if (connectionError) {
-          console.error('Connection lookup error:', connectionError);
+          logger.error('Connection lookup error', connectionError);
         }
         return;
       }
@@ -139,10 +141,12 @@ async function handleInstagramMessage(event: any) {
       const businessAccountId = connection.platform_user_id;
       const customerAccountId = isEcho ? recipientId : senderId;
 
-      console.log(`📍 Message type: ${isEcho ? 'ECHO (sent by business)' : 'INCOMING (from customer)'}`);
-      console.log(`   Business account: ${businessAccountId}`);
-      console.log(`   Customer account: ${customerAccountId}`);
-      console.log(`✓ Found business connection for @${connection.platform_username}`);
+      logger.info('Message type determined', {
+        type: isEcho ? 'ECHO (sent by business)' : 'INCOMING (from customer)',
+        businessAccountId,
+        customerAccountId,
+        platformUsername: connection.platform_username
+      });
 
       // Fetch customer's Instagram username using the database token (only for incoming messages)
       let customerUsername = customerAccountId; // Default to ID if fetch fails
@@ -159,19 +163,21 @@ async function handleInstagramMessage(event: any) {
           if (userResponse.ok) {
             const userData = await userResponse.json();
             customerUsername = userData.username || customerAccountId;
-            console.log(`✓ Fetched customer username: @${customerUsername}`);
+            logger.debug('Fetched customer username', { customerUsername });
           } else {
             const errorData = await userResponse.json();
-            console.error('❌ Failed to fetch Instagram username:', errorData);
-            console.error('Response status:', userResponse.status);
+            logger.error('Failed to fetch Instagram username', undefined, {
+              status: userResponse.status,
+              errorData
+            });
             // Still continue with ID as username
           }
         } catch (error) {
-          console.error('❌ Exception fetching Instagram username:', error);
+          logger.error('Exception fetching Instagram username', error);
           // Still continue with ID as username
         }
       } else {
-        console.log(`📤 Echo message - using existing customer from conversation`);
+        logger.debug('Echo message - using existing customer from conversation');
       }
 
       // Find or create conversation
@@ -208,12 +214,12 @@ async function handleInstagramMessage(event: any) {
           .eq('id', conversationId);
 
         if (updateError) {
-          console.error('❌ Failed to update conversation:', updateError);
+          logger.error('Failed to update conversation', updateError, { conversationId });
         } else {
           if (isEcho) {
-            console.log('📝 Updated conversation (echo):', conversationId);
+            logger.debug('Updated conversation (echo)', { conversationId });
           } else {
-            console.log('📝 Updated conversation:', conversationId, 'Unread count:', currentUnreadCount + 1);
+            logger.debug('Updated conversation', { conversationId, unreadCount: currentUnreadCount + 1 });
           }
         }
       } else {
@@ -222,7 +228,7 @@ async function handleInstagramMessage(event: any) {
           // Check conversation usage limit before creating
           const canCreate = await canCreateConversation(connection.business_id);
           if (!canCreate) {
-            console.log('⚠️ Conversation limit reached for business:', connection.business_id);
+            logger.warn('Conversation limit reached for business', { businessId: connection.business_id });
             // Note: We still need to store the message somehow, but won't create a new conversation
             // For now, we'll log it. In the future, you might want to create a "pending" conversation
             // or send an email notification to the business owner
@@ -244,28 +250,28 @@ async function handleInstagramMessage(event: any) {
             .single();
 
           if (createError) {
-            console.error('❌ Failed to create conversation:', createError);
+            logger.error('Failed to create conversation', createError);
           } else {
-            console.log('✓ Created new conversation:', newConv?.id);
+            logger.success('Created new conversation', { conversationId: newConv?.id });
 
             // Increment conversation usage counter
             const incrementSuccess = await incrementConversationUsage(connection.business_id);
             if (!incrementSuccess) {
-              console.warn('⚠️ Failed to increment conversation usage counter');
+              logger.warn('Failed to increment conversation usage counter');
             } else {
-              console.log('✓ Conversation usage incremented');
+              logger.debug('Conversation usage incremented');
             }
           }
 
           conversationId = newConv?.id;
         } else {
-          console.log('⚠️ Echo message for non-existent conversation - this should not happen');
+          logger.warn('Echo message for non-existent conversation - this should not happen');
           return;
         }
       }
 
       if (!conversationId) {
-        console.log('❌ Failed to create/find conversation');
+        logger.error('Failed to create/find conversation');
         return;
       }
 
@@ -277,7 +283,7 @@ async function handleInstagramMessage(event: any) {
         .contains('metadata', { instagram_message_id: messageId });
 
       if (existingMessages && existingMessages.length > 0) {
-        console.log('⚠️ Message already exists, skipping duplicate:', messageId);
+        logger.warn('Message already exists, skipping duplicate', { messageId });
         return;
       }
 
@@ -307,15 +313,15 @@ async function handleInstagramMessage(event: any) {
       if (messageError) {
         // Check if this is a duplicate constraint violation (PostgreSQL error code 23505)
         if (messageError.code === '23505' || messageError.message?.includes('duplicate') || messageError.message?.includes('idx_messages_instagram_message_id')) {
-          console.log('⚠️ Duplicate message blocked by database constraint (expected for race conditions):', messageId);
+          logger.warn('Duplicate message blocked by database constraint (expected for race conditions)', { messageId });
           return; // Silently ignore duplicates
         }
-        console.error('❌ Failed to save message:', messageError);
+        logger.error('Failed to save message', messageError);
       } else {
         if (isEcho) {
-          console.log('✅ Echo message saved to database (message you sent through Instagram)');
+          logger.success('Echo message saved to database (message you sent through Instagram)');
         } else {
-          console.log('✅ Customer message saved to database');
+          logger.success('Customer message saved to database');
 
           // Trigger auto-notes for customer messages (fire and forget)
           if (process.env.NEXT_PUBLIC_APP_URL) {
@@ -323,15 +329,15 @@ async function handleInstagramMessage(event: any) {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' }
             }).catch(err => {
-              console.log('Auto-notes failed (non-critical):', err.message);
+              logger.debug('Auto-notes failed (non-critical)', { error: err.message });
             });
           } else {
-            console.warn('⚠️ NEXT_PUBLIC_APP_URL not set - skipping auto-notes');
+            logger.warn('NEXT_PUBLIC_APP_URL not set - skipping auto-notes');
           }
         }
       }
     }
   } catch (error) {
-    console.error('❌ Error handling Instagram message:', error);
+    logger.error('Error handling Instagram message', error);
   }
 }

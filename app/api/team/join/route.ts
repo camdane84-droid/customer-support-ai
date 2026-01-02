@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
 import { authenticateUser } from '@/lib/api/auth-middleware';
+import { logger } from '@/lib/logger';
 
 // POST /api/team/join
 export async function POST(request: NextRequest) {
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
         }
       } else {
         // New member - add to business
-        console.log('➕ [JOIN] Adding new member:', { userId, businessId: invitation.business_id, role: invitation.role });
+        logger.info('[JOIN] Adding new member', { userId, businessId: invitation.business_id, role: invitation.role });
         const { data: newMember, error: memberError } = await supabaseAdmin
           .from('business_members')
           .insert({
@@ -83,22 +84,22 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (memberError) {
-          console.error('❌ [JOIN] Failed to add member:', memberError);
+          logger.error('[JOIN] Failed to add member', memberError, { userId, businessId: invitation.business_id });
           throw memberError;
         }
-        console.log('✅ [JOIN] Member added successfully:', newMember);
+        logger.success('[JOIN] Member added successfully', { memberId: newMember.id });
         member = newMember;
       }
 
       // Update invitation status
-      console.log('📝 [JOIN] Updating invitation status to accepted');
+      logger.debug('[JOIN] Updating invitation status to accepted');
       const { error: updateError } = await supabaseAdmin
         .from('team_invitations')
         .update({ status: 'accepted' })
         .eq('id', invitation.id);
 
       if (updateError) {
-        console.error('❌ [JOIN] Failed to update invitation status:', updateError);
+        logger.error('[JOIN] Failed to update invitation status', updateError);
         // Don't throw - member was already added
       }
 
@@ -229,7 +230,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   } catch (error: any) {
-    console.error('Error joining business:', error);
+    logger.error('Error joining business', error);
     return NextResponse.json(
       { error: error.message || 'Failed to join business' },
       { status: 500 }
