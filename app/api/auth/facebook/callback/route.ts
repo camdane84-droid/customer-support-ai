@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/api/supabase';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest) {
       new URL('/dashboard/settings?success=facebook_connected', request.url)
     );
   } catch (error: any) {
-    console.error('Facebook OAuth error:', error);
+    logger.error('Facebook OAuth error', error);
     return NextResponse.redirect(
       new URL(`/dashboard/settings?error=${error.message}`, request.url)
     );

@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/api/supabase-admin';
 import { authenticateRequest } from '@/lib/api/auth-middleware';
 import { sendEmail } from '@/lib/api/email';
 import { randomBytes } from 'crypto';
+import { logger } from '@/lib/logger';
 
 // GET /api/team/invitations?businessId=xxx
 export async function GET(request: NextRequest) {
@@ -149,7 +150,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('Failed to send invitation email:', error);
+    logger.error('Failed to send invitation email', error);
     return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
   }
 }

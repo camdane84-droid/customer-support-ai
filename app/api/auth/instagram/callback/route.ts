@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -91,7 +92,7 @@ export async function GET(request: NextRequest) {
     const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?success=instagram_connected`;
     return NextResponse.redirect(redirectUrl);
   } catch (error: any) {
-    console.error('Instagram OAuth error:', error);
+    logger.error('Instagram OAuth error', error);
     const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?error=${encodeURIComponent(error.message)}`;
     return NextResponse.redirect(redirectUrl);
   }
