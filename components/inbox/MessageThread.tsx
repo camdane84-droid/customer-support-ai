@@ -249,15 +249,9 @@ export default function MessageThread({ conversation, businessId, onConversation
         channel: conversation.channel,
       });
 
-      // Success - realtime subscription will handle adding the confirmed message
-      // Remove optimistic message (will be replaced by real one from DB)
-      console.log('✅ [SEND] API success, removing optimistic message:', tempId);
-      setOptimisticMessages((prev) => {
-        const next = new Map(prev);
-        next.delete(tempId);
-        console.log('✅ [SEND] Removed optimistic. Remaining:', next.size);
-        return next;
-      });
+      // Success! The optimistic message will remain visible until the Realtime
+      // subscription receives the INSERT event and removes it
+      console.log('✅ [SEND] API success - waiting for Realtime confirmation to replace optimistic message');
     } catch (error) {
       console.error('❌ [SEND] Failed to send message:', error);
 
