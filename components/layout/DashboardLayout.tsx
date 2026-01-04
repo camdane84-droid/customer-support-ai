@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, MessageSquare, BookOpen, Settings, LayoutDashboard, TrendingUp, Users, Archive, Moon, Sun } from 'lucide-react';
+import { Menu, X, MessageSquare, BookOpen, Settings, LayoutDashboard, TrendingUp, Users, Archive, Moon, Sun, FlaskConical } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from '@/lib/auth';
@@ -19,6 +19,7 @@ const navigation = [
   { name: 'Knowledge Base', href: '/dashboard/knowledge', icon: BookOpen },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   { name: 'Team', href: '/dashboard/team', icon: Users },
+  { name: 'Test Customer', href: '/dashboard/test-email', icon: FlaskConical },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
