@@ -17,6 +17,15 @@ export default function SettingsPage() {
   const [businessType, setBusinessType] = useState('');
   const [policies, setPolicies] = useState('');
   const [autoGenerateNotes, setAutoGenerateNotes] = useState(false);
+  const [profileSettings, setProfileSettings] = useState({
+    show_allergies: true,
+    show_favorite_category: true,
+    show_past_orders: true,
+    show_issues: true,
+    show_sizes_dimensions: true,
+    show_preferences: true,
+    show_best_times: true,
+  });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -29,6 +38,11 @@ export default function SettingsPage() {
       setBusinessType(business.business_type || '');
       setPolicies(business.policies || '');
       setAutoGenerateNotes((business as any).auto_generate_notes || false);
+
+      // Load profile settings if they exist
+      if ((business as any).profile_settings) {
+        setProfileSettings((business as any).profile_settings);
+      }
     }
   }, [business]);
 
@@ -41,7 +55,7 @@ export default function SettingsPage() {
     try {
       console.log('💾 Saving settings...');
 
-      // Try to update with auto_generate_notes first
+      // Try to update with auto_generate_notes and profile_settings
       let { error } = await supabase
         .from('businesses')
         .update({
@@ -49,6 +63,7 @@ export default function SettingsPage() {
           business_type: businessType,
           policies: policies,
           auto_generate_notes: autoGenerateNotes,
+          profile_settings: profileSettings,
         })
         .eq('id', business.id);
 
@@ -284,6 +299,159 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {/* Customer Profile Settings */}
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
+          <div className="flex items-center space-x-2 mb-4">
+            <FileText className="w-5 h-5 text-gray-500 dark:text-slate-400" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Customer Profile Settings</h2>
+          </div>
+          <p className="text-sm text-gray-600 dark:text-slate-300 mb-6">
+            Customize which information categories appear in customer profiles. Hide irrelevant categories to keep profiles clean and focused on your business needs.
+          </p>
+
+          <div className="space-y-3">
+            {/* Allergies Toggle */}
+            <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:border-gray-300 dark:hover:border-slate-600 transition-colors">
+              <div className="flex-1">
+                <h3 className="font-medium text-gray-900 dark:text-white mb-1">Allergies / Restrictions</h3>
+                <p className="text-sm text-gray-600 dark:text-slate-400">Track customer allergies and dietary restrictions</p>
+              </div>
+              <button
+                onClick={() => setProfileSettings(prev => ({ ...prev, show_allergies: !prev.show_allergies }))}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 ${
+                  profileSettings.show_allergies ? 'bg-purple-600' : 'bg-gray-200 dark:bg-slate-600'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    profileSettings.show_allergies ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Favorite Category Toggle */}
+            <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:border-gray-300 dark:hover:border-slate-600 transition-colors">
+              <div className="flex-1">
+                <h3 className="font-medium text-gray-900 dark:text-white mb-1">Favorite Category</h3>
+                <p className="text-sm text-gray-600 dark:text-slate-400">Display customer's most frequently ordered category</p>
+              </div>
+              <button
+                onClick={() => setProfileSettings(prev => ({ ...prev, show_favorite_category: !prev.show_favorite_category }))}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 ${
+                  profileSettings.show_favorite_category ? 'bg-purple-600' : 'bg-gray-200 dark:bg-slate-600'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    profileSettings.show_favorite_category ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Past Orders Toggle */}
+            <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:border-gray-300 dark:hover:border-slate-600 transition-colors">
+              <div className="flex-1">
+                <h3 className="font-medium text-gray-900 dark:text-white mb-1">Past Orders</h3>
+                <p className="text-sm text-gray-600 dark:text-slate-400">Show customer's order history</p>
+              </div>
+              <button
+                onClick={() => setProfileSettings(prev => ({ ...prev, show_past_orders: !prev.show_past_orders }))}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 ${
+                  profileSettings.show_past_orders ? 'bg-purple-600' : 'bg-gray-200 dark:bg-slate-600'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    profileSettings.show_past_orders ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Issues Toggle */}
+            <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:border-gray-300 dark:hover:border-slate-600 transition-colors">
+              <div className="flex-1">
+                <h3 className="font-medium text-gray-900 dark:text-white mb-1">Issues</h3>
+                <p className="text-sm text-gray-600 dark:text-slate-400">Track customer complaints and problems</p>
+              </div>
+              <button
+                onClick={() => setProfileSettings(prev => ({ ...prev, show_issues: !prev.show_issues }))}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 ${
+                  profileSettings.show_issues ? 'bg-purple-600' : 'bg-gray-200 dark:bg-slate-600'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    profileSettings.show_issues ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Sizes/Dimensions Toggle */}
+            <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:border-gray-300 dark:hover:border-slate-600 transition-colors">
+              <div className="flex-1">
+                <h3 className="font-medium text-gray-900 dark:text-white mb-1">Sizes / Dimensions</h3>
+                <p className="text-sm text-gray-600 dark:text-slate-400">Store customer size preferences (clothing, ring size, etc.)</p>
+              </div>
+              <button
+                onClick={() => setProfileSettings(prev => ({ ...prev, show_sizes_dimensions: !prev.show_sizes_dimensions }))}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 ${
+                  profileSettings.show_sizes_dimensions ? 'bg-purple-600' : 'bg-gray-200 dark:bg-slate-600'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    profileSettings.show_sizes_dimensions ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Preferences Toggle */}
+            <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:border-gray-300 dark:hover:border-slate-600 transition-colors">
+              <div className="flex-1">
+                <h3 className="font-medium text-gray-900 dark:text-white mb-1">Preferences</h3>
+                <p className="text-sm text-gray-600 dark:text-slate-400">Track customer preferences and special requests</p>
+              </div>
+              <button
+                onClick={() => setProfileSettings(prev => ({ ...prev, show_preferences: !prev.show_preferences }))}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 ${
+                  profileSettings.show_preferences ? 'bg-purple-600' : 'bg-gray-200 dark:bg-slate-600'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    profileSettings.show_preferences ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Best Times Toggle */}
+            <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:border-gray-300 dark:hover:border-slate-600 transition-colors">
+              <div className="flex-1">
+                <h3 className="font-medium text-gray-900 dark:text-white mb-1">Best Times</h3>
+                <p className="text-sm text-gray-600 dark:text-slate-400">Record preferred contact or delivery times</p>
+              </div>
+              <button
+                onClick={() => setProfileSettings(prev => ({ ...prev, show_best_times: !prev.show_best_times }))}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 ${
+                  profileSettings.show_best_times ? 'bg-purple-600' : 'bg-gray-200 dark:bg-slate-600'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    profileSettings.show_best_times ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Business Info */}
         <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
           <div className="flex items-center space-x-2 mb-4">
@@ -293,25 +461,25 @@ export default function SettingsPage() {
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                 Business Name
               </label>
               <input
                 type="text"
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-purple-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                 Business Type
               </label>
               <select
                 value={businessType}
                 onChange={(e) => setBusinessType(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-purple-500"
               >
                 <option value="">Select type...</option>
                 <option value="restaurant">Restaurant / Cafe</option>
@@ -323,7 +491,7 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                 Policies & Information
               </label>
               <textarea
@@ -331,7 +499,7 @@ export default function SettingsPage() {
                 onChange={(e) => setPolicies(e.target.value)}
                 rows={6}
                 placeholder="Enter your business policies, return policy, shipping info, etc. This helps the AI provide better responses."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-purple-500 placeholder:text-gray-400 dark:placeholder:text-slate-500"
               />
               <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
                 This information will be used by AI to generate better response suggestions

@@ -16,6 +16,7 @@ import {
   Loader2,
   RefreshCw
 } from 'lucide-react';
+import { useAuth } from '@/lib/context/AuthContext';
 
 interface CustomerProfile {
   past_orders: Array<{
@@ -47,9 +48,21 @@ export default function CustomerProfileModal({
   customerInstagram,
   onClose
 }: CustomerProfileModalProps) {
+  const { currentBusiness } = useAuth();
   const [profile, setProfile] = useState<CustomerProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
+
+  // Get profile settings from business, default all to true
+  const profileSettings = (currentBusiness as any)?.profile_settings || {
+    show_allergies: true,
+    show_favorite_category: true,
+    show_past_orders: true,
+    show_issues: true,
+    show_sizes_dimensions: true,
+    show_preferences: true,
+    show_best_times: true,
+  };
 
   useEffect(() => {
     loadProfile();
@@ -249,17 +262,19 @@ export default function CustomerProfileModal({
           ) : profile ? (
             <>
               {/* Allergies - TOP PRIORITY */}
-              <InfoSection
-                icon={AlertTriangle}
-                title="Allergies / Restrictions"
-                items={profile.allergies}
-                emptyMessage="No allergies noted"
-                color="red"
-                inverse={true}
-              />
+              {profileSettings.show_allergies && (
+                <InfoSection
+                  icon={AlertTriangle}
+                  title="Allergies / Restrictions"
+                  items={profile.allergies}
+                  emptyMessage="No allergies noted"
+                  color="red"
+                  inverse={true}
+                />
+              )}
 
               {/* Favorite Category */}
-              {profile.favorite_category && (
+              {profileSettings.show_favorite_category && profile.favorite_category && (
                 <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-lg p-4 mb-4 shadow-md">
                   <div className="flex items-center space-x-2 mb-2">
                     <div className="p-2 rounded-lg bg-white border-2 border-amber-300 shadow-sm">
@@ -272,70 +287,80 @@ export default function CustomerProfileModal({
               )}
 
               {/* Past Orders */}
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-3">
-                <div className="flex items-center space-x-2 mb-3">
-                  <div className="p-2 rounded-lg bg-white border border-green-200 shadow-sm">
-                    <ShoppingBag className="w-5 h-5 text-green-600" />
+              {profileSettings.show_past_orders && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-3">
+                  <div className="flex items-center space-x-2 mb-3">
+                    <div className="p-2 rounded-lg bg-white border border-green-200 shadow-sm">
+                      <ShoppingBag className="w-5 h-5 text-green-600" />
+                    </div>
+                    <h3 className="text-sm font-bold text-green-900">Past Orders</h3>
                   </div>
-                  <h3 className="text-sm font-bold text-green-900">Past Orders</h3>
-                </div>
-                {profile.past_orders.length === 0 ? (
-                  <div className="flex items-center space-x-2 text-xs text-gray-400 italic pl-2">
-                    <AlertCircle className="w-3 h-3" />
-                    <span>Needs more data</span>
-                  </div>
-                ) : (
-                  <ul className="space-y-3 pl-2">
-                    {profile.past_orders.map((order, idx) => (
-                      <li key={idx} className="text-sm text-green-900">
-                        <div className="font-bold flex items-center space-x-2">
-                          <span className="text-green-600">•</span>
-                          <span>{order.product}</span>
-                        </div>
-                        {(order.date || order.quantity) && (
-                          <div className="text-xs text-green-700 ml-4 mt-1">
-                            {order.quantity && `Qty: ${order.quantity}`}
-                            {order.quantity && order.date && ' • '}
-                            {order.date}
+                  {profile.past_orders.length === 0 ? (
+                    <div className="flex items-center space-x-2 text-xs text-gray-400 italic pl-2">
+                      <AlertCircle className="w-3 h-3" />
+                      <span>Needs more data</span>
+                    </div>
+                  ) : (
+                    <ul className="space-y-3 pl-2">
+                      {profile.past_orders.map((order, idx) => (
+                        <li key={idx} className="text-sm text-green-900">
+                          <div className="font-bold flex items-center space-x-2">
+                            <span className="text-green-600">•</span>
+                            <span>{order.product}</span>
                           </div>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+                          {(order.date || order.quantity) && (
+                            <div className="text-xs text-green-700 ml-4 mt-1">
+                              {order.quantity && `Qty: ${order.quantity}`}
+                              {order.quantity && order.date && ' • '}
+                              {order.date}
+                            </div>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
 
-              <InfoSection
-                icon={AlertCircle}
-                title="Issues"
-                items={profile.issues}
-                emptyMessage="No issues reported"
-                color="orange"
-              />
+              {profileSettings.show_issues && (
+                <InfoSection
+                  icon={AlertCircle}
+                  title="Issues"
+                  items={profile.issues}
+                  emptyMessage="No issues reported"
+                  color="orange"
+                />
+              )}
 
-              <InfoSection
-                icon={Ruler}
-                title="Sizes / Dimensions"
-                items={profile.sizes_dimensions}
-                emptyMessage="No size information"
-                color="indigo"
-              />
+              {profileSettings.show_sizes_dimensions && (
+                <InfoSection
+                  icon={Ruler}
+                  title="Sizes / Dimensions"
+                  items={profile.sizes_dimensions}
+                  emptyMessage="No size information"
+                  color="indigo"
+                />
+              )}
 
-              <InfoSection
-                icon={Heart}
-                title="Preferences"
-                items={profile.preferences}
-                emptyMessage="No preferences noted"
-                color="pink"
-              />
+              {profileSettings.show_preferences && (
+                <InfoSection
+                  icon={Heart}
+                  title="Preferences"
+                  items={profile.preferences}
+                  emptyMessage="No preferences noted"
+                  color="pink"
+                />
+              )}
 
-              <InfoSection
-                icon={Clock}
-                title="Best Times"
-                items={profile.best_times}
-                emptyMessage="No time preferences"
-                color="teal"
-              />
+              {profileSettings.show_best_times && (
+                <InfoSection
+                  icon={Clock}
+                  title="Best Times"
+                  items={profile.best_times}
+                  emptyMessage="No time preferences"
+                  color="teal"
+                />
+              )}
             </>
           ) : (
             <div className="text-center py-8 text-gray-500">
