@@ -128,27 +128,55 @@ export async function POST(
       max_tokens: 2000,
       messages: [{
         role: 'user',
-        content: `Analyze this customer support conversation and extract the following information in JSON format:
+        content: `Analyze this customer support conversation and extract ONLY essential, actionable customer information in JSON format:
 
 Conversation:
 ${conversationText}
 
-Extract the following, keeping ALL responses CONCISE and bullet-point friendly:
-1. past_orders: Array of products ordered (with date/quantity if mentioned)
-2. issues: Array of problems/issues - be CONCISE, remove unnecessary words like "my", "the", "I have". Example: "order not received" NOT "my order was not received"
-3. sizes_dimensions: Object with size/dimension info (e.g., {"shirt": "medium", "shoes": "10"})
-4. preferences: Array of preferences - be CONCISE. Example: "email communication" NOT "prefers to be contacted by email"
-5. allergies: Array of allergies/restrictions - CONCISE format. Example: "peanuts" NOT "allergic to peanuts"
-6. best_times: Array of preferred contact times - CONCISE. Example: "mornings" NOT "best to contact in the mornings"
-7. favorite_category: Most frequently ordered product category (if determinable)
+Extract ONLY the following information if explicitly mentioned:
 
-IMPORTANT RULES:
-- Keep ALL text concise and clean for bullet points
-- Remove possessive pronouns (my, the, his, her)
-- Remove unnecessary phrases (I have, I am, customer has)
-- Use short, direct phrases
-- No periods at the end of bullet points
-- Lowercase unless proper noun
+1. past_orders: Products the customer has purchased (with date/quantity if mentioned)
+   - Include ONLY if specific products are mentioned
+
+2. issues: Actual problems the customer experienced (e.g., "damaged item", "late delivery")
+   - Include ONLY real issues/complaints, NOT general inquiries
+   - Be CONCISE: "order not received" NOT "my order was not received"
+
+3. sizes_dimensions: The customer's PERSONAL sizes (e.g., {"shirt": "medium", "ring": "7"})
+   - Include ONLY if customer states their personal size/fit
+   - DO NOT include product order sizes (e.g., "small coffee", "large pizza")
+   - DO NOT include if just ordering a size once
+   - Only include if it's a reusable fact about the customer
+
+4. preferences: Customer-specific preferences that affect future service
+   - Include ONLY actionable preferences like "no ice", "decaf only", "leave at door"
+   - DO NOT include: order methods (online ordering), payment types, or one-time requests
+   - Must be something that would apply to future interactions
+
+5. allergies: Food allergies or dietary restrictions
+   - Include ONLY if explicitly stated
+
+6. best_times: Preferred contact/delivery times
+   - Include ONLY if customer explicitly states time preferences
+
+7. favorite_category: Most frequently ordered product type (if 3+ orders of same type)
+   - Include ONLY if clear pattern emerges
+
+CRITICAL RULES:
+- Be VERY selective - only include information that is:
+  * Explicitly stated by the customer
+  * Reusable for future interactions
+  * Actionable for the support team
+- Keep all text concise (remove "my", "the", "I have", etc.)
+- Format professionally: Capitalize first letter, use proper punctuation
+- End each item with a period for professional documentation
+- Use proper capitalization for names, places, and proper nouns
+- When in doubt, LEAVE IT OUT
+
+FORMATTING EXAMPLES:
+- allergies: ["Peanuts.", "Dairy.", "Shellfish."]
+- preferences: ["No ice in drinks.", "Extra napkins.", "Leave at door."]
+- issues: ["Order not received.", "Damaged item.", "Wrong size delivered."]
 
 Return ONLY valid JSON in this exact format:
 {
@@ -161,7 +189,7 @@ Return ONLY valid JSON in this exact format:
   "favorite_category": "string or null"
 }
 
-If information is not mentioned, use empty arrays/objects/null. Do not infer or make assumptions.`
+If information is not explicitly mentioned or doesn't meet the criteria above, use empty arrays/objects/null.`
       }]
     });
 
