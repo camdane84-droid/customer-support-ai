@@ -57,6 +57,15 @@ export async function POST(request: NextRequest) {
 
     logger.debug('[AI Suggest] Business found', { businessName: business.name });
 
+    // Check if AI Customer Insights is enabled
+    if (!(business as any).auto_generate_notes) {
+      logger.debug('[AI Suggest] AI Customer Insights not enabled for business', { businessId });
+      return NextResponse.json(
+        { error: 'AI Customer Insights is disabled. Enable it in Settings to use AI suggestions.' },
+        { status: 403 }
+      );
+    }
+
     // Check usage limits
     const canUse = await canUseAiSuggestion(businessId);
     if (!canUse) {

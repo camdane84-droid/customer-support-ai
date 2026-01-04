@@ -782,8 +782,8 @@ export default function MessageThread({ conversation, businessId, onConversation
         <div ref={messagesEndRef} />
       </div>
 
-      {/* AI Suggestion - Only show if user can send messages */}
-      {canSendMessages && (
+      {/* AI Suggestion - Only show if user can send messages AND AI is enabled */}
+      {canSendMessages && (currentBusiness as any)?.auto_generate_notes && (
         <AISuggestion
           conversationId={conversation.id}
           businessId={businessId}
