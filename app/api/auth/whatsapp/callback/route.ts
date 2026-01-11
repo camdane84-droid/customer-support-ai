@@ -99,6 +99,33 @@ export async function GET(request: NextRequest) {
 
     if (dbError) throw dbError;
 
+    // Subscribe webhook to WABA
+    logger.info('Subscribing webhook to WABA', { wabaId });
+
+    const subscribeResponse = await fetch(
+      `https://graph.facebook.com/v21.0/${wabaId}/subscribed_apps?` +
+      `subscribed_fields=messages&` +
+      `access_token=${tokenData.access_token}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    const subscribeData = await subscribeResponse.json();
+
+    if (!subscribeResponse.ok) {
+      logger.error('Failed to subscribe webhook to WABA', undefined, {
+        wabaId,
+        error: subscribeData
+      });
+      throw new Error(`Webhook subscription failed: ${JSON.stringify(subscribeData)}`);
+    }
+
+    logger.success('Webhook subscribed to WABA', { wabaId, subscribeData });
+
     const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?success=whatsapp_connected`;
     return NextResponse.redirect(redirectUrl);
   } catch (error: any) {
