@@ -10,7 +10,7 @@ import { getConversations } from '@/lib/api/conversations';
 import { supabase } from '@/lib/api/supabase';
 import { useAuth } from '@/lib/context/AuthContext';
 import type { Conversation } from '@/lib/api/supabase';
-import { MessageSquare, Clock, TrendingUp, Users, ArrowRight, Mail, Instagram, Phone } from 'lucide-react';
+import { MessageSquare, Clock, TrendingUp, Users, ArrowRight, Mail, Instagram, Phone, MessageCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { getCustomerDisplayName, getCustomerInitials } from '@/lib/utils/customerDisplay';
 
@@ -250,6 +250,7 @@ export default function DashboardPage() {
     switch (channel) {
       case 'email': return <Mail className="w-3.5 h-3.5" />;
       case 'instagram': return <Instagram className="w-3.5 h-3.5" />;
+      case 'whatsapp': return <MessageCircle className="w-3.5 h-3.5" />;
       case 'sms': return <Phone className="w-3.5 h-3.5" />;
       default: return <Mail className="w-3.5 h-3.5" />;
     }
@@ -259,6 +260,7 @@ export default function DashboardPage() {
     switch (channel) {
       case 'email': return 'bg-blue-100 dark:bg-blue-900/30 text-indigo-600 dark:text-indigo-400';
       case 'instagram': return 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400';
+      case 'whatsapp': return 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400';
       case 'sms': return 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400';
       default: return 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400';
     }

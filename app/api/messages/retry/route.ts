@@ -53,6 +53,8 @@ export async function POST(request: NextRequest) {
         await handleEmailSend(message, message.business_id);
       } else if (message.channel === 'instagram') {
         await handleInstagramSend(message, message.business_id);
+      } else if (message.channel === 'whatsapp') {
+        await handleWhatsAppSend(message, message.business_id);
       }
 
       // Update to sent
@@ -223,4 +225,95 @@ async function handleInstagramSend(message: Message, businessId: string) {
   }
 
   logger.info('✅ Instagram message sent!');
+}
+
+async function handleWhatsAppSend(message: Message, businessId: string) {
+  logger.info('💬 Sending WhatsApp message...');
+
+  // Get the WhatsApp connection with access token
+  const { data: connection, error: connError } = await supabaseServer
+    .from('social_connections')
+    .select('*')
+    .eq('business_id', businessId)
+    .eq('platform', 'whatsapp')
+    .eq('is_active', true)
+    .single();
+
+  if (connError || !connection) {
+    logger.error('No WhatsApp connection found:', connError);
+    throw new Error('WhatsApp not connected');
+  }
+
+  const accessToken = connection.access_token;
+  const phoneNumberId = connection.metadata?.phone_number_id;
+
+  if (!accessToken) {
+    logger.error('No access token in connection');
+    throw new Error('WhatsApp access token missing');
+  }
+
+  if (!phoneNumberId) {
+    logger.error('No phone number ID in connection metadata');
+    throw new Error('WhatsApp phone number ID missing');
+  }
+
+  logger.info('Using phone number ID:', phoneNumberId);
+
+  // Get conversation for recipient phone number
+  const { data: conversation } = await supabaseServer
+    .from('conversations')
+    .select('customer_phone')
+    .eq('id', message.conversation_id)
+    .single();
+
+  if (!conversation?.customer_phone) {
+    throw new Error('Customer phone number not found');
+  }
+
+  logger.info('📤 Sending WhatsApp message to:', conversation.customer_phone);
+
+  // Use WhatsApp Cloud API to send message
+  const url = `https://graph.facebook.com/v21.0/${phoneNumberId}/messages`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
+      to: conversation.customer_phone,
+      type: 'text',
+      text: {
+        body: message.content,
+      },
+    }),
+  });
+
+  const responseData = await response.json();
+  logger.info('WhatsApp API response:', responseData);
+
+  if (!response.ok) {
+    logger.error('❌ WhatsApp send failed:', responseData);
+    throw new Error(responseData.error?.message || 'Failed to send WhatsApp message');
+  }
+
+  // Store the WhatsApp message ID for status tracking
+  if (responseData.messages && responseData.messages.length > 0) {
+    const whatsappMessageId = responseData.messages[0].id;
+
+    await supabaseServer
+      .from('messages')
+      .update({
+        metadata: {
+          ...message.metadata,
+          whatsapp_message_id: whatsappMessageId,
+        },
+      })
+      .eq('id', message.id);
+  }
+
+  logger.info('✅ WhatsApp message sent!');
 }

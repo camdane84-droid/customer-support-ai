@@ -71,6 +71,8 @@ export async function POST(request: NextRequest) {
           await handleEmailSend(data, message.business_id);
         } else if (message.channel === 'instagram') {
           await handleInstagramSend(data, message.business_id);
+        } else if (message.channel === 'whatsapp') {
+          await handleWhatsAppSend(data, message.business_id);
         }
 
         // Update status to sent
@@ -217,5 +219,84 @@ async function handleInstagramSend(message: Message, businessId: string) {
 
   if (!response.ok) {
     throw new Error(responseData.error?.message || 'Failed to send Instagram message');
+  }
+}
+
+async function handleWhatsAppSend(message: Message, businessId: string) {
+  // Get the WhatsApp connection with access token
+  const { data: connection, error: connError } = await supabaseServer
+    .from('social_connections')
+    .select('*')
+    .eq('business_id', businessId)
+    .eq('platform', 'whatsapp')
+    .eq('is_active', true)
+    .single();
+
+  if (connError || !connection) {
+    throw new Error('WhatsApp not connected');
+  }
+
+  const accessToken = connection.access_token;
+  const phoneNumberId = connection.metadata?.phone_number_id;
+
+  if (!accessToken) {
+    throw new Error('WhatsApp access token missing');
+  }
+
+  if (!phoneNumberId) {
+    throw new Error('WhatsApp phone number ID missing');
+  }
+
+  // Get conversation for recipient phone number
+  const { data: conversation } = await supabaseServer
+    .from('conversations')
+    .select('customer_phone')
+    .eq('id', message.conversation_id)
+    .single();
+
+  if (!conversation?.customer_phone) {
+    throw new Error('Customer phone number not found');
+  }
+
+  // Use WhatsApp Cloud API to send message
+  const url = `https://graph.facebook.com/v21.0/${phoneNumberId}/messages`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
+      to: conversation.customer_phone,
+      type: 'text',
+      text: {
+        body: message.content,
+      },
+    }),
+  });
+
+  const responseData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(responseData.error?.message || 'Failed to send WhatsApp message');
+  }
+
+  // Store the WhatsApp message ID for status tracking
+  if (responseData.messages && responseData.messages.length > 0) {
+    const whatsappMessageId = responseData.messages[0].id;
+
+    // Update message metadata with WhatsApp message ID
+    await supabaseServer
+      .from('messages')
+      .update({
+        metadata: {
+          ...message.metadata,
+          whatsapp_message_id: whatsappMessageId,
+        },
+      })
+      .eq('id', message.id);
   }
 }

@@ -199,17 +199,8 @@ export default function SettingsPage() {
             {/* Facebook Connection - COMING SOON */}
             {/* <FacebookConnection businessId={business.id} /> */}
 
-            {/* WhatsApp (Coming Soon) */}
-            <ConnectionCard
-              platform="whatsapp"
-              icon={MessageCircle}
-              name="WhatsApp"
-              description="Coming soon"
-              isConnected={false}
-              canDisconnect={false}
-              color="green"
-              disabled={true}
-            />
+            {/* WhatsApp Connection */}
+            <WhatsAppConnection businessId={business.id} />
 
             {/* TikTok (Coming Soon) */}
             <ConnectionCard
@@ -716,3 +707,88 @@ function FacebookConnection({ businessId }: { businessId: string }) {
   );
 }
 */
+
+// WhatsApp Connection Component
+function WhatsAppConnection({ businessId }: { businessId: string }) {
+  const [connection, setConnection] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadConnection();
+  }, []);
+
+  async function loadConnection() {
+    try {
+      const { data, error } = await supabase
+        .from('social_connections')
+        .select('*')
+        .eq('business_id', businessId)
+        .eq('platform', 'whatsapp')
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error loading WhatsApp connection:', error);
+      }
+
+      setConnection(data);
+    } catch (error) {
+      console.error('Failed to load WhatsApp connection:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleConnect() {
+    const metaAppId = process.env.NEXT_PUBLIC_META_APP_ID;
+
+    console.log('🔍 WhatsApp Debug Info:');
+    console.log('Meta App ID:', metaAppId);
+
+    if (!metaAppId) {
+      alert('Meta App ID not configured! Check your .env.local file.');
+      return;
+    }
+
+    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/whatsapp/callback`;
+
+    // Use Facebook OAuth for WhatsApp Business
+    const authUrl =
+      `https://www.facebook.com/v21.0/dialog/oauth?` +
+      `client_id=${metaAppId}&` +
+      `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+      `scope=business_management,whatsapp_business_management,whatsapp_business_messaging&` +
+      `response_type=code&` +
+      `state=${businessId}`;
+
+    console.log('🔗 Full WhatsApp OAuth URL:', authUrl);
+    console.log('Using Meta App ID:', metaAppId);
+    window.location.href = authUrl;
+  }
+
+  async function handleDisconnect() {
+    if (!confirm('Disconnect WhatsApp? You will stop receiving WhatsApp messages.')) return;
+
+    await supabase
+      .from('social_connections')
+      .update({ is_active: false })
+      .eq('id', connection.id);
+
+    setConnection(null);
+  }
+
+  // Always show the card, even while loading
+  return (
+    <ConnectionCard
+      platform="whatsapp"
+      icon={MessageCircle}
+      name="WhatsApp"
+      description={connection ? connection.platform_username : 'Receive WhatsApp messages'}
+      isConnected={!!connection}
+      canDisconnect={true}
+      color="green"
+      onConnect={handleConnect}
+      onDisconnect={handleDisconnect}
+    />
+  );
+}

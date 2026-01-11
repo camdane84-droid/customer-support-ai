@@ -15,7 +15,8 @@ import {
   Search,
   X,
   ArrowLeft,
-  CheckCircle
+  CheckCircle,
+  MessageCircle
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import type { Conversation } from '@/lib/api/supabase';
@@ -287,6 +288,7 @@ export default function ArchivesPage() {
     switch (channel) {
       case 'email': return <Mail className="w-4 h-4" />;
       case 'instagram': return <Instagram className="w-4 h-4" />;
+      case 'whatsapp': return <MessageCircle className="w-4 h-4" />;
       case 'sms': return <Phone className="w-4 h-4" />;
       default: return <Mail className="w-4 h-4" />;
     }
@@ -296,6 +298,7 @@ export default function ArchivesPage() {
     switch (channel) {
       case 'email': return 'text-indigo-500 bg-blue-50';
       case 'instagram': return 'text-pink-500 bg-pink-50';
+      case 'whatsapp': return 'text-green-500 bg-green-50';
       case 'sms': return 'text-green-500 bg-green-50';
       default: return 'text-gray-500 dark:text-slate-400 bg-gray-50';
     }
