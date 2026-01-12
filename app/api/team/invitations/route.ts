@@ -38,8 +38,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { email, role } = body;
 
-    if (!email || !role) {
-      return NextResponse.json({ error: 'Email and role required' }, { status: 400 });
+    if (!role) {
+      return NextResponse.json({ error: 'Role required' }, { status: 400 });
     }
 
     const token = randomBytes(32).toString('hex');
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       .from('team_invitations')
       .insert({
         business_id: businessId,
-        email: email.toLowerCase(),
+        email: email ? email.toLowerCase() : null,
         role,
         invited_by: userId,
         token,

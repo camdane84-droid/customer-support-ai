@@ -215,6 +215,39 @@ export default function TeamPage() {
     }
   }
 
+  async function handleGenerateLink() {
+    if (!currentBusiness) return;
+
+    setInviting(true);
+    setError('');
+
+    try {
+      // Create invitation without email
+      const response = await fetch(`/api/team/invitations?businessId=${currentBusiness.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          role: inviteRole,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to create invitation link');
+      }
+
+      const { inviteUrl: url, invitation } = await response.json();
+      setInviteUrl(url);
+      setCreatedInvitationId(invitation.id);
+      setActionSuccess('Invite link generated successfully!');
+      await fetchTeamData();
+    } catch (error: any) {
+      setError(error.message);
+    } finally {
+      setInviting(false);
+    }
+  }
+
   async function handleRemoveMember(memberId: string) {
     if (!confirm('Are you sure you want to remove this team member?')) return;
     if (!currentBusiness) return;
@@ -631,7 +664,7 @@ export default function TeamPage() {
                       <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
                       <div>
                         <p className="text-sm text-green-800 dark:text-green-200 font-medium">
-                          Invitation email sent successfully!
+                          {inviteEmail ? 'Invitation email sent successfully!' : 'Invite link generated successfully!'}
                         </p>
                         <p className="text-xs text-green-700 dark:text-green-300 mt-1">
                           This invitation will expire in 7 days
@@ -639,7 +672,7 @@ export default function TeamPage() {
                       </div>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-slate-300 mb-3">
-                      Backup invitation link (in case the email doesn't arrive):
+                      {inviteEmail ? 'Backup invitation link (in case the email doesn\'t arrive):' : 'Share this link with the person you want to invite:'}
                     </p>
                     <div className="p-3 bg-gray-50 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600 mb-4">
                       <code className="text-sm text-gray-800 dark:text-slate-200 break-all">{inviteUrl}</code>
@@ -806,23 +839,42 @@ export default function TeamPage() {
                   </div>
                 )}
 
-                <button
-                  onClick={handleInvite}
-                  disabled={inviting || !inviteEmail}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-                >
-                  {inviting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <Mail className="w-4 h-4" />
-                      Send Invitation
-                    </>
-                  )}
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleGenerateLink}
+                    disabled={inviting}
+                    className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                  >
+                    {inviting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Link2 className="w-4 h-4" />
+                        Generate Link
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={handleInvite}
+                    disabled={inviting || !inviteEmail}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                  >
+                    {inviting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        <Mail className="w-4 h-4" />
+                        Send Invitation
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             )}
           </div>

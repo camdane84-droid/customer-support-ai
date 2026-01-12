@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { signOut } from '@/lib/auth';
 
 interface InvitationDetails {
-  email: string;
+  email: string | null;
   businessName: string;
   role: string;
   expired: boolean;
@@ -30,10 +30,13 @@ export default function InvitePage() {
     }
   }, [token]);
 
-  // Auto-accept if user is logged in with correct email
+  // Auto-accept if user is logged in with correct email (or no email required)
   useEffect(() => {
     if (user && inviteDetails && !inviteDetails.expired) {
-      if (user.email?.toLowerCase() === inviteDetails.email.toLowerCase()) {
+      // If invitation has no email (generic link), accept for any logged-in user
+      if (!inviteDetails.email) {
+        acceptInvitation();
+      } else if (user.email?.toLowerCase() === inviteDetails.email.toLowerCase()) {
         acceptInvitation();
       } else {
         setStatus('wrong-account');
@@ -171,12 +174,14 @@ export default function InvitePage() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="max-w-md w-full mx-4 bg-white rounded-lg shadow-lg p-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Team Invitation</h1>
-          <p className="text-gray-600 mb-2">
+          <p className="text-gray-600 mb-6">
             You've been invited to join <strong>{inviteDetails.businessName}</strong> as a <strong>{inviteDetails.role}</strong>.
           </p>
-          <p className="text-sm text-gray-500 mb-6">
-            Invitation for: <strong>{inviteDetails.email}</strong>
-          </p>
+          {inviteDetails.email && (
+            <p className="text-sm text-gray-500 mb-6">
+              Invitation for: <strong>{inviteDetails.email}</strong>
+            </p>
+          )}
           <div className="space-y-3">
             <Link
               href={`/login?redirect=/invite/${token}`}
