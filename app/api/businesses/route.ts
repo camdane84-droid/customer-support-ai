@@ -21,11 +21,13 @@ export async function GET(request: NextRequest) {
           name,
           email,
           business_type,
+          policies,
           subscription_status,
           subscription_plan,
           subscription_tier,
           stripe_customer_id,
-          created_at
+          created_at,
+          auto_generate_notes
         )
       `)
       .eq('user_id', userId)
