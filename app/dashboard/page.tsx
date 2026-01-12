@@ -491,8 +491,8 @@ export default function DashboardPage() {
                           )}
                         </div>
                         <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
-                          {convo.channel === 'whatsapp' && convo.customer_phone
-                            ? `${convo.customer_phone} · via WhatsApp`
+                          {convo.channel === 'whatsapp'
+                            ? `via WhatsApp`
                             : convo.channel === 'instagram'
                             ? `via Instagram`
                             : convo.customer_email || convo.customer_phone || `via ${convo.channel}`}

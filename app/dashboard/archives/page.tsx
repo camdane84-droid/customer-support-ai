@@ -647,10 +647,10 @@ export default function ArchivesPage() {
                                       {displayName}
                                     </h3>
                                     <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 truncate">
-                                      {conversation.channel === 'whatsapp' && conversation.customer_phone
-                                        ? `${conversation.customer_phone} · via WhatsApp`
-                                        : conversation.channel === 'instagram' && conversation.customer_instagram_id
-                                        ? `${conversation.customer_instagram_id} · via Instagram`
+                                      {conversation.channel === 'whatsapp'
+                                        ? `via WhatsApp`
+                                        : conversation.channel === 'instagram'
+                                        ? `via Instagram`
                                         : conversation.customer_email || conversation.customer_instagram_id || conversation.customer_phone || 'No contact info'}
                                     </p>
                                     <div className="flex items-center space-x-2 mt-2">
@@ -699,10 +699,10 @@ export default function ArchivesPage() {
                                     {displayName}
                                   </h3>
                                   <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
-                                    {conversation.channel === 'whatsapp' && conversation.customer_phone
-                                      ? `${conversation.customer_phone} · via WhatsApp`
-                                      : conversation.channel === 'instagram' && conversation.customer_instagram_id
-                                      ? `${conversation.customer_instagram_id} · via Instagram`
+                                    {conversation.channel === 'whatsapp'
+                                      ? `via WhatsApp`
+                                      : conversation.channel === 'instagram'
+                                      ? `via Instagram`
                                       : conversation.customer_email || conversation.customer_instagram_id || conversation.customer_phone || 'No contact info'}
                                   </p>
                                   <div className="flex items-center space-x-3 mt-2">
