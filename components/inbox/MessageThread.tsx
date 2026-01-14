@@ -782,8 +782,8 @@ export default function MessageThread({ conversation, businessId, onConversation
         <div ref={messagesEndRef} />
       </div>
 
-      {/* AI Suggestion - Only show if user can send messages */}
-      {canSendMessages && (
+      {/* AI Suggestion - Only show if user can send messages and AI insights are enabled */}
+      {canSendMessages && currentBusiness?.auto_generate_notes && (
         <AISuggestion
           conversationId={conversation.id}
           businessId={businessId}
@@ -1059,6 +1059,7 @@ export default function MessageThread({ conversation, businessId, onConversation
           customerName={displayName}
           customerEmail={conversation.customer_email}
           customerInstagram={conversation.customer_instagram_id}
+          aiInsightsEnabled={currentBusiness?.auto_generate_notes || false}
           onClose={() => setShowProfileModal(false)}
         />
       )}

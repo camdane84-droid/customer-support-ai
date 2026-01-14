@@ -55,7 +55,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    logger.debug('[AI Suggest] Business found', { businessName: business.name });
+    logger.debug('[AI Suggest] Business found', { businessName: business.name, autoGenerateNotes: business.auto_generate_notes });
+
+    // Check if AI insights are enabled
+    if (!business.auto_generate_notes) {
+      logger.debug('[AI Suggest] AI insights disabled for business', { businessId });
+      return NextResponse.json(
+        {
+          error: 'AI Customer Insights is disabled. Enable it in Settings to use AI features.',
+          insightsDisabled: true,
+        },
+        { status: 403 }
+      );
+    }
 
     // Check usage limits
     const canUse = await canUseAiSuggestion(businessId);

@@ -37,6 +37,7 @@ interface CustomerProfileModalProps {
   customerName: string;
   customerEmail?: string | null;
   customerInstagram?: string | null;
+  aiInsightsEnabled?: boolean;
   onClose: () => void;
 }
 
@@ -45,6 +46,7 @@ export default function CustomerProfileModal({
   customerName,
   customerEmail,
   customerInstagram,
+  aiInsightsEnabled = true,
   onClose
 }: CustomerProfileModalProps) {
   const [profile, setProfile] = useState<CustomerProfile | null>(null);
@@ -219,24 +221,33 @@ export default function CustomerProfileModal({
               )}
             </div>
 
-            {/* Refresh Button */}
-            <button
-              onClick={analyzeProfile}
-              disabled={analyzing}
-              className="mt-4 flex items-center space-x-2 px-4 py-2 bg-blue-50 text-indigo-600 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50 text-sm"
-            >
-              {analyzing ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Analyzing...</span>
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="w-4 h-4" />
-                  <span>Refresh Profile</span>
-                </>
-              )}
-            </button>
+            {/* Refresh Button - Only show if AI insights are enabled */}
+            {aiInsightsEnabled && (
+              <button
+                onClick={analyzeProfile}
+                disabled={analyzing}
+                className="mt-4 flex items-center space-x-2 px-4 py-2 bg-blue-50 text-indigo-600 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50 text-sm"
+              >
+                {analyzing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Analyzing...</span>
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-4 h-4" />
+                    <span>Refresh Profile</span>
+                  </>
+                )}
+              </button>
+            )}
+
+            {/* Show message when AI insights are disabled */}
+            {!aiInsightsEnabled && (
+              <div className="mt-4 text-xs text-gray-500 italic text-center">
+                Enable AI Customer Insights in Settings to analyze this profile
+              </div>
+            )}
           </div>
         </div>
 

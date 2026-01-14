@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { hasPermission } from '@/lib/permissions';
 
 export default function SettingsPage() {
-  const { currentBusiness: business, loading: authLoading, user } = useAuth();
+  const { currentBusiness: business, loading: authLoading, user, refreshBusinesses } = useAuth();
   const router = useRouter();
   const [businessName, setBusinessName] = useState('');
   const [businessType, setBusinessType] = useState('');
@@ -73,6 +73,10 @@ export default function SettingsPage() {
       }
 
       console.log('✅ Settings saved successfully');
+
+      // Refresh business data in AuthContext to reflect the changes
+      await refreshBusinesses();
+
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (error: any) {

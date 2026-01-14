@@ -37,6 +37,7 @@ export type Business = {
   hours_of_operation: Record<string, string> | null;
   services: string[] | null;
   policies: string | null;
+  auto_generate_notes?: boolean;
   subscription_status: string;
   subscription_plan: string;
   subscription_tier?: 'free' | 'starter' | 'pro';

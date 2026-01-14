@@ -57,6 +57,11 @@ export default function AISuggestion({
           return; // Don't throw, just show the upgrade prompt
         }
 
+        // Check if AI insights are disabled (403 status)
+        if (response.status === 403 && errorData.insightsDisabled) {
+          throw new Error('AI Customer Insights is disabled. Enable it in Settings to use this feature.');
+        }
+
         throw new Error(errorData.error || 'Failed to generate suggestion');
       }
 
