@@ -1060,6 +1060,7 @@ export default function MessageThread({ conversation, businessId, onConversation
           customerEmail={conversation.customer_email}
           customerInstagram={conversation.customer_instagram_id}
           aiInsightsEnabled={currentBusiness?.auto_generate_notes || false}
+          profileCategories={currentBusiness?.profile_categories}
           onClose={() => setShowProfileModal(false)}
         />
       )}

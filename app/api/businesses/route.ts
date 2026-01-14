@@ -27,7 +27,8 @@ export async function GET(request: NextRequest) {
           subscription_tier,
           stripe_customer_id,
           created_at,
-          auto_generate_notes
+          auto_generate_notes,
+          profile_categories
         )
       `)
       .eq('user_id', userId)

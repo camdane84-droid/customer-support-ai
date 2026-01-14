@@ -38,6 +38,15 @@ export type Business = {
   services: string[] | null;
   policies: string | null;
   auto_generate_notes?: boolean;
+  profile_categories?: {
+    allergies: boolean;
+    favorite_category: boolean;
+    past_orders: boolean;
+    issues: boolean;
+    sizes_dimensions: boolean;
+    preferences: boolean;
+    best_times: boolean;
+  };
   subscription_status: string;
   subscription_plan: string;
   subscription_tier?: 'free' | 'starter' | 'pro';

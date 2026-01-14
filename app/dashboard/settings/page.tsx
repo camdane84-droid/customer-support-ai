@@ -17,6 +17,15 @@ export default function SettingsPage() {
   const [businessType, setBusinessType] = useState('');
   const [policies, setPolicies] = useState('');
   const [autoGenerateNotes, setAutoGenerateNotes] = useState(false);
+  const [profileCategories, setProfileCategories] = useState({
+    allergies: true,
+    favorite_category: true,
+    past_orders: true,
+    issues: true,
+    sizes_dimensions: true,
+    preferences: true,
+    best_times: true,
+  });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -29,6 +38,15 @@ export default function SettingsPage() {
       setBusinessType(business.business_type || '');
       setPolicies(business.policies || '');
       setAutoGenerateNotes((business as any).auto_generate_notes || false);
+      setProfileCategories((business as any).profile_categories || {
+        allergies: true,
+        favorite_category: true,
+        past_orders: true,
+        issues: true,
+        sizes_dimensions: true,
+        preferences: true,
+        best_times: true,
+      });
     }
   }, [business]);
 
@@ -41,7 +59,7 @@ export default function SettingsPage() {
     try {
       console.log('💾 Saving settings...');
 
-      // Try to update with auto_generate_notes first
+      // Try to update with auto_generate_notes and profile_categories
       let { error } = await supabase
         .from('businesses')
         .update({
@@ -49,6 +67,7 @@ export default function SettingsPage() {
           business_type: businessType,
           policies: policies,
           auto_generate_notes: autoGenerateNotes,
+          profile_categories: profileCategories,
         })
         .eq('id', business.id);
 
@@ -276,6 +295,119 @@ export default function SettingsPage() {
                 />
               </button>
             </div>
+
+            {/* Profile Categories - Only show when AI insights are enabled */}
+            {autoGenerateNotes && (
+              <div className="mt-4 p-4 border border-gray-200 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-900">
+                <div className="flex items-center space-x-2 mb-3">
+                  <FileText className="w-4 h-4 text-gray-600 dark:text-slate-400" />
+                  <h3 className="font-medium text-gray-900 dark:text-white">Customize Profile Categories</h3>
+                </div>
+                <p className="text-xs text-gray-600 dark:text-slate-400 mb-4">
+                  Choose which customer information categories appear in profiles
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Allergies Toggle */}
+                  <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
+                    <div className="flex items-center space-x-2">
+                      <AlertTriangle className="w-4 h-4 text-red-500" />
+                      <span className="text-sm text-gray-700 dark:text-slate-300">Allergies</span>
+                    </div>
+                    <button
+                      onClick={() => setProfileCategories(prev => ({ ...prev, allergies: !prev.allergies }))}
+                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${profileCategories.allergies ? 'bg-purple-600' : 'bg-gray-200'}`}
+                    >
+                      <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${profileCategories.allergies ? 'translate-x-4' : 'translate-x-0'}`} />
+                    </button>
+                  </div>
+
+                  {/* Favorite Category Toggle */}
+                  <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
+                    <div className="flex items-center space-x-2">
+                      <Star className="w-4 h-4 text-amber-500" />
+                      <span className="text-sm text-gray-700 dark:text-slate-300">Favorite Category</span>
+                    </div>
+                    <button
+                      onClick={() => setProfileCategories(prev => ({ ...prev, favorite_category: !prev.favorite_category }))}
+                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${profileCategories.favorite_category ? 'bg-purple-600' : 'bg-gray-200'}`}
+                    >
+                      <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${profileCategories.favorite_category ? 'translate-x-4' : 'translate-x-0'}`} />
+                    </button>
+                  </div>
+
+                  {/* Past Orders Toggle */}
+                  <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
+                    <div className="flex items-center space-x-2">
+                      <ShoppingBag className="w-4 h-4 text-green-600" />
+                      <span className="text-sm text-gray-700 dark:text-slate-300">Past Orders</span>
+                    </div>
+                    <button
+                      onClick={() => setProfileCategories(prev => ({ ...prev, past_orders: !prev.past_orders }))}
+                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${profileCategories.past_orders ? 'bg-purple-600' : 'bg-gray-200'}`}
+                    >
+                      <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${profileCategories.past_orders ? 'translate-x-4' : 'translate-x-0'}`} />
+                    </button>
+                  </div>
+
+                  {/* Issues Toggle */}
+                  <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
+                    <div className="flex items-center space-x-2">
+                      <AlertCircle className="w-4 h-4 text-orange-500" />
+                      <span className="text-sm text-gray-700 dark:text-slate-300">Issues</span>
+                    </div>
+                    <button
+                      onClick={() => setProfileCategories(prev => ({ ...prev, issues: !prev.issues }))}
+                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${profileCategories.issues ? 'bg-purple-600' : 'bg-gray-200'}`}
+                    >
+                      <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${profileCategories.issues ? 'translate-x-4' : 'translate-x-0'}`} />
+                    </button>
+                  </div>
+
+                  {/* Sizes/Dimensions Toggle */}
+                  <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
+                    <div className="flex items-center space-x-2">
+                      <Ruler className="w-4 h-4 text-indigo-500" />
+                      <span className="text-sm text-gray-700 dark:text-slate-300">Sizes / Dimensions</span>
+                    </div>
+                    <button
+                      onClick={() => setProfileCategories(prev => ({ ...prev, sizes_dimensions: !prev.sizes_dimensions }))}
+                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${profileCategories.sizes_dimensions ? 'bg-purple-600' : 'bg-gray-200'}`}
+                    >
+                      <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${profileCategories.sizes_dimensions ? 'translate-x-4' : 'translate-x-0'}`} />
+                    </button>
+                  </div>
+
+                  {/* Preferences Toggle */}
+                  <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
+                    <div className="flex items-center space-x-2">
+                      <Heart className="w-4 h-4 text-pink-500" />
+                      <span className="text-sm text-gray-700 dark:text-slate-300">Preferences</span>
+                    </div>
+                    <button
+                      onClick={() => setProfileCategories(prev => ({ ...prev, preferences: !prev.preferences }))}
+                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${profileCategories.preferences ? 'bg-purple-600' : 'bg-gray-200'}`}
+                    >
+                      <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${profileCategories.preferences ? 'translate-x-4' : 'translate-x-0'}`} />
+                    </button>
+                  </div>
+
+                  {/* Best Times Toggle */}
+                  <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
+                    <div className="flex items-center space-x-2">
+                      <Clock className="w-4 h-4 text-teal-500" />
+                      <span className="text-sm text-gray-700 dark:text-slate-300">Best Times</span>
+                    </div>
+                    <button
+                      onClick={() => setProfileCategories(prev => ({ ...prev, best_times: !prev.best_times }))}
+                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${profileCategories.best_times ? 'bg-purple-600' : 'bg-gray-200'}`}
+                    >
+                      <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${profileCategories.best_times ? 'translate-x-4' : 'translate-x-0'}`} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

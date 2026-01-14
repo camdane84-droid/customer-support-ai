@@ -38,6 +38,15 @@ interface CustomerProfileModalProps {
   customerEmail?: string | null;
   customerInstagram?: string | null;
   aiInsightsEnabled?: boolean;
+  profileCategories?: {
+    allergies: boolean;
+    favorite_category: boolean;
+    past_orders: boolean;
+    issues: boolean;
+    sizes_dimensions: boolean;
+    preferences: boolean;
+    best_times: boolean;
+  };
   onClose: () => void;
 }
 
@@ -47,6 +56,15 @@ export default function CustomerProfileModal({
   customerEmail,
   customerInstagram,
   aiInsightsEnabled = true,
+  profileCategories = {
+    allergies: true,
+    favorite_category: true,
+    past_orders: true,
+    issues: true,
+    sizes_dimensions: true,
+    preferences: true,
+    best_times: true,
+  },
   onClose
 }: CustomerProfileModalProps) {
   const [profile, setProfile] = useState<CustomerProfile | null>(null);
@@ -260,17 +278,19 @@ export default function CustomerProfileModal({
           ) : profile ? (
             <>
               {/* Allergies - TOP PRIORITY */}
-              <InfoSection
-                icon={AlertTriangle}
-                title="Allergies / Restrictions"
-                items={profile.allergies}
-                emptyMessage="No allergies noted"
-                color="red"
-                inverse={true}
-              />
+              {profileCategories.allergies && (
+                <InfoSection
+                  icon={AlertTriangle}
+                  title="Allergies / Restrictions"
+                  items={profile.allergies}
+                  emptyMessage="No allergies noted"
+                  color="red"
+                  inverse={true}
+                />
+              )}
 
               {/* Favorite Category */}
-              {profile.favorite_category && (
+              {profileCategories.favorite_category && profile.favorite_category && (
                 <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-lg p-4 mb-4 shadow-md">
                   <div className="flex items-center space-x-2 mb-2">
                     <div className="p-2 rounded-lg bg-white border-2 border-amber-300 shadow-sm">
@@ -283,6 +303,7 @@ export default function CustomerProfileModal({
               )}
 
               {/* Past Orders */}
+              {profileCategories.past_orders && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-3">
                 <div className="flex items-center space-x-2 mb-3">
                   <div className="p-2 rounded-lg bg-white border border-green-200 shadow-sm">
@@ -315,38 +336,47 @@ export default function CustomerProfileModal({
                   </ul>
                 )}
               </div>
+              )}
 
-              <InfoSection
-                icon={AlertCircle}
-                title="Issues"
-                items={profile.issues}
-                emptyMessage="No issues reported"
-                color="orange"
-              />
+              {profileCategories.issues && (
+                <InfoSection
+                  icon={AlertCircle}
+                  title="Issues"
+                  items={profile.issues}
+                  emptyMessage="No issues reported"
+                  color="orange"
+                />
+              )}
 
-              <InfoSection
-                icon={Ruler}
-                title="Sizes / Dimensions"
-                items={profile.sizes_dimensions}
-                emptyMessage="No size information"
-                color="indigo"
-              />
+              {profileCategories.sizes_dimensions && (
+                <InfoSection
+                  icon={Ruler}
+                  title="Sizes / Dimensions"
+                  items={profile.sizes_dimensions}
+                  emptyMessage="No size information"
+                  color="indigo"
+                />
+              )}
 
-              <InfoSection
-                icon={Heart}
-                title="Preferences"
-                items={profile.preferences}
-                emptyMessage="No preferences noted"
-                color="pink"
-              />
+              {profileCategories.preferences && (
+                <InfoSection
+                  icon={Heart}
+                  title="Preferences"
+                  items={profile.preferences}
+                  emptyMessage="No preferences noted"
+                  color="pink"
+                />
+              )}
 
-              <InfoSection
-                icon={Clock}
-                title="Best Times"
-                items={profile.best_times}
-                emptyMessage="No time preferences"
-                color="teal"
-              />
+              {profileCategories.best_times && (
+                <InfoSection
+                  icon={Clock}
+                  title="Best Times"
+                  items={profile.best_times}
+                  emptyMessage="No time preferences"
+                  color="teal"
+                />
+              )}
             </>
           ) : (
             <div className="text-center py-8 text-gray-500">
