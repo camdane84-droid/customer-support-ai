@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/lib/context/AuthContext';
 import { supabase } from '@/lib/api/supabase';
-import { Save, Building, Clock, Share2, Mail, MessageCircle, Instagram, Facebook, CheckCircle, FileText, Sparkles, Trash2, AlertTriangle } from 'lucide-react';
+import { Save, Building, Clock, Share2, Mail, MessageCircle, Instagram, Facebook, CheckCircle, FileText, Sparkles, Trash2, AlertTriangle, Star, ShoppingBag, AlertCircle, Ruler, Heart } from 'lucide-react';
 import TikTokIcon from '@/components/icons/TikTokIcon';
 import BillingSection from '@/components/ui/BillingSection';
 import { useRouter } from 'next/navigation';

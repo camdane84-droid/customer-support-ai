@@ -1054,15 +1054,19 @@ export default function MessageThread({ conversation, businessId, onConversation
 
       {/* Customer Profile Modal */}
       {showProfileModal && (
-        <CustomerProfileModal
-          conversationId={conversation.id}
-          customerName={displayName}
-          customerEmail={conversation.customer_email}
-          customerInstagram={conversation.customer_instagram_id}
-          aiInsightsEnabled={currentBusiness?.auto_generate_notes || false}
-          profileCategories={currentBusiness?.profile_categories}
-          onClose={() => setShowProfileModal(false)}
-        />
+        <>
+          {console.log('🔍 [MessageThread] Current Business:', currentBusiness)}
+          {console.log('🔍 [MessageThread] Profile Categories:', currentBusiness?.profile_categories)}
+          <CustomerProfileModal
+            conversationId={conversation.id}
+            customerName={displayName}
+            customerEmail={conversation.customer_email}
+            customerInstagram={conversation.customer_instagram_id}
+            aiInsightsEnabled={currentBusiness?.auto_generate_notes || false}
+            profileCategories={currentBusiness?.profile_categories}
+            onClose={() => setShowProfileModal(false)}
+          />
+        </>
       )}
     </div>
   );

@@ -71,6 +71,11 @@ export default function CustomerProfileModal({
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
 
+  // Debug: Log profile categories on mount
+  useEffect(() => {
+    console.log('🔍 [CustomerProfileModal] Profile Categories:', profileCategories);
+  }, [profileCategories]);
+
   useEffect(() => {
     loadProfile();
   }, [conversationId]);
