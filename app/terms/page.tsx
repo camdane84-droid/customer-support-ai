@@ -1,11 +1,11 @@
 export default function TermsOfService() {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold mb-8">Terms of Service</h1>
+    <div className="max-w-4xl mx-auto px-4 py-12 bg-white">
+      <h1 className="text-4xl font-bold mb-8 text-gray-900">Terms of Service</h1>
 
-      <div className="space-y-6 text-gray-700">
+      <div className="space-y-6 text-gray-800">
         <section>
-          <p className="text-sm text-gray-500 mb-4">Last Updated: {new Date().toLocaleDateString()}</p>
+          <p className="text-sm text-gray-600 mb-4">Last Updated: {new Date().toLocaleDateString()}</p>
 
           <p>
             These Terms of Service govern your use of our customer support messaging platform.
@@ -17,8 +17,8 @@ export default function TermsOfService() {
           <h2 className="text-2xl font-semibold mb-3">Service Description</h2>
           <p>
             Our platform provides businesses with tools to manage customer conversations across multiple
-            channels including Instagram Direct Messages and email. We facilitate communication between
-            businesses and their customers.
+            channels including Instagram Direct Messages, TikTok Direct Messages, WhatsApp, and email.
+            We facilitate communication between businesses and their customers through a unified inbox.
           </p>
         </section>
 
@@ -31,6 +31,8 @@ export default function TermsOfService() {
             <li>Not attempt to gain unauthorized access to our systems</li>
             <li>Comply with all applicable laws and regulations</li>
             <li>Comply with Meta's Platform Policy and Instagram's Terms of Use</li>
+            <li>Comply with TikTok's Developer Terms of Service and Platform Policies</li>
+            <li>Comply with WhatsApp Business Policy and Meta's Platform Terms</li>
           </ul>
         </section>
 
@@ -41,7 +43,7 @@ export default function TermsOfService() {
             <li>You are responsible for all messages sent through your account</li>
             <li>You must respond to customer inquiries in a timely and professional manner</li>
             <li>You must comply with applicable consumer protection and privacy laws</li>
-            <li>You grant us permission to access your Instagram account to send/receive messages on your behalf</li>
+            <li>You grant us permission to access your connected social media accounts (Instagram, TikTok, WhatsApp) to send and receive messages on your behalf</li>
           </ul>
         </section>
 
