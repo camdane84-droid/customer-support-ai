@@ -225,17 +225,8 @@ export default function SettingsPage() {
             {/* WhatsApp Connection */}
             <WhatsAppConnection businessId={business.id} />
 
-            {/* TikTok (Coming Soon) */}
-            <ConnectionCard
-              platform="tiktok"
-              icon={TikTokIcon}
-              name="TikTok"
-              description="Coming soon"
-              isConnected={false}
-              canDisconnect={false}
-              color="slate"
-              disabled={true}
-            />
+            {/* TikTok Connection */}
+            <TikTokConnection businessId={business.id} />
           </div>
         </div>
         )}
@@ -923,6 +914,98 @@ function WhatsAppConnection({ businessId }: { businessId: string }) {
       isConnected={!!connection}
       canDisconnect={true}
       color="green"
+      onConnect={handleConnect}
+      onDisconnect={handleDisconnect}
+    />
+  );
+}
+
+// TikTok Connection Component
+function TikTokConnection({ businessId }: { businessId: string }) {
+  const [connection, setConnection] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadConnection();
+  }, []);
+
+  async function loadConnection() {
+    try {
+      const { data, error } = await supabase
+        .from('social_connections')
+        .select('*')
+        .eq('business_id', businessId)
+        .eq('platform', 'tiktok')
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error loading TikTok connection:', error);
+      }
+
+      setConnection(data);
+    } catch (error) {
+      console.error('Failed to load TikTok connection:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleConnect() {
+    const tiktokClientKey = process.env.NEXT_PUBLIC_TIKTOK_CLIENT_KEY;
+
+    console.log('TikTok Debug Info:');
+    console.log('TikTok Client Key:', tiktokClientKey);
+
+    if (!tiktokClientKey) {
+      alert('TikTok Client Key not configured! Check your .env.local file.');
+      return;
+    }
+
+    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/tiktok/callback`;
+
+    // TikTok OAuth URL
+    // Scopes for TikTok Login Kit with DM access
+    const scopes = [
+      'user.info.basic',
+      'user.info.profile',
+      'dm.read',
+      'dm.write',
+    ].join(',');
+
+    const authUrl =
+      `https://www.tiktok.com/v2/auth/authorize/?` +
+      `client_key=${tiktokClientKey}&` +
+      `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+      `scope=${scopes}&` +
+      `response_type=code&` +
+      `state=${businessId}`;
+
+    console.log('Full TikTok OAuth URL:', authUrl);
+    window.location.href = authUrl;
+  }
+
+  async function handleDisconnect() {
+    if (!confirm('Disconnect TikTok? You will stop receiving TikTok DMs.')) return;
+
+    await supabase
+      .from('social_connections')
+      .update({ is_active: false })
+      .eq('id', connection.id);
+
+    setConnection(null);
+  }
+
+  // Always show the card, even while loading
+  return (
+    <ConnectionCard
+      platform="tiktok"
+      icon={TikTokIcon}
+      name="TikTok"
+      description={connection ? `@${connection.platform_username}` : 'Receive TikTok DMs'}
+      isConnected={!!connection}
+      canDisconnect={true}
+      color="slate"
       onConnect={handleConnect}
       onDisconnect={handleDisconnect}
     />

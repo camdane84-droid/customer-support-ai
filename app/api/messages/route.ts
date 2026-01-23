@@ -73,6 +73,8 @@ export async function POST(request: NextRequest) {
           await handleInstagramSend(data, message.business_id);
         } else if (message.channel === 'whatsapp') {
           await handleWhatsAppSend(data, message.business_id);
+        } else if (message.channel === 'tiktok') {
+          await handleTikTokSend(data, message.business_id);
         }
 
         // Update status to sent
@@ -298,5 +300,131 @@ async function handleWhatsAppSend(message: Message, businessId: string) {
         },
       })
       .eq('id', message.id);
+  }
+}
+
+async function handleTikTokSend(message: Message, businessId: string) {
+  // Get the TikTok connection with access token
+  const { data: connection, error: connError } = await supabaseServer
+    .from('social_connections')
+    .select('*')
+    .eq('business_id', businessId)
+    .eq('platform', 'tiktok')
+    .eq('is_active', true)
+    .single();
+
+  if (connError || !connection) {
+    throw new Error('TikTok not connected');
+  }
+
+  const accessToken = connection.access_token;
+
+  if (!accessToken) {
+    throw new Error('TikTok access token missing');
+  }
+
+  // Check if token is expired and refresh if needed
+  if (connection.token_expires_at) {
+    const expiresAt = new Date(connection.token_expires_at);
+    if (expiresAt <= new Date()) {
+      // Token expired, try to refresh
+      if (connection.refresh_token) {
+        const refreshedToken = await refreshTikTokToken(connection.refresh_token, connection.id);
+        if (!refreshedToken) {
+          throw new Error('TikTok token expired and refresh failed. Please reconnect your TikTok account.');
+        }
+      } else {
+        throw new Error('TikTok token expired. Please reconnect your TikTok account.');
+      }
+    }
+  }
+
+  // Get conversation for recipient TikTok ID
+  const { data: conversation } = await supabaseServer
+    .from('conversations')
+    .select('customer_tiktok_id')
+    .eq('id', message.conversation_id)
+    .single();
+
+  if (!conversation?.customer_tiktok_id) {
+    throw new Error('Customer TikTok ID not found');
+  }
+
+  // Use TikTok Direct Message API to send message
+  const url = 'https://open.tiktokapis.com/v2/dm/message/send/';
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      receiver_open_id: conversation.customer_tiktok_id,
+      message_type: 'text',
+      text: {
+        text: message.content,
+      },
+    }),
+  });
+
+  const responseData = await response.json();
+
+  if (!response.ok || responseData.error?.code) {
+    throw new Error(responseData.error?.message || 'Failed to send TikTok message');
+  }
+
+  // Store the TikTok message ID for tracking
+  if (responseData.data?.msg_id) {
+    await supabaseServer
+      .from('messages')
+      .update({
+        metadata: {
+          ...message.metadata,
+          tiktok_message_id: responseData.data.msg_id,
+        },
+      })
+      .eq('id', message.id);
+  }
+}
+
+async function refreshTikTokToken(refreshToken: string, connectionId: string): Promise<string | null> {
+  try {
+    const response = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        client_key: process.env.TIKTOK_CLIENT_KEY || '',
+        client_secret: process.env.TIKTOK_CLIENT_SECRET || '',
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || data.error) {
+      logger.error('Failed to refresh TikTok token', undefined, { error: data.error });
+      return null;
+    }
+
+    // Update the connection with new tokens
+    const tokenExpiresAt = new Date(Date.now() + (data.expires_in * 1000)).toISOString();
+
+    await supabaseServer
+      .from('social_connections')
+      .update({
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+        token_expires_at: tokenExpiresAt,
+      })
+      .eq('id', connectionId);
+
+    return data.access_token;
+  } catch (error) {
+    logger.error('Error refreshing TikTok token', error);
+    return null;
   }
 }
