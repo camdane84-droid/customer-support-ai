@@ -154,7 +154,10 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-2xl font-semibold mb-3 text-white">Contact Us</h2>
             <p>
-              If you have any questions about this privacy policy or our data practices, please contact us.
+              If you have any questions about this privacy policy or our data practices, please contact us at{' '}
+              <a href="mailto:hello@inbox-forge.com" className="text-blue-400 hover:text-blue-300 underline">
+                hello@inbox-forge.com
+              </a>.
             </p>
           </section>
 
