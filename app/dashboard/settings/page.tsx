@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/lib/context/AuthContext';
 import { supabase } from '@/lib/api/supabase';
@@ -28,6 +28,8 @@ export default function SettingsPage() {
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [bottomSaveVisible, setBottomSaveVisible] = useState(false);
+  const bottomSaveRef = useRef<HTMLDivElement>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [deleting, setDeleting] = useState(false);
@@ -49,6 +51,22 @@ export default function SettingsPage() {
       });
     }
   }, [business]);
+
+  // Track when bottom save button is visible
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setBottomSaveVisible(entry.isIntersecting);
+      },
+      { threshold: 0.5 }
+    );
+
+    if (bottomSaveRef.current) {
+      observer.observe(bottomSaveRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   async function handleSave() {
     if (!business) return;
@@ -187,7 +205,7 @@ export default function SettingsPage() {
                 Manage your business information and preferences
               </p>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className={`flex items-center space-x-3 transition-opacity duration-200 ${bottomSaveVisible ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
               {saved && <span className="text-sm text-green-600">✓ Saved!</span>}
               <button
                 onClick={handleSave}
@@ -608,7 +626,7 @@ export default function SettingsPage() {
         )}
 
         {/* Save Button */}
-        <div className="flex items-center justify-between">
+        <div ref={bottomSaveRef} className="flex items-center justify-between">
           <div className="text-sm text-gray-500 dark:text-slate-400">
             {saved && <span className="text-green-600">✓ Settings saved!</span>}
           </div>
