@@ -197,7 +197,7 @@ export default function SettingsPage() {
     <DashboardLayout>
       <div className="p-6 max-w-4xl mx-auto space-y-6">
         {/* Header with Sticky Save Button */}
-        <div className="sticky top-6 z-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-lg border border-gray-200 dark:border-slate-700 p-6">
+        <div className={`sticky top-6 z-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-lg border border-gray-200 dark:border-slate-700 p-6 transition-opacity duration-200 ${bottomSaveVisible ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Settings</h1>
@@ -205,7 +205,7 @@ export default function SettingsPage() {
                 Manage your business info and preferences
               </p>
             </div>
-            <div className={`flex items-center space-x-3 transition-opacity duration-200 ${bottomSaveVisible ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+            <div className="flex items-center space-x-3">
               {saved && <span className="text-sm text-green-600">✓ Saved!</span>}
               <button
                 onClick={handleSave}
