@@ -367,39 +367,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-slate-300">Total Conversations</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{totalConversations}</p>
-              </div>
-              <MessageSquare className="w-10 h-10 text-indigo-500" />
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-slate-300">Open Conversations</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{openConversations}</p>
-              </div>
-              <Clock className="w-10 h-10 text-green-500" />
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-slate-300">Response Rate</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">100%</p>
-              </div>
-              <TrendingUp className="w-10 h-10 text-purple-500" />
-            </div>
-          </div>
-        </div>
-
         {/* Quick Actions */}
         <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h2>

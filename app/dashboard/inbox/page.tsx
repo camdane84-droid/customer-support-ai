@@ -12,6 +12,7 @@ import { getConversations } from '@/lib/api/conversations';
 import { supabase } from '@/lib/api/supabase';
 import { useAuth } from '@/lib/context/AuthContext';
 import type { Conversation } from '@/lib/api/supabase';
+import { MessageSquare, Clock, Mail } from 'lucide-react';
 
 export default function InboxPage() {
   const { currentBusiness: business, user, loading: authLoading } = useAuth();
@@ -465,10 +466,36 @@ export default function InboxPage() {
     }
   }
 
+  // Calculate stats
+  const totalConversations = conversations.length;
+  const openConversations = conversations.filter(c => c.status === 'open').length;
+  const unreadConversations = conversations.filter(c => c.unread_count > 0).length;
+
   return (
     <DashboardLayout>
-      <div className="flex h-full bg-gray-50">
-        <div className="w-80 border-r border-gray-200 dark:border-slate-700 bg-white flex-shrink-0 hidden md:block">
+      <div className="flex flex-col h-full bg-gray-50 dark:bg-slate-900">
+        {/* Compact Stats Bar */}
+        <div className="flex items-center justify-start gap-6 px-4 py-2 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 text-sm">
+            <MessageSquare className="w-4 h-4 text-indigo-500" />
+            <span className="text-gray-500 dark:text-slate-400">Total:</span>
+            <span className="font-semibold text-gray-900 dark:text-white">{totalConversations}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <Clock className="w-4 h-4 text-green-500" />
+            <span className="text-gray-500 dark:text-slate-400">Open:</span>
+            <span className="font-semibold text-gray-900 dark:text-white">{openConversations}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <Mail className="w-4 h-4 text-orange-500" />
+            <span className="text-gray-500 dark:text-slate-400">Unread:</span>
+            <span className="font-semibold text-gray-900 dark:text-white">{unreadConversations}</span>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex flex-1 overflow-hidden">
+        <div className="w-80 border-r border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex-shrink-0 hidden md:block">
           <ConversationList
             conversations={conversations}
             selectedConversation={selectedConversation}
@@ -494,6 +521,7 @@ export default function InboxPage() {
               </div>
             </div>
           )}
+        </div>
         </div>
       </div>
     </DashboardLayout>
