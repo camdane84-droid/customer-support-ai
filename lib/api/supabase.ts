@@ -68,7 +68,8 @@ export type Conversation = {
   customer_email: string | null;
   customer_phone: string | null;
   customer_instagram_id: string | null;
-  channel: 'email' | 'instagram' | 'sms' | 'whatsapp';
+  customer_tiktok_id: string | null;
+  channel: 'email' | 'instagram' | 'sms' | 'whatsapp' | 'tiktok';
   status: 'open' | 'closed' | 'pending' | 'archived';
   unread_count: number;
   last_message_at: string;

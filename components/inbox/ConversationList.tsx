@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Mail, Instagram, Phone, Search, MoreHorizontal, Archive, Trash2, X, Download } from 'lucide-react';
+import { Mail, Instagram, Phone, Search, MoreHorizontal, Archive, Trash2, X, Download, MessageCircle } from 'lucide-react';
+import TikTokIcon from '@/components/icons/TikTokIcon';
 import type { Conversation } from '@/lib/api/supabase';
 import { formatDistanceToNow } from 'date-fns';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
@@ -49,6 +50,10 @@ export default function ConversationList({
         return <Instagram className="w-4 h-4" />;
       case 'sms':
         return <Phone className="w-4 h-4" />;
+      case 'whatsapp':
+        return <MessageCircle className="w-4 h-4" />;
+      case 'tiktok':
+        return <TikTokIcon className="w-4 h-4" />;
       default:
         return <Mail className="w-4 h-4" />;
     }
@@ -62,6 +67,10 @@ export default function ConversationList({
         return 'text-pink-500';
       case 'sms':
         return 'text-green-500';
+      case 'whatsapp':
+        return 'text-green-500';
+      case 'tiktok':
+        return 'text-slate-800 dark:text-slate-200';
       default:
         return 'text-gray-500';
     }

@@ -14,9 +14,11 @@ export function getCustomerDisplayName(conversation: Conversation | {
   customer_email?: string | null;
   customer_phone?: string | null;
   customer_instagram_id?: string | null;
+  customer_tiktok_id?: string | null;
   channel: string;
 }): string {
   const { customer_name, customer_email, customer_phone, customer_instagram_id, channel } = conversation;
+  const customer_tiktok_id = 'customer_tiktok_id' in conversation ? conversation.customer_tiktok_id : null;
 
   // Check if customer_name is all digits (Instagram ID)
   const isNumericId = /^\d+$/.test(customer_name.replace('@', ''));
@@ -33,6 +35,19 @@ export function getCustomerDisplayName(conversation: Conversation | {
     }
     // Last resort: show as "User [ID]"
     return `User ${customer_instagram_id || customer_name}`;
+  }
+
+  // If it's a TikTok channel and name is numeric (the ID), try alternatives
+  if (channel === 'tiktok' && isNumericId) {
+    if (customer_email) {
+      const emailUsername = customer_email.split('@')[0];
+      return `${emailUsername} (via TikTok)`;
+    }
+    if (customer_phone) {
+      return `${customer_phone} (via TikTok)`;
+    }
+    // Last resort: show as "User [ID]"
+    return `User ${customer_tiktok_id || customer_name}`;
   }
 
   // If customer_name is a username (has @ and not all digits), use it

@@ -37,6 +37,7 @@ interface ArchivedConversation {
   customer_email: string | null;
   customer_phone: string | null;
   customer_instagram_id: string | null;
+  customer_tiktok_id: string | null;
   channel: string;
   status: string;
   unread_count: number;
