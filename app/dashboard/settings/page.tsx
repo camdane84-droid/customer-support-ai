@@ -178,12 +178,27 @@ export default function SettingsPage() {
   return (
     <DashboardLayout>
       <div className="p-6 max-w-4xl mx-auto space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
-          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
-            Manage your business information and preferences
-          </p>
+        {/* Header with Sticky Save Button */}
+        <div className="sticky top-0 z-10 bg-gray-50 dark:bg-slate-900 -mx-6 px-6 py-4 -mt-6 mb-2 border-b border-gray-200 dark:border-slate-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
+              <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
+                Manage your business information and preferences
+              </p>
+            </div>
+            <div className="flex items-center space-x-3">
+              {saved && <span className="text-sm text-green-600">✓ Saved!</span>}
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium text-sm"
+              >
+                <Save className="w-4 h-4" />
+                <span>{saving ? 'Saving...' : 'Save'}</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Billing & Subscription */}
