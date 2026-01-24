@@ -148,7 +148,10 @@ export default function AnalyticsPage() {
       // Calculate conversation metrics
       const totalConversations = allConversations?.length || 0;
       const openConversations = allConversations?.filter(c => c.status === 'open').length || 0;
-      const closedConversations = allConversations?.filter(c => c.status === 'closed').length || 0;
+      // Count resolved conversations: status='archived' with archive_type='resolved'
+      const closedConversations = allConversations?.filter(c =>
+        c.status === 'archived' && c.archive_type === 'resolved'
+      ).length || 0;
       const newConversationsThisPeriod = currentPeriodConvos?.length || 0;
       const previousPeriodCount = previousPeriodConvos?.length || 0;
       const conversationGrowth = calculateGrowth(newConversationsThisPeriod, previousPeriodCount);

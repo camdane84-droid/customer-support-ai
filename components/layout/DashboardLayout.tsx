@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { Menu, X, MessageSquare, BookOpen, Settings, LayoutDashboard, TrendingUp, Users, Archive, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -21,13 +21,19 @@ const navigation = [
   { name: 'Team', href: '/dashboard/team', icon: Users },
 ];
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const { user, currentBusiness, loading } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const router = useRouter();
+
+  // Memoized handlers to prevent re-renders
+  const handleMouseEnter = useCallback(() => setSidebarExpanded(true), []);
+  const handleMouseLeave = useCallback(() => setSidebarExpanded(false), []);
+  const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
+  const openMobileMenu = useCallback(() => setMobileMenuOpen(true), []);
 
   // Show skeleton while auth and businesses are loading
   if (loading || (user && !currentBusiness)) {
@@ -79,7 +85,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {mobileMenuOpen && (
         <div
           className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
-          onClick={() => setMobileMenuOpen(false)}
+          onClick={closeMobileMenu}
           aria-hidden="true"
         />
       )}
@@ -95,16 +101,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex items-center justify-between h-14 px-4 border-b border-slate-200 dark:border-slate-700">
           <Link
             href="/dashboard"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center space-x-2 group rounded-lg px-2 py-1.5 -mx-2 transition-all duration-200 hover:bg-purple-50 dark:hover:bg-white"
+            onClick={closeMobileMenu}
+            className="flex items-center space-x-2 group rounded-lg px-2 py-1.5 -mx-2 transition-colors duration-150 hover:bg-purple-50 dark:hover:bg-white"
           >
-            <div className="w-7 h-7 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-lg flex items-center justify-center shadow-sm transition-all duration-200 group-hover:from-purple-600 group-hover:to-indigo-600 dark:group-hover:bg-purple-600">
+            <div className="w-7 h-7 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-lg flex items-center justify-center shadow-sm group-hover:from-purple-600 group-hover:to-indigo-600 dark:group-hover:bg-purple-600">
               <MessageSquare className="w-4 h-4 text-purple-700 dark:text-white transition-colors duration-200 group-hover:text-white dark:group-hover:text-white" />
             </div>
             <span className="text-base font-semibold text-slate-900 dark:text-white transition-colors duration-200 group-hover:text-purple-600 dark:group-hover:text-purple-600">InboxForge</span>
           </Link>
           <button
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={closeMobileMenu}
             className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1"
             aria-label="Close navigation menu"
           >
@@ -124,7 +130,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Link
                 key={item.name}
                 href={item.href}
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={closeMobileMenu}
                 className={`
                   flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors
                   ${isActive
@@ -174,25 +180,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Desktop Sidebar - Supabase style */}
       <nav
         className={`
-          hidden lg:flex flex-col bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transition-all duration-200 ease-out z-30
+          hidden lg:flex flex-col bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 z-30
+          transition-[width] duration-200 ease-out will-change-[width]
           ${sidebarExpanded ? 'w-52' : 'w-14'}
         `}
-        onMouseEnter={() => setSidebarExpanded(true)}
-        onMouseLeave={() => setSidebarExpanded(false)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         aria-label="Main navigation"
       >
         {/* Logo */}
         <div className="flex items-center h-14 px-3 border-b border-slate-200 dark:border-slate-700">
           <Link
             href="/dashboard"
-            className="flex items-center space-x-2 overflow-hidden group cursor-pointer rounded-lg px-2 py-1.5 -mx-2 transition-all duration-200 hover:bg-purple-50 dark:hover:bg-white"
+            className="flex items-center space-x-2 overflow-hidden group cursor-pointer rounded-lg px-2 py-1.5 -mx-2 transition-colors duration-150 hover:bg-purple-50 dark:hover:bg-white"
           >
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm transition-all duration-200 group-hover:from-purple-600 group-hover:to-indigo-600 dark:group-hover:bg-purple-600">
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm group-hover:from-purple-600 group-hover:to-indigo-600 dark:group-hover:bg-purple-600">
               <MessageSquare className="w-4 h-4 text-purple-700 dark:text-white transition-colors duration-200 group-hover:text-white dark:group-hover:text-white" />
             </div>
             <span
               className={`
-                text-base font-semibold text-slate-900 dark:text-white whitespace-nowrap transition-all duration-200 group-hover:text-purple-600 dark:group-hover:text-purple-600
+                text-base font-semibold text-slate-900 dark:text-white whitespace-nowrap
+                transition-[opacity,transform] duration-150 ease-out will-change-[opacity,transform]
+                group-hover:text-purple-600 dark:group-hover:text-purple-600
                 ${sidebarExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2'}
               `}
             >
@@ -210,7 +219,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 key={item.name}
                 href={item.href}
                 className={`
-                  group flex items-center h-9 px-2.5 text-sm font-medium rounded-md transition-all duration-150
+                  group flex items-center h-9 px-2.5 text-sm font-medium rounded-md transition-colors duration-150
                   ${isActive
                     ? 'bg-slate-100 text-slate-900'
                     : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
@@ -221,7 +230,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <item.icon className={`w-4 h-4 flex-shrink-0 transition-colors ${isActive ? 'text-slate-700' : 'text-slate-400 group-hover:text-slate-600'}`} />
                 <span
                   className={`
-                    ml-3 whitespace-nowrap transition-all duration-200
+                    ml-3 whitespace-nowrap transition-[opacity,transform] duration-150 ease-out
                     ${sidebarExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 w-0'}
                   `}
                 >
@@ -236,7 +245,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="relative z-40 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
           {/* Business Switcher */}
           <div className={`
-            transition-all duration-200
+            transition-opacity duration-150 ease-out
             ${sidebarExpanded ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}
           `}>
             <div className="p-2">
@@ -255,7 +264,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </div>
                 <div
                   className={`
-                    min-w-0 transition-all duration-200
+                    min-w-0 transition-opacity duration-150 ease-out
                     ${sidebarExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0'}
                   `}
                 >
@@ -270,7 +279,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <button
                 onClick={handleLogout}
                 className={`
-                  text-slate-400 hover:text-slate-600 p-1.5 transition-all duration-200
+                  text-slate-400 hover:text-slate-600 p-1.5 transition-opacity duration-150 ease-out
                   ${sidebarExpanded ? 'opacity-100' : 'opacity-0 w-0 p-0'}
                 `}
                 aria-label="Logout"
@@ -305,7 +314,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Top bar (mobile) */}
         <div className="lg:hidden flex items-center justify-between h-14 px-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
           <button
-            onClick={() => setMobileMenuOpen(true)}
+            onClick={openMobileMenu}
             className="text-slate-500 hover:text-slate-700 p-1"
             aria-label="Open navigation menu"
           >
@@ -313,9 +322,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </button>
           <Link
             href="/dashboard"
-            className="flex items-center space-x-2 group rounded-lg px-2 py-1 transition-all duration-200 hover:bg-purple-50 dark:hover:bg-white"
+            className="flex items-center space-x-2 group rounded-lg px-2 py-1 transition-colors duration-150 hover:bg-purple-50 dark:hover:bg-white"
           >
-            <div className="w-6 h-6 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-md flex items-center justify-center shadow-sm transition-all duration-200 group-hover:from-purple-600 group-hover:to-indigo-600 dark:group-hover:bg-purple-600">
+            <div className="w-6 h-6 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-md flex items-center justify-center shadow-sm group-hover:from-purple-600 group-hover:to-indigo-600 dark:group-hover:bg-purple-600">
               <MessageSquare className="w-3.5 h-3.5 text-purple-700 dark:text-white transition-colors duration-200 group-hover:text-white dark:group-hover:text-white" />
             </div>
             <span className="text-base font-semibold text-slate-900 dark:text-white transition-colors duration-200 group-hover:text-purple-600 dark:group-hover:text-purple-600">InboxForge</span>
@@ -341,3 +350,5 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     </div>
   );
 }
+
+export default memo(DashboardLayout);
