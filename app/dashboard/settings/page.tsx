@@ -179,7 +179,7 @@ export default function SettingsPage() {
     <DashboardLayout>
       <div className="p-6 max-w-4xl mx-auto space-y-6">
         {/* Header with Sticky Save Button */}
-        <div className="sticky top-0 z-10 bg-gray-50 dark:bg-slate-900 -mx-6 px-6 py-4 -mt-6 mb-2 border-b border-gray-200 dark:border-slate-700">
+        <div className="sticky top-0 z-10 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md -mx-6 px-6 py-4 -mt-6 mb-2 border-b border-gray-200 dark:border-slate-700">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
