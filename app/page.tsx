@@ -30,6 +30,14 @@ export default function LandingPage() {
   const heroRef = useRef<HTMLDivElement>(null);
   const [isHeroVisible, setIsHeroVisible] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Use dark theme as default for SSR
+  const currentTheme = mounted ? theme : 'dark';
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     // If user is logged in, redirect to dashboard (Supabase-style)
@@ -188,28 +196,28 @@ export default function LandingPage() {
             <div className="aspect-video flex items-center justify-center p-4">
               {/* Mockup Browser Window */}
               <div className={`w-full h-full rounded-lg border shadow-xl overflow-hidden flex ${
-                theme === 'dark'
+                currentTheme === 'dark'
                   ? 'bg-[#1a2332] border-slate-700'
                   : 'bg-white border-gray-200'
               }`}>
                 {/* Left Sidebar - Conversations List */}
                 <div className={`w-72 border-r flex flex-col ${
-                  theme === 'dark'
+                  currentTheme === 'dark'
                     ? 'bg-[#0f1621] border-slate-700'
                     : 'bg-gray-50 border-gray-200'
                 }`}>
                   {/* Inbox Header */}
                   <div className={`p-4 border-b ${
-                    theme === 'dark' ? 'border-slate-700' : 'border-gray-200'
+                    currentTheme === 'dark' ? 'border-slate-700' : 'border-gray-200'
                   }`}>
                     <h2 className={`font-semibold text-sm flex items-center gap-2 ${
-                      theme === 'dark' ? 'text-white' : 'text-gray-900'
+                      currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
                     }`}>
                       <MessageSquare className="w-4 h-4 text-primary" />
                       Inbox
                     </h2>
                     <p className={`text-xs mt-0.5 ${
-                      theme === 'dark' ? 'text-slate-400' : 'text-gray-500'
+                      currentTheme === 'dark' ? 'text-slate-400' : 'text-gray-500'
                     }`}>6 conversations</p>
                   </div>
 
@@ -218,7 +226,7 @@ export default function LandingPage() {
                     <div className="p-2 space-y-1">
                       {/* Active Conversation */}
                       <div className={`flex items-center gap-3 p-2 rounded-lg border animate-slide-up-fade-in ${
-                        theme === 'dark'
+                        currentTheme === 'dark'
                           ? 'bg-slate-800/50 border-primary/20'
                           : 'bg-white border-gray-200 shadow-sm'
                       }`}>
@@ -228,12 +236,12 @@ export default function LandingPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className={`text-xs font-medium ${
-                              theme === 'dark' ? 'text-white' : 'text-gray-900'
+                              currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
                             }`}>@sarahcoffee</span>
                             <Instagram className="w-3 h-3 text-pink-400" />
                           </div>
                           <p className={`text-xs truncate ${
-                            theme === 'dark' ? 'text-slate-400' : 'text-gray-500'
+                            currentTheme === 'dark' ? 'text-slate-400' : 'text-gray-500'
                           }`}>Do you have decaf options?</p>
                         </div>
                         <span className="text-[10px] text-green-500 font-medium">open</span>
@@ -241,7 +249,7 @@ export default function LandingPage() {
 
                       {/* WhatsApp Conversation */}
                       <div className={`flex items-center gap-3 p-2 rounded-lg animate-slide-up-fade-in animation-delay-200 ${
-                        theme === 'dark'
+                        currentTheme === 'dark'
                           ? 'hover:bg-slate-800/30'
                           : 'hover:bg-gray-100'
                       }`}>
@@ -251,12 +259,12 @@ export default function LandingPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className={`text-xs ${
-                              theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
+                              currentTheme === 'dark' ? 'text-slate-300' : 'text-gray-700'
                             }`}>+1 415-555-0199</span>
                             <MessageCircle className="w-3 h-3 text-emerald-400" />
                           </div>
                           <p className={`text-xs truncate ${
-                            theme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+                            currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
                           }`}>When do you open tomorrow?</p>
                         </div>
                         <span className="text-[10px] text-green-500 font-medium">open</span>
@@ -264,7 +272,7 @@ export default function LandingPage() {
 
                       {/* TikTok Conversation */}
                       <div className={`flex items-center gap-3 p-2 rounded-lg animate-slide-up-fade-in animation-delay-400 ${
-                        theme === 'dark' ? 'hover:bg-slate-800/30' : 'hover:bg-gray-100'
+                        currentTheme === 'dark' ? 'hover:bg-slate-800/30' : 'hover:bg-gray-100'
                       }`}>
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-pink-600 flex items-center justify-center text-white text-xs font-bold">
                           LC
@@ -272,14 +280,14 @@ export default function LandingPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className={`text-xs ${
-                              theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
+                              currentTheme === 'dark' ? 'text-slate-300' : 'text-gray-700'
                             }`}>@lattecreator</span>
                             <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
                               <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" fill="currentColor"/>
                             </svg>
                           </div>
                           <p className={`text-xs truncate ${
-                            theme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+                            currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
                           }`}>Is this available for wholesale?</p>
                         </div>
                         <span className="text-[10px] text-green-500 font-medium">open</span>
@@ -287,7 +295,7 @@ export default function LandingPage() {
 
                       {/* Email Conversation */}
                       <div className={`flex items-center gap-3 p-2 rounded-lg animate-slide-up-fade-in animation-delay-600 ${
-                        theme === 'dark' ? 'hover:bg-slate-800/30' : 'hover:bg-gray-100'
+                        currentTheme === 'dark' ? 'hover:bg-slate-800/30' : 'hover:bg-gray-100'
                       }`}>
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">
                           MC
@@ -295,12 +303,12 @@ export default function LandingPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className={`text-xs ${
-                              theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
+                              currentTheme === 'dark' ? 'text-slate-300' : 'text-gray-700'
                             }`}>Mike Chen</span>
                             <Mail className="w-3 h-3 text-slate-400" />
                           </div>
                           <p className={`text-xs truncate ${
-                            theme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+                            currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
                           }`}>Thanks for the quick response!</p>
                         </div>
                         <span className="text-[10px] text-green-500 font-medium">open</span>
@@ -314,12 +322,12 @@ export default function LandingPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className={`text-xs ${
-                              theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
+                              currentTheme === 'dark' ? 'text-slate-300' : 'text-gray-700'
                             }`}>@alexbrews</span>
                             <Instagram className="w-3 h-3 text-pink-400" />
                           </div>
                           <p className={`text-xs truncate ${
-                            theme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+                            currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
                           }`}>Love your new blend!</p>
                         </div>
                         <span className="text-[10px] text-green-500 font-medium">open</span>
@@ -333,12 +341,12 @@ export default function LandingPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className={`text-xs ${
-                              theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
+                              currentTheme === 'dark' ? 'text-slate-300' : 'text-gray-700'
                             }`}>Taylor Smith</span>
                             <MessageCircle className="w-3 h-3 text-emerald-400" />
                           </div>
                           <p className={`text-xs truncate ${
-                            theme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+                            currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
                           }`}>Perfect, order received!</p>
                         </div>
                         <span className="text-[10px] text-green-500 font-medium">open</span>
@@ -351,7 +359,7 @@ export default function LandingPage() {
                 <div className="flex-1 flex flex-col relative">
                   {/* Chat Header */}
                   <div className={`h-16 border-b flex items-center px-6 animate-slide-up-fade-in animation-delay-400 ${
-                    theme === 'dark'
+                    currentTheme === 'dark'
                       ? 'bg-[#0f1621] border-slate-700'
                       : 'bg-gray-50 border-gray-200'
                   }`}>
@@ -361,10 +369,10 @@ export default function LandingPage() {
                       </div>
                       <div>
                         <h3 className={`text-sm font-semibold ${
-                          theme === 'dark' ? 'text-white' : 'text-gray-900'
+                          currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
                         }`}>@sarahcoffee</h3>
                         <p className={`text-xs flex items-center gap-1 ${
-                          theme === 'dark' ? 'text-slate-400' : 'text-gray-500'
+                          currentTheme === 'dark' ? 'text-slate-400' : 'text-gray-500'
                         }`}>
                           <Instagram className="w-3 h-3" />
                           via Instagram
@@ -382,14 +390,14 @@ export default function LandingPage() {
                       </div>
                       <div className="flex-1">
                         <div className={`rounded-lg px-3 py-2 max-w-[80%] text-xs ${
-                          theme === 'dark'
+                          currentTheme === 'dark'
                             ? 'bg-slate-700/50 text-slate-100'
                             : 'bg-gray-100 text-gray-900'
                         }`}>
                           <span className="typing-text">Hi! Do you have any decaf coffee options? I love coffee but can't have caffeine 😊</span>
                         </div>
                         <span className={`text-[10px] mt-1 block ${
-                          theme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+                          currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
                         }`}>2m ago</span>
                       </div>
                     </div>
@@ -401,7 +409,7 @@ export default function LandingPage() {
                           <span className="typing-text">Yes! We have 3 delicious decaf options: Swiss Water Decaf, French Vanilla Decaf, and Hazelnut Decaf ☕</span>
                         </div>
                         <span className={`text-[10px] mt-1 ${
-                          theme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+                          currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
                         }`}>1m ago • Support Team</span>
                       </div>
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
@@ -416,14 +424,14 @@ export default function LandingPage() {
                       </div>
                       <div className="flex-1">
                         <div className={`rounded-lg px-3 py-2 max-w-[80%] text-xs ${
-                          theme === 'dark'
+                          currentTheme === 'dark'
                             ? 'bg-slate-700/50 text-slate-100'
                             : 'bg-gray-100 text-gray-900'
                         }`}>
                           <span className="typing-text">Perfect! Which one is most popular?</span>
                         </div>
                         <span className={`text-[10px] mt-1 block ${
-                          theme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+                          currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
                         }`}>30s ago</span>
                       </div>
                     </div>
@@ -439,19 +447,19 @@ export default function LandingPage() {
                     {/* AI Suggestion Panel pops up after button click, stays visible, then fades out */}
                     <div className="absolute bottom-20 left-6 right-6 animate-ai-panel animation-delay-2000" style={{ animationFillMode: 'forwards' }}>
                       <div className={`border-2 border-purple-500 rounded-lg p-4 shadow-2xl ${
-                        theme === 'dark' ? 'bg-slate-800' : 'bg-white'
+                        currentTheme === 'dark' ? 'bg-slate-800' : 'bg-white'
                       }`}>
                         <div className="flex items-center gap-2 mb-3">
                           <Sparkles className="w-4 h-4 text-purple-400" />
                           <span className={`text-xs font-semibold ${
-                            theme === 'dark' ? 'text-white' : 'text-gray-900'
+                            currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
                           }`}>AI Suggested Response</span>
                         </div>
                         <div className={`rounded-lg p-3 mb-3 ${
-                          theme === 'dark' ? 'bg-slate-700/50' : 'bg-gray-50'
+                          currentTheme === 'dark' ? 'bg-slate-700/50' : 'bg-gray-50'
                         }`}>
                           <p className={`text-xs leading-relaxed ${
-                            theme === 'dark' ? 'text-slate-200' : 'text-gray-700'
+                            currentTheme === 'dark' ? 'text-slate-200' : 'text-gray-700'
                           }`}>
                             Our Swiss Water Decaf is definitely the customer favorite! It has a smooth, rich flavor and is processed without chemicals. Many customers say they can't even tell it's decaf 🌟
                           </p>
@@ -485,14 +493,14 @@ export default function LandingPage() {
                       </div>
                       <div className="flex-1">
                         <div className={`rounded-lg px-3 py-2 max-w-[80%] text-xs ${
-                          theme === 'dark'
+                          currentTheme === 'dark'
                             ? 'bg-slate-700/50 text-slate-100'
                             : 'bg-gray-100 text-gray-900'
                         }`}>
                           <span className="typing-text">Awesome! I'll order that one. Thanks so much! 💜</span>
                         </div>
                         <span className={`text-[10px] mt-1 block ${
-                          theme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+                          currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
                         }`}>Just now</span>
                       </div>
                     </div>
@@ -504,7 +512,7 @@ export default function LandingPage() {
                           <span className="typing-text">You're so welcome! Enjoy your coffee, and feel free to reach out anytime ☕✨</span>
                         </div>
                         <span className={`text-[10px] mt-1 ${
-                          theme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+                          currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
                         }`}>Just now • Support Team</span>
                       </div>
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
