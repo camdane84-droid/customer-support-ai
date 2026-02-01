@@ -21,7 +21,11 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
+      className={`p-2 rounded-lg border border-purple-400/30 transition-all ${
+        theme === 'dark'
+          ? 'text-slate-400 hover:text-black/70 hover:bg-gradient-to-br hover:from-purple-100 hover:via-purple-200 hover:to-purple-300'
+          : 'text-gray-600 hover:text-white hover:bg-gradient-to-br hover:from-purple-900/60 hover:via-purple-950/70 hover:to-purple-950/90'
+      }`}
       aria-label="Toggle dark mode"
     >
       {theme === 'dark' ? (
