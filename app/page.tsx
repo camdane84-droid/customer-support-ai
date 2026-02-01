@@ -703,8 +703,8 @@ export default function LandingPage() {
             </div>
 
             {/* Starter Tier */}
-            <div className="p-8 rounded-xl border-2 border-purple-400/50 bg-purple-900/50 backdrop-blur-lg relative">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-semibold rounded-full shadow-lg">
+            <div className="p-8 rounded-xl border-2 border-purple-400/50 bg-gradient-to-tr from-purple-950/60 to-purple-900/50 backdrop-blur-lg relative">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-sm font-semibold rounded-full">
                 Most Popular
               </div>
 
