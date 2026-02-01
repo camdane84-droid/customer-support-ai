@@ -438,21 +438,21 @@ export default function LandingPage() {
       <section className="py-16 border-b border-purple-400/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center p-6 rounded-xl bg-white/5 dark:bg-white/10 backdrop-blur-lg border border-white/20">
+            <div className="text-center p-6 rounded-xl bg-slate-900/40 backdrop-blur-lg border border-purple-400/20">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
                 <Zap className="w-8 h-8 text-primary" />
               </div>
               <div className="text-5xl font-bold text-primary mb-2">10x</div>
               <div className="text-muted-foreground font-medium">Faster Response Times</div>
             </div>
-            <div className="text-center p-6 rounded-xl bg-white/5 dark:bg-white/10 backdrop-blur-lg border border-white/20">
+            <div className="text-center p-6 rounded-xl bg-slate-900/40 backdrop-blur-lg border border-purple-400/20">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
                 <MessageSquare className="w-8 h-8 text-primary" />
               </div>
               <div className="text-5xl font-bold text-primary mb-2">5+</div>
               <div className="text-muted-foreground font-medium">Channels Unified</div>
             </div>
-            <div className="text-center p-6 rounded-xl bg-white/5 dark:bg-white/10 backdrop-blur-lg border border-white/20">
+            <div className="text-center p-6 rounded-xl bg-slate-900/40 backdrop-blur-lg border border-purple-400/20">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
                 <Star className="w-8 h-8 text-primary fill-primary" />
               </div>
@@ -661,7 +661,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {/* Free Tier */}
-            <div className="p-8 rounded-xl border-2 border-white/20 bg-white/5 dark:bg-white/10 backdrop-blur-lg">
+            <div className="p-8 rounded-xl border-2 border-purple-400/20 bg-slate-900/40 backdrop-blur-lg">
               <div className="mb-6">
                 <h3 className="text-2xl font-bold mb-2">Free</h3>
                 <div className="mb-4">
@@ -753,7 +753,7 @@ export default function LandingPage() {
             </div>
 
             {/* Pro Tier */}
-            <div className="p-8 rounded-xl border-2 border-white/20 bg-white/5 dark:bg-white/10 backdrop-blur-lg">
+            <div className="p-8 rounded-xl border-2 border-purple-400/20 bg-slate-900/40 backdrop-blur-lg">
               <div className="mb-6">
                 <h3 className="text-2xl font-bold mb-2">Pro</h3>
                 <div className="mb-4">
@@ -827,7 +827,7 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-8 rounded-xl border-2 border-white/20 bg-white/5 dark:bg-white/10 backdrop-blur-lg">
+            <div className="p-8 rounded-xl border-2 border-purple-400/20 bg-slate-900/40 backdrop-blur-lg">
               <div className="flex gap-1 mb-4">
                 <Star className="w-5 h-5 text-primary fill-primary" />
                 <Star className="w-5 h-5 text-primary fill-primary" />
@@ -849,7 +849,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="p-8 rounded-xl border-2 border-white/20 bg-white/5 dark:bg-white/10 backdrop-blur-lg">
+            <div className="p-8 rounded-xl border-2 border-purple-400/20 bg-slate-900/40 backdrop-blur-lg">
               <div className="flex gap-1 mb-4">
                 <Star className="w-5 h-5 text-primary fill-primary" />
                 <Star className="w-5 h-5 text-primary fill-primary" />
@@ -871,7 +871,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="p-8 rounded-xl border-2 border-white/20 bg-white/5 dark:bg-white/10 backdrop-blur-lg">
+            <div className="p-8 rounded-xl border-2 border-purple-400/20 bg-slate-900/40 backdrop-blur-lg">
               <div className="flex gap-1 mb-4">
                 <Star className="w-5 h-5 text-primary fill-primary" />
                 <Star className="w-5 h-5 text-primary fill-primary" />
