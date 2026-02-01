@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/context/AuthContext";
 import { ThemeProvider } from "@/lib/context/ThemeContext";
+import { Analytics } from "@vercel/analytics/react";
 import "@/lib/env-validation"; // Validate environment variables at startup
 
 const geistSans = Geist({
@@ -52,6 +53,7 @@ export default function RootLayout({
             {children}
           </AuthProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
