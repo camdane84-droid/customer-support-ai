@@ -704,7 +704,7 @@ export default function LandingPage() {
 
             {/* Starter Tier */}
             <div className="p-8 rounded-xl border-2 border-purple-400/50 backdrop-blur-lg relative">
-              <div className="absolute inset-0 rounded-xl bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-950/80 via-purple-800/50 to-purple-600/30 pointer-events-none"></div>
+              <div className="absolute inset-0 rounded-xl bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-950 via-purple-800 to-purple-700 opacity-60 pointer-events-none"></div>
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-sm font-semibold rounded-full z-10">
                 Most Popular
               </div>
