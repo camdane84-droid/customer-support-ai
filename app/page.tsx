@@ -100,7 +100,7 @@ export default function LandingPage() {
       {/* Navigation */}
       <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-purple-600/80 backdrop-blur-md border-b border-purple-500/30 shadow-lg'
+          ? 'bg-purple-600/20 backdrop-blur-lg border-b border-purple-500/20 shadow-sm'
           : 'bg-transparent border-b border-transparent'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
