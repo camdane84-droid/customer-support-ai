@@ -478,7 +478,7 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="p-6 rounded-xl bg-white/5 dark:bg-white/10 backdrop-blur-lg border border-white/20 hover:shadow-lg hover:bg-white/10 dark:hover:bg-white/15 transition-shadow">
+            <div className="p-6 rounded-xl bg-slate-900/40 backdrop-blur-lg border border-purple-400/20 hover:shadow-lg hover:bg-slate-900/50 transition-all">
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Sparkles className="w-6 h-6 text-primary" />
               </div>
@@ -488,7 +488,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="p-6 rounded-xl bg-white/5 dark:bg-white/10 backdrop-blur-lg border border-white/20 hover:shadow-lg hover:bg-white/10 dark:hover:bg-white/15 transition-shadow">
+            <div className="p-6 rounded-xl bg-slate-900/40 backdrop-blur-lg border border-purple-400/20 hover:shadow-lg hover:bg-slate-900/50 transition-all">
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <MessageSquare className="w-6 h-6 text-primary" />
               </div>
@@ -498,7 +498,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="p-6 rounded-xl bg-white/5 dark:bg-white/10 backdrop-blur-lg border border-white/20 hover:shadow-lg hover:bg-white/10 dark:hover:bg-white/15 transition-shadow">
+            <div className="p-6 rounded-xl bg-slate-900/40 backdrop-blur-lg border border-purple-400/20 hover:shadow-lg hover:bg-slate-900/50 transition-all">
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Zap className="w-6 h-6 text-primary" />
               </div>
@@ -508,7 +508,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="p-6 rounded-xl bg-white/5 dark:bg-white/10 backdrop-blur-lg border border-white/20 hover:shadow-lg hover:bg-white/10 dark:hover:bg-white/15 transition-shadow">
+            <div className="p-6 rounded-xl bg-slate-900/40 backdrop-blur-lg border border-purple-400/20 hover:shadow-lg hover:bg-slate-900/50 transition-all">
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Users className="w-6 h-6 text-primary" />
               </div>
@@ -518,7 +518,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="p-6 rounded-xl bg-white/5 dark:bg-white/10 backdrop-blur-lg border border-white/20 hover:shadow-lg hover:bg-white/10 dark:hover:bg-white/15 transition-shadow">
+            <div className="p-6 rounded-xl bg-slate-900/40 backdrop-blur-lg border border-purple-400/20 hover:shadow-lg hover:bg-slate-900/50 transition-all">
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <BarChart3 className="w-6 h-6 text-primary" />
               </div>
@@ -528,7 +528,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="p-6 rounded-xl bg-white/5 dark:bg-white/10 backdrop-blur-lg border border-white/20 hover:shadow-lg hover:bg-white/10 dark:hover:bg-white/15 transition-shadow">
+            <div className="p-6 rounded-xl bg-slate-900/40 backdrop-blur-lg border border-purple-400/20 hover:shadow-lg hover:bg-slate-900/50 transition-all">
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <TrendingUp className="w-6 h-6 text-primary" />
               </div>
