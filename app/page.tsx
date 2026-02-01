@@ -600,7 +600,7 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <div className="p-8 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-card to-primary/5 text-center hover:shadow-xl transition-shadow group">
+            <div className="p-8 rounded-xl border-2 border-purple-400/20 bg-slate-900/40 backdrop-blur-lg text-center hover:shadow-xl hover:bg-slate-900/50 transition-all group">
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                 <Mail className="w-8 h-8 text-primary" />
               </div>
@@ -611,7 +611,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="p-8 rounded-xl border-2 border-primary bg-gradient-to-br from-primary/10 to-primary/5 text-center hover:shadow-xl transition-shadow group relative overflow-hidden">
+            <div className="p-8 rounded-xl border-2 border-purple-400/50 bg-purple-900/50 backdrop-blur-lg text-center hover:shadow-xl hover:bg-purple-900/60 transition-all group relative overflow-hidden">
               <div className="absolute top-0 right-0 px-3 py-1 bg-primary text-primary-foreground text-xs font-semibold rounded-bl-lg">
                 Popular
               </div>
@@ -625,7 +625,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="p-8 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-card to-primary/5 text-center hover:shadow-xl transition-shadow group">
+            <div className="p-8 rounded-xl border-2 border-purple-400/20 bg-slate-900/40 backdrop-blur-lg text-center hover:shadow-xl hover:bg-slate-900/50 transition-all group">
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                 <MessageCircle className="w-8 h-8 text-primary" />
               </div>
