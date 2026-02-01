@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/context/AuthContext';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import {
   MessageSquare,
   Sparkles,
@@ -105,6 +106,7 @@ export default function LandingPage() {
               </a>
             </div>
             <div className="flex items-center gap-4">
+              <ThemeToggle />
               <Link
                 href="/login"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
