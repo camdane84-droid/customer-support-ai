@@ -45,3 +45,7 @@ next-env.d.ts
 # Claude Code
 .claude/settings.local.json
 tmpclaude-*
+
+# Local screenshots and diagnostic scripts
+*.png
+scripts/
