@@ -100,23 +100,23 @@ export default function LandingPage() {
       {/* Navigation */}
       <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-background/70 backdrop-blur-md border-b border-border/50 shadow-sm'
+          ? 'bg-purple-600/80 backdrop-blur-md border-b border-purple-500/30 shadow-lg'
           : 'bg-transparent border-b border-transparent'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center gap-2">
               <Image src="/logo.svg" alt="InboxForge" width={32} height={32} className="w-8 h-8" />
-              <span className="text-xl font-bold">InboxForge</span>
+              <span className={`text-xl font-bold transition-colors ${isScrolled ? 'text-white' : ''}`}>InboxForge</span>
             </Link>
             <div className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <a href="#features" className={`text-sm transition-colors ${isScrolled ? 'text-white/90 hover:text-white' : 'text-muted-foreground hover:text-foreground'}`}>
                 Features
               </a>
-              <a href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <a href="#how-it-works" className={`text-sm transition-colors ${isScrolled ? 'text-white/90 hover:text-white' : 'text-muted-foreground hover:text-foreground'}`}>
                 How It Works
               </a>
-              <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <a href="#pricing" className={`text-sm transition-colors ${isScrolled ? 'text-white/90 hover:text-white' : 'text-muted-foreground hover:text-foreground'}`}>
                 Pricing
               </a>
             </div>
@@ -124,13 +124,17 @@ export default function LandingPage() {
               <ThemeToggle />
               <Link
                 href="/login"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className={`text-sm transition-colors ${isScrolled ? 'text-white/90 hover:text-white' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Log in
               </Link>
               <Link
                 href="/signup"
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  isScrolled
+                    ? 'bg-white text-purple-600 hover:bg-white/90'
+                    : 'bg-primary text-primary-foreground hover:opacity-90'
+                }`}
               >
                 Start Free Trial
               </Link>
