@@ -46,70 +46,70 @@
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
+  --foreground: oklch(0.2 0.015 285.883);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
+  --card-foreground: oklch(0.2 0.015 285.883);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
+  --popover-foreground: oklch(0.2 0.015 285.883);
+  --primary: oklch(0.64 0.238 293.498);
   --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+  --secondary: oklch(0.968 0.007 285.883);
+  --secondary-foreground: oklch(0.2 0.015 285.883);
+  --muted: oklch(0.968 0.007 285.883);
+  --muted-foreground: oklch(0.554 0.046 285.883);
+  --accent: oklch(0.968 0.007 285.883);
+  --accent-foreground: oklch(0.64 0.238 293.498);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --border: oklch(0.929 0.013 285.883);
+  --input: oklch(0.929 0.013 285.883);
+  --ring: oklch(0.704 0.15 293.498);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-3: oklch(0.64 0.238 293.498);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
   --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
+  --sidebar-foreground: oklch(0.2 0.015 285.883);
+  --sidebar-primary: oklch(0.64 0.238 293.498);
   --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
+  --sidebar-accent: oklch(0.968 0.007 285.883);
+  --sidebar-accent-foreground: oklch(0.64 0.238 293.498);
+  --sidebar-border: oklch(0.929 0.013 285.883);
+  --sidebar-ring: oklch(0.704 0.15 293.498);
 }
 
 .dark {
-  --background: oklch(0.129 0.042 264.695);
+  --background: oklch(0.15 0.015 285.883);
   --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
+  --card: oklch(0.22 0.025 285.883);
   --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
+  --popover: oklch(0.22 0.025 285.883);
   --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
+  --primary: oklch(0.7 0.22 293.498);
+  --primary-foreground: oklch(0.15 0.015 285.883);
+  --secondary: oklch(0.3 0.04 285.883);
   --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
+  --muted: oklch(0.3 0.04 285.883);
+  --muted-foreground: oklch(0.704 0.04 285.883);
+  --accent: oklch(0.3 0.04 285.883);
   --accent-foreground: oklch(0.984 0.003 247.858);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
-  --chart-1: oklch(0.488 0.243 264.376);
+  --ring: oklch(0.7 0.22 293.498);
+  --chart-1: oklch(0.7 0.22 293.498);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
+  --sidebar: oklch(0.22 0.025 285.883);
   --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
+  --sidebar-primary: oklch(0.7 0.22 293.498);
+  --sidebar-primary-foreground: oklch(0.15 0.015 285.883);
+  --sidebar-accent: oklch(0.3 0.04 285.883);
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+  --sidebar-ring: oklch(0.7 0.22 293.498);
 }
 
 @layer base {
@@ -153,5 +153,288 @@
 
   .animate-message-in {
     animation: message-pop-in 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Hero Demo Animations */
+  @keyframes typing-pulse {
+    0%, 100% {
+      opacity: 0.4;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  /* Typing text effect */
+  @keyframes typing-then-wrap {
+    0% {
+      width: 0;
+      white-space: nowrap;
+    }
+    99% {
+      width: 100%;
+      white-space: nowrap;
+    }
+    100% {
+      width: auto;
+      white-space: normal;
+    }
+  }
+
+  .typing-text {
+    overflow: hidden;
+    white-space: nowrap;
+    display: inline-block;
+    width: 0;
+  }
+
+  /* Typing animation synced with each message */
+  .hero-visible .animation-delay-600 .typing-text {
+    animation: typing-then-wrap 1.5s steps(60, end) forwards;
+    animation-delay: 1000ms;
+  }
+
+  .hero-visible .animation-delay-1000 .typing-text {
+    animation: typing-then-wrap 1.5s steps(60, end) forwards;
+    animation-delay: 3000ms;
+  }
+
+  .hero-visible .animation-delay-1400 .typing-text {
+    animation: typing-then-wrap 1.5s steps(60, end) forwards;
+    animation-delay: 5000ms;
+  }
+
+  .hero-visible .animation-delay-3200 .typing-text {
+    animation: typing-then-wrap 1.5s steps(60, end) forwards;
+    animation-delay: 12000ms;
+  }
+
+  .hero-visible .animation-delay-3800 .typing-text {
+    animation: typing-then-wrap 1.5s steps(60, end) forwards;
+    animation-delay: 14000ms;
+  }
+
+  /* No typing for AI-generated message - appears instantly */
+  .no-typing {
+    width: 100%;
+    overflow: visible;
+    white-space: normal;
+  }
+
+  /* Button click then fade out */
+  @keyframes button-click-fade {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    20% {
+      transform: scale(0.95);
+      opacity: 1;
+    }
+    40% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0;
+    }
+  }
+
+  .hero-visible .animate-button-click.animation-delay-1800 {
+    animation: button-click-fade 1s ease-out forwards;
+    animation-delay: 8000ms;
+  }
+
+  .hero-visible .animate-button-click.animation-delay-2400 {
+    animation: button-click-fade 1s ease-out forwards;
+    animation-delay: 10000ms;
+  }
+
+  @keyframes slide-up-fade-in {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 20px 5px rgba(139, 92, 246, 0.2);
+    }
+  }
+
+  .hero-visible .animate-typing-pulse {
+    animation: typing-pulse 1.5s ease-in-out infinite;
+  }
+
+  .animate-slide-up-fade-in {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .hero-visible .animate-slide-up-fade-in {
+    animation: slide-up-fade-in 0.6s ease-out forwards;
+  }
+
+  /* Make sure delays are preserved */
+  .hero-visible .animation-delay-200 {
+    animation-delay: 1600ms;
+  }
+
+  .hero-visible .animation-delay-400 {
+    animation-delay: 1600ms;
+  }
+
+  .hero-visible .animation-delay-600 {
+    animation-delay: 1000ms;
+  }
+
+  .hero-visible .animation-delay-800 {
+    animation-delay: 1600ms;
+  }
+
+  .hero-visible .animation-delay-1000 {
+    animation-delay: 3000ms;
+  }
+
+  .hero-visible .animation-delay-1400 {
+    animation-delay: 5000ms;
+  }
+
+  .hero-visible .animation-delay-1500 {
+    animation-delay: 7000ms;
+  }
+
+  .hero-visible .animation-delay-1800 {
+    animation-delay: 8000ms;
+  }
+
+  .hero-visible .animation-delay-2000 {
+    animation-delay: 8500ms;
+  }
+
+  .hero-visible .animation-delay-2600 {
+    animation-delay: 10500ms;
+  }
+
+  .hero-visible .animation-delay-2800 {
+    animation-delay: 11000ms;
+  }
+
+  .hero-visible .animation-delay-3200 {
+    animation-delay: 12000ms;
+  }
+
+  .hero-visible .animation-delay-3800 {
+    animation-delay: 14000ms;
+  }
+
+  .hero-visible .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .animation-delay-200 {
+    animation-delay: 1600ms;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 1600ms;
+  }
+
+  .animation-delay-600 {
+    animation-delay: 1000ms;
+  }
+
+  .animation-delay-800 {
+    animation-delay: 1600ms;
+  }
+
+  .animation-delay-1000 {
+    animation-delay: 3000ms;
+  }
+
+  .animation-delay-1400 {
+    animation-delay: 5000ms;
+  }
+
+  .animation-delay-1500 {
+    animation-delay: 7000ms;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 8500ms;
+  }
+
+  .animation-delay-2600 {
+    animation-delay: 10500ms;
+  }
+
+  .animation-delay-3200 {
+    animation-delay: 12000ms;
+  }
+
+  .animation-delay-3800 {
+    animation-delay: 14000ms;
+  }
+
+  @keyframes slide-down-fade-out {
+    0% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+    }
+  }
+
+  .hero-visible .animate-slide-down-fade-out {
+    animation: slide-down-fade-out 0.4s ease-out forwards;
+  }
+
+  .animation-delay-2400 {
+    animation-delay: 10000ms;
+  }
+
+  .animation-delay-2800 {
+    animation-delay: 11000ms;
+  }
+
+  /* AI Panel lifecycle - appears, stays, then disappears */
+  @keyframes ai-panel-lifecycle {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    5% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    85% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
+
+  /* AI panel starts hidden */
+  .animate-ai-panel {
+    opacity: 0;
+  }
+
+  .hero-visible .animate-ai-panel.animation-delay-2000 {
+    animation: ai-panel-lifecycle 2.5s ease-out forwards;
+    animation-delay: 8500ms;
   }
 }
