@@ -27,6 +27,7 @@ export default function LandingPage() {
   const router = useRouter();
   const heroRef = useRef<HTMLDivElement>(null);
   const [isHeroVisible, setIsHeroVisible] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     // If user is logged in, redirect to dashboard (Supabase-style)
@@ -34,6 +35,16 @@ export default function LandingPage() {
       router.push('/dashboard');
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    // Detect scroll for navbar blur effect
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const currentRef = heroRef.current;
@@ -87,7 +98,11 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-md border-b border-border z-50">
+      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+        isScrolled
+          ? 'bg-background/70 backdrop-blur-md border-b border-border/50 shadow-sm'
+          : 'bg-transparent border-b border-transparent'
+      }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center gap-2">
