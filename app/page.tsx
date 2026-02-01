@@ -703,7 +703,8 @@ export default function LandingPage() {
             </div>
 
             {/* Starter Tier */}
-            <div className="p-8 rounded-xl border-2 border-purple-400/50 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-950/70 via-purple-900/50 to-purple-700/40 backdrop-blur-lg relative">
+            <div className="p-8 rounded-xl border-2 border-purple-400/50 backdrop-blur-lg relative overflow-hidden">
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-950 via-purple-800/60 to-purple-600/30 -z-10"></div>
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-sm font-semibold rounded-full">
                 Most Popular
               </div>
