@@ -288,10 +288,24 @@
   .animate-slide-up-fade-in {
     opacity: 0;
     transform: translateY(10px);
+    will-change: opacity, transform;
   }
 
   .hero-visible .animate-slide-up-fade-in {
     animation: slide-up-fade-in 0.6s ease-out forwards;
+  }
+
+  /* GPU acceleration for other animated elements */
+  .typing-text,
+  .animate-ai-panel,
+  .animate-button-click {
+    will-change: opacity, transform;
+  }
+
+  /* Content visibility optimization for hero demo */
+  .hero-demo-container {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 600px;
   }
 
   /* Sidebar conversations - all load together early */

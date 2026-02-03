@@ -65,19 +65,18 @@ export default function LandingPage() {
     const currentRef = heroRef.current;
     if (!currentRef) return;
 
-    // Observer for triggering animations
+    // Observer for triggering/pausing animations based on visibility
     const isSmallScreen = window.innerWidth < 1024;
     const animationObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsHeroVisible(true);
-          }
+          // Start animations when visible, pause when scrolled away
+          setIsHeroVisible(entry.isIntersecting);
         });
       },
       {
-        threshold: isSmallScreen ? 0.3 : 0.5,
-        rootMargin: '0px'
+        threshold: isSmallScreen ? 0.1 : 0.2,
+        rootMargin: '100px'
       }
     );
 
@@ -198,7 +197,7 @@ export default function LandingPage() {
           </div>
 
           {/* Hero Image - Dashboard Preview */}
-          <div ref={heroRef} className={`mt-16 rounded-xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-primary/10 overflow-hidden shadow-2xl relative ${isHeroVisible ? 'hero-visible' : ''}`}>
+          <div ref={heroRef} className={`mt-16 rounded-xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-primary/10 overflow-hidden shadow-2xl relative hero-demo-container ${isHeroVisible ? 'hero-visible' : ''}`}>
             <div className="aspect-video flex items-center justify-center p-4">
               {/* Mockup Browser Window */}
               <div className={`w-full rounded-lg border shadow-xl overflow-hidden flex ${
