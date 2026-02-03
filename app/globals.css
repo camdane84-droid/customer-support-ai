@@ -214,6 +214,16 @@
     animation-delay: 14000ms;
   }
 
+  .hero-visible .animation-delay-4200 .typing-text {
+    animation: typing-then-wrap 1.5s steps(60, end) forwards;
+    animation-delay: 16000ms;
+  }
+
+  .hero-visible .animation-delay-4600 .typing-text {
+    animation: typing-then-wrap 1.5s steps(60, end) forwards;
+    animation-delay: 18000ms;
+  }
+
   /* No typing for AI-generated message - appears instantly */
   .no-typing {
     width: 100%;
@@ -284,6 +294,15 @@
     animation: slide-up-fade-in 0.6s ease-out forwards;
   }
 
+  /* Sidebar conversations - all load together early */
+  .animation-delay-sidebar {
+    animation-delay: 200ms;
+  }
+
+  .hero-visible .animation-delay-sidebar {
+    animation-delay: 200ms;
+  }
+
   /* Make sure delays are preserved */
   .hero-visible .animation-delay-200 {
     animation-delay: 1600ms;
@@ -337,6 +356,14 @@
     animation-delay: 14000ms;
   }
 
+  .hero-visible .animation-delay-4200 {
+    animation-delay: 16000ms;
+  }
+
+  .hero-visible .animation-delay-4600 {
+    animation-delay: 18000ms;
+  }
+
   .hero-visible .animate-pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite;
   }
@@ -383,6 +410,14 @@
 
   .animation-delay-3800 {
     animation-delay: 14000ms;
+  }
+
+  .animation-delay-4200 {
+    animation-delay: 16000ms;
+  }
+
+  .animation-delay-4600 {
+    animation-delay: 18000ms;
   }
 
   @keyframes slide-down-fade-out {
@@ -436,5 +471,84 @@
   .hero-visible .animate-ai-panel.animation-delay-2000 {
     animation: ai-panel-lifecycle 2.5s ease-out forwards;
     animation-delay: 8500ms;
+  }
+
+  /* Chatbox typing animations */
+  .chatbox-placeholder {
+    opacity: 1;
+    transition: opacity 0.2s ease;
+  }
+
+  .chatbox-typing {
+    opacity: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 0;
+  }
+
+  /* Typing animation for chatbox */
+  @keyframes chatbox-type-send {
+    0% {
+      opacity: 1;
+      width: 0;
+    }
+    70% {
+      opacity: 1;
+      width: 100%;
+    }
+    85% {
+      opacity: 1;
+      width: 100%;
+    }
+    100% {
+      opacity: 0;
+      width: 100%;
+    }
+  }
+
+  /* Hide placeholder when any typing is active */
+  .hero-visible .chatbox-typing-1,
+  .hero-visible .chatbox-typing-3,
+  .hero-visible .chatbox-typing-4 {
+    background: inherit;
+  }
+
+  /* Reply 1: Customer msg at 1000ms, typing starts 2000ms, sends at 3000ms */
+  .hero-visible .chatbox-typing-1 {
+    animation: chatbox-type-send 2s steps(100, end) forwards;
+    animation-delay: 2000ms;
+  }
+
+  /* Reply 2 is AI-generated - no chatbox typing needed */
+
+  /* Reply 3: Customer msg at 12000ms, typing starts 13000ms, sends at 14000ms */
+  .hero-visible .chatbox-typing-3 {
+    animation: chatbox-type-send 2s steps(80, end) forwards;
+    animation-delay: 13000ms;
+  }
+
+  /* Reply 4: Customer msg at 16000ms, typing starts 17000ms, sends at 18000ms */
+  .hero-visible .chatbox-typing-4 {
+    animation: chatbox-type-send 2s steps(90, end) forwards;
+    animation-delay: 17000ms;
+  }
+
+  /* Pulse send button when message is ready (only for manual replies, not AI) */
+  @keyframes send-pulse {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(147, 51, 234, 0);
+    }
+    50% {
+      transform: scale(1.05);
+      box-shadow: 0 0 0 4px rgba(147, 51, 234, 0.3);
+    }
+  }
+
+  .hero-visible .send-button-pulse {
+    animation:
+      send-pulse 0.3s ease 3800ms,
+      send-pulse 0.3s ease 14800ms,
+      send-pulse 0.3s ease 18800ms;
   }
 }

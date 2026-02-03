@@ -20,7 +20,9 @@ import {
   ArrowRight,
   TrendingUp,
   Star,
-  Music
+  Music,
+  Send,
+  Lightbulb
 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -28,7 +30,9 @@ export default function LandingPage() {
   const { theme } = useTheme();
   const router = useRouter();
   const heroRef = useRef<HTMLDivElement>(null);
-  const [isHeroVisible, setIsHeroVisible] = useState(true);
+  const [isHeroVisible, setIsHeroVisible] = useState(false);
+  const [scrollTickCount, setScrollTickCount] = useState(0);
+  const [hasSnappedToHero, setHasSnappedToHero] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -57,43 +61,106 @@ export default function LandingPage() {
   }, []);
 
   useEffect(() => {
-    const currentRef = heroRef.current;
+    // Don't set up observer until loading is complete and we're showing the landing page
+    if (loading || user) return;
 
-    const observer = new IntersectionObserver(
+    const currentRef = heroRef.current;
+    if (!currentRef) return;
+
+    // Observer for triggering animations
+    const isSmallScreen = window.innerWidth < 1024;
+    const animationObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          // Toggle visibility based on whether element is in viewport
           if (entry.isIntersecting) {
             setIsHeroVisible(true);
-          } else {
-            // Reset when scrolled away
-            setIsHeroVisible(false);
           }
         });
       },
       {
-        threshold: 0.2,
+        threshold: isSmallScreen ? 0.3 : 0.5,
         rootMargin: '0px'
       }
     );
 
-    if (currentRef) {
-      // Check if already in view on mount
+    // Check if hero is sufficiently visible on mount
+    requestAnimationFrame(() => {
       const rect = currentRef.getBoundingClientRect();
-      const isInView = rect.top < window.innerHeight && rect.bottom > 0;
-      if (isInView) {
+      const visibleHeight = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
+      const visibleRatio = visibleHeight / rect.height;
+      const shouldTrigger = visibleRatio >= (isSmallScreen ? 0.3 : 0.5);
+
+      if (shouldTrigger) {
         setIsHeroVisible(true);
       }
+    });
 
-      observer.observe(currentRef);
-    }
+    animationObserver.observe(currentRef);
 
     return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef);
+      animationObserver.unobserve(currentRef);
+    };
+  }, [loading, user]);
+
+  // Track scroll ticks and snap to hero on 4th tick
+  useEffect(() => {
+    if (loading || user || hasSnappedToHero) return;
+
+    const currentRef = heroRef.current;
+    if (!currentRef) return;
+
+    // Custom smooth scroll with easing
+    const smoothScrollToCenter = (element: HTMLElement) => {
+      const rect = element.getBoundingClientRect();
+      const elementCenter = rect.top + rect.height / 2;
+      const viewportCenter = window.innerHeight / 2;
+      const scrollOffset = elementCenter - viewportCenter;
+      const startPosition = window.scrollY;
+      const targetPosition = startPosition + scrollOffset;
+      const duration = 800;
+      let startTime: number | null = null;
+
+      // Ease-out-cubic for smooth deceleration
+      const easeOutCubic = (t: number): number => 1 - Math.pow(1 - t, 3);
+
+      const animateScroll = (currentTime: number) => {
+        if (startTime === null) startTime = currentTime;
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easedProgress = easeOutCubic(progress);
+
+        window.scrollTo(0, startPosition + (targetPosition - startPosition) * easedProgress);
+
+        if (progress < 1) {
+          requestAnimationFrame(animateScroll);
+        }
+      };
+
+      requestAnimationFrame(animateScroll);
+    };
+
+    let tickCount = 0;
+
+    const handleWheel = (e: WheelEvent) => {
+      // Only count downward scrolls
+      if (e.deltaY > 0 && !hasSnappedToHero) {
+        tickCount++;
+        setScrollTickCount(tickCount);
+
+        if (tickCount === 4) {
+          e.preventDefault();
+          smoothScrollToCenter(currentRef);
+          setHasSnappedToHero(true);
+        }
       }
     };
-  }, []);
+
+    window.addEventListener('wheel', handleWheel, { passive: false });
+
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+    };
+  }, [loading, user, hasSnappedToHero]);
 
   // Show loading while checking auth or if user is logged in (redirecting)
   if (loading || user) {
@@ -195,13 +262,13 @@ export default function LandingPage() {
           <div ref={heroRef} className={`mt-16 rounded-xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-primary/10 overflow-hidden shadow-2xl relative ${isHeroVisible ? 'hero-visible' : ''}`}>
             <div className="aspect-video flex items-center justify-center p-4">
               {/* Mockup Browser Window */}
-              <div className={`w-full h-full rounded-lg border shadow-xl overflow-hidden flex ${
+              <div className={`w-full rounded-lg border shadow-xl overflow-hidden flex ${
                 currentTheme === 'dark'
                   ? 'bg-[#1a2332] border-slate-700'
                   : 'bg-white border-gray-200'
               }`}>
                 {/* Left Sidebar - Conversations List */}
-                <div className={`w-72 border-r flex flex-col ${
+                <div className={`w-48 md:w-60 xl:w-72 border-r flex-col flex-shrink-0 flex ${
                   currentTheme === 'dark'
                     ? 'bg-[#0f1621] border-slate-700'
                     : 'bg-gray-50 border-gray-200'
@@ -225,7 +292,7 @@ export default function LandingPage() {
                   <div className="flex-1 overflow-hidden">
                     <div className="p-2 space-y-1">
                       {/* Active Conversation */}
-                      <div className={`flex items-center gap-3 p-2 rounded-lg border animate-slide-up-fade-in ${
+                      <div className={`flex items-center gap-3 p-2 rounded-lg border animate-slide-up-fade-in animation-delay-sidebar ${
                         currentTheme === 'dark'
                           ? 'bg-slate-800/50 border-primary/20'
                           : 'bg-white border-gray-200 shadow-sm'
@@ -248,7 +315,7 @@ export default function LandingPage() {
                       </div>
 
                       {/* WhatsApp Conversation */}
-                      <div className={`flex items-center gap-3 p-2 rounded-lg animate-slide-up-fade-in animation-delay-200 ${
+                      <div className={`flex items-center gap-3 p-2 rounded-lg animate-slide-up-fade-in animation-delay-sidebar ${
                         currentTheme === 'dark'
                           ? 'hover:bg-slate-800/30'
                           : 'hover:bg-gray-100'
@@ -271,7 +338,7 @@ export default function LandingPage() {
                       </div>
 
                       {/* TikTok Conversation */}
-                      <div className={`flex items-center gap-3 p-2 rounded-lg animate-slide-up-fade-in animation-delay-400 ${
+                      <div className={`flex items-center gap-3 p-2 rounded-lg animate-slide-up-fade-in animation-delay-sidebar ${
                         currentTheme === 'dark' ? 'hover:bg-slate-800/30' : 'hover:bg-gray-100'
                       }`}>
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-pink-600 flex items-center justify-center text-white text-xs font-bold">
@@ -294,7 +361,7 @@ export default function LandingPage() {
                       </div>
 
                       {/* Email Conversation */}
-                      <div className={`flex items-center gap-3 p-2 rounded-lg animate-slide-up-fade-in animation-delay-600 ${
+                      <div className={`flex items-center gap-3 p-2 rounded-lg animate-slide-up-fade-in animation-delay-sidebar ${
                         currentTheme === 'dark' ? 'hover:bg-slate-800/30' : 'hover:bg-gray-100'
                       }`}>
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">
@@ -315,7 +382,7 @@ export default function LandingPage() {
                       </div>
 
                       {/* Instagram */}
-                      <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800/30 animate-slide-up-fade-in animation-delay-800">
+                      <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800/30 animate-slide-up-fade-in animation-delay-sidebar">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-rose-600 flex items-center justify-center text-white text-xs font-bold">
                           AB
                         </div>
@@ -334,7 +401,7 @@ export default function LandingPage() {
                       </div>
 
                       {/* WhatsApp */}
-                      <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800/30 animate-slide-up-fade-in animation-delay-1000">
+                      <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800/30 animate-slide-up-fade-in animation-delay-sidebar">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-fuchsia-600 flex items-center justify-center text-white text-xs font-bold">
                           TS
                         </div>
@@ -356,9 +423,9 @@ export default function LandingPage() {
                 </div>
 
                 {/* Main Chat Area */}
-                <div className="flex-1 flex flex-col relative">
+                <div className="flex-1 flex flex-col relative min-h-0">
                   {/* Chat Header */}
-                  <div className={`h-16 border-b flex items-center px-6 animate-slide-up-fade-in animation-delay-400 ${
+                  <div className={`h-16 border-b flex items-center px-6 animate-slide-up-fade-in animation-delay-sidebar ${
                     currentTheme === 'dark'
                       ? 'bg-[#0f1621] border-slate-700'
                       : 'bg-gray-50 border-gray-200'
@@ -382,7 +449,7 @@ export default function LandingPage() {
                   </div>
 
                   {/* Messages Area */}
-                  <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                  <div className="flex-1 p-6 space-y-4">
                     {/* Message 1: Customer asks about decaf */}
                     <div className="flex gap-3 animate-slide-up-fade-in animation-delay-600">
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
@@ -519,14 +586,80 @@ export default function LandingPage() {
                         ST
                       </div>
                     </div>
+
+                    {/* Message 4: Customer follow-up */}
+                    <div className="flex gap-3 animate-slide-up-fade-in animation-delay-4200">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                        SC
+                      </div>
+                      <div className="flex-1">
+                        <div className={`rounded-lg px-3 py-2 max-w-[80%] text-xs ${
+                          currentTheme === 'dark'
+                            ? 'bg-slate-700/50 text-slate-100'
+                            : 'bg-gray-100 text-gray-900'
+                        }`}>
+                          <span className="typing-text">One more thing - do you offer subscriptions? Would love monthly deliveries!</span>
+                        </div>
+                        <span className={`text-[10px] mt-1 block ${
+                          currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+                        }`}>Just now</span>
+                      </div>
+                    </div>
+
+                    {/* Reply 4: Support response */}
+                    <div className="flex gap-3 justify-end animate-slide-up-fade-in animation-delay-4600">
+                      <div className="flex-1 flex flex-col items-end">
+                        <div className="bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg px-3 py-2 max-w-[80%] text-xs text-white">
+                          <span className="typing-text">Absolutely! We have monthly subscriptions with 15% off. I'll send you the link now 🎉</span>
+                        </div>
+                        <span className={`text-[10px] mt-1 ${
+                          currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+                        }`}>Just now • Support Team</span>
+                      </div>
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                        ST
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Chat Input Area */}
+                  <div className={`border-t p-4 ${
+                    currentTheme === 'dark' ? 'border-slate-700 bg-[#0f1621]' : 'border-gray-200 bg-gray-50'
+                  }`}>
+                    {/* Input Row */}
+                    <div className="flex gap-2 items-center">
+                      <div className={`flex-1 rounded-lg px-3 py-2 text-xs ${
+                        currentTheme === 'dark'
+                          ? 'bg-slate-800 text-slate-400'
+                          : 'bg-white border border-gray-300 text-gray-400'
+                      }`}>
+                        Type your reply...
+                      </div>
+                      <button className="bg-gradient-to-r from-purple-600 to-purple-500 text-white px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-1.5">
+                        <Send className="w-3 h-3" />
+                        Send
+                      </button>
+                    </div>
+                    {/* Quick Replies & Tip */}
+                    <div className="flex items-center justify-between mt-2">
+                      <button className={`flex items-center gap-1.5 px-2 py-1 rounded text-[10px] border ${
+                        currentTheme === 'dark'
+                          ? 'border-slate-600 text-slate-300 bg-slate-800'
+                          : 'border-gray-300 text-gray-600 bg-white'
+                      }`}>
+                        <MessageSquare className="w-3 h-3" />
+                        Quick Replies
+                      </button>
+                      <div className={`flex items-center gap-1 text-[10px] ${
+                        currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-400'
+                      }`}>
+                        <Lightbulb className="w-3 h-3 text-yellow-500" />
+                        Tip: Press Enter to send, Shift+Enter for new line
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            {/* Floating Badge */}
-            <div className="absolute top-6 right-6 bg-gradient-to-r from-purple-600 to-purple-500 text-white px-2.5 py-1 rounded-full text-[10px] font-semibold shadow-lg flex items-center gap-1">
-              <Sparkles className="w-3 h-3" />
-              AI-Powered
             </div>
           </div>
         </div>
