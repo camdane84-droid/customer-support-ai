@@ -31,8 +31,6 @@ export default function LandingPage() {
   const router = useRouter();
   const heroRef = useRef<HTMLDivElement>(null);
   const [isHeroVisible, setIsHeroVisible] = useState(false);
-  const [scrollTickCount, setScrollTickCount] = useState(0);
-  const [hasSnappedToHero, setHasSnappedToHero] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -102,65 +100,6 @@ export default function LandingPage() {
     };
   }, [loading, user]);
 
-  // Track scroll ticks and snap to hero on 4th tick
-  useEffect(() => {
-    if (loading || user || hasSnappedToHero) return;
-
-    const currentRef = heroRef.current;
-    if (!currentRef) return;
-
-    // Custom smooth scroll with easing
-    const smoothScrollToCenter = (element: HTMLElement) => {
-      const rect = element.getBoundingClientRect();
-      const elementCenter = rect.top + rect.height / 2;
-      const viewportCenter = window.innerHeight / 2;
-      const scrollOffset = elementCenter - viewportCenter;
-      const startPosition = window.scrollY;
-      const targetPosition = startPosition + scrollOffset;
-      const duration = 800;
-      let startTime: number | null = null;
-
-      // Ease-out-cubic for smooth deceleration
-      const easeOutCubic = (t: number): number => 1 - Math.pow(1 - t, 3);
-
-      const animateScroll = (currentTime: number) => {
-        if (startTime === null) startTime = currentTime;
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const easedProgress = easeOutCubic(progress);
-
-        window.scrollTo(0, startPosition + (targetPosition - startPosition) * easedProgress);
-
-        if (progress < 1) {
-          requestAnimationFrame(animateScroll);
-        }
-      };
-
-      requestAnimationFrame(animateScroll);
-    };
-
-    let tickCount = 0;
-
-    const handleWheel = (e: WheelEvent) => {
-      // Only count downward scrolls
-      if (e.deltaY > 0 && !hasSnappedToHero) {
-        tickCount++;
-        setScrollTickCount(tickCount);
-
-        if (tickCount === 4) {
-          e.preventDefault();
-          smoothScrollToCenter(currentRef);
-          setHasSnappedToHero(true);
-        }
-      }
-    };
-
-    window.addEventListener('wheel', handleWheel, { passive: false });
-
-    return () => {
-      window.removeEventListener('wheel', handleWheel);
-    };
-  }, [loading, user, hasSnappedToHero]);
 
   // Show loading while checking auth or if user is logged in (redirecting)
   if (loading || user) {
