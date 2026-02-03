@@ -122,16 +122,16 @@ export default function LandingPage() {
           <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center gap-2">
               <Image src="/logo.svg" alt="InboxForge" width={32} height={32} className="w-8 h-8" />
-              <span className={`text-xl font-bold transition-colors ${isScrolled ? 'text-purple-600/90 dark:text-white' : ''}`}>InboxForge</span>
+              <span className={`text-xl font-bold transition-colors ${isScrolled ? 'text-purple-600 dark:text-white' : ''}`}>InboxForge</span>
             </Link>
             <div className="hidden md:flex items-center gap-8">
-              <a href="#features" className={`text-sm transition-colors ${isScrolled ? 'text-purple-600/90 hover:text-purple-700 dark:text-white/90 dark:hover:text-white' : 'text-muted-foreground hover:text-foreground'}`}>
+              <a href="#features" className={`text-sm transition-colors ${isScrolled ? 'text-purple-600 hover:text-purple-700 dark:text-white/90 dark:hover:text-white' : 'text-muted-foreground hover:text-foreground'}`}>
                 Features
               </a>
-              <a href="#how-it-works" className={`text-sm transition-colors ${isScrolled ? 'text-purple-600/90 hover:text-purple-700 dark:text-white/90 dark:hover:text-white' : 'text-muted-foreground hover:text-foreground'}`}>
+              <a href="#how-it-works" className={`text-sm transition-colors ${isScrolled ? 'text-purple-600 hover:text-purple-700 dark:text-white/90 dark:hover:text-white' : 'text-muted-foreground hover:text-foreground'}`}>
                 How It Works
               </a>
-              <a href="#pricing" className={`text-sm transition-colors ${isScrolled ? 'text-purple-600/90 hover:text-purple-700 dark:text-white/90 dark:hover:text-white' : 'text-muted-foreground hover:text-foreground'}`}>
+              <a href="#pricing" className={`text-sm transition-colors ${isScrolled ? 'text-purple-600 hover:text-purple-700 dark:text-white/90 dark:hover:text-white' : 'text-muted-foreground hover:text-foreground'}`}>
                 Pricing
               </a>
             </div>
@@ -139,7 +139,7 @@ export default function LandingPage() {
               <ThemeToggle />
               <Link
                 href="/login"
-                className={`text-sm transition-colors ${isScrolled ? 'text-purple-600/90 hover:text-purple-700 dark:text-white/90 dark:hover:text-white' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`text-sm transition-colors ${isScrolled ? 'text-purple-600 hover:text-purple-700 dark:text-white/90 dark:hover:text-white' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Log in
               </Link>
