@@ -22,7 +22,10 @@ export async function POST(request: NextRequest) {
     logger.info('Email received', { from: senderEmail, to, subject });
 
     // Get business by support email (the "to" address)
-    const businessEmail = to.match(/<(.+?)>/)?.[1] || to;
+    let businessEmail = to.match(/<(.+?)>/)?.[1] || to;
+    // Strip parse subdomain if routed through SendGrid Inbound Parse
+    // e.g. hello@parse.inbox-forge.com → hello@inbox-forge.com
+    businessEmail = businessEmail.replace('@parse.', '@');
     const { data: business } = await supabaseServer
       .from('businesses')
       .select('*')

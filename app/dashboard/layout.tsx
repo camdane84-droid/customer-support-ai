@@ -3,7 +3,6 @@
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/context/AuthContext';
-
 export default function DashboardLayoutWrapper({
   children,
 }: {
@@ -14,31 +13,16 @@ export default function DashboardLayoutWrapper({
   const redirectedRef = useRef(false);
 
   useEffect(() => {
-    console.log('📊 [DASHBOARD LAYOUT] State:', { loading, hasUser: !!user, userEmail: user?.email, redirected: redirectedRef.current });
-
     // Redirect to login only once if not authenticated
     if (!loading && !user && !redirectedRef.current) {
-      console.log('🔒 No user, redirecting to login...');
       redirectedRef.current = true;
       router.push('/login');
     } else if (user) {
-      // Reset redirect flag when user logs in
-      console.log('✅ [DASHBOARD LAYOUT] User authenticated:', user.email);
       redirectedRef.current = false;
     }
-  }, [user, loading]); // Remove router from dependencies - it's stable
+  }, [user, loading]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-gray-500 dark:text-slate-400">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
-
+  // Always render children - pages handle their own loading skeletons.
+  // The useEffect above handles redirect when no user.
   return <>{children}</>;
 }

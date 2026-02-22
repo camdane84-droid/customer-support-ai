@@ -29,6 +29,7 @@ import TrendChart from '@/components/analytics/TrendChart';
 import ActionableInsights from '@/components/analytics/ActionableInsights';
 import CustomerSegmentation from '@/components/analytics/CustomerSegmentation';
 import CyclingStat from '@/components/analytics/CyclingStat';
+import AnalyticsSkeleton from '@/components/skeletons/AnalyticsSkeleton';
 
 interface CustomerProfile {
   past_orders?: Array<{
@@ -338,9 +339,7 @@ export default function AnalyticsPage() {
   if (!business || loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-full">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-        </div>
+        <AnalyticsSkeleton />
       </DashboardLayout>
     );
   }

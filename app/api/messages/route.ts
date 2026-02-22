@@ -156,9 +156,10 @@ async function handleEmailSend(message: Message, businessId: string) {
   }
 
   try {
+    const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'hello@inbox-forge.com';
     await sendEmail({
       to: conversation.customer_email,
-      from: business.email,
+      from: fromEmail,
       subject: `Re: Message from ${business.name}`,
       text: message.content,
     });

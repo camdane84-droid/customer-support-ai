@@ -9,6 +9,7 @@ import TikTokIcon from '@/components/icons/TikTokIcon';
 import BillingSection from '@/components/ui/BillingSection';
 import { useRouter } from 'next/navigation';
 import { hasPermission } from '@/lib/permissions';
+import SettingsSkeleton from '@/components/skeletons/SettingsSkeleton';
 
 export default function SettingsPage() {
   const { currentBusiness: business, loading: authLoading, user, refreshBusinesses } = useAuth();
@@ -169,9 +170,7 @@ export default function SettingsPage() {
   if (authLoading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-full">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-        </div>
+        <SettingsSkeleton />
       </DashboardLayout>
     );
   }

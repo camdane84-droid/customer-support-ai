@@ -5,6 +5,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/lib/context/AuthContext';
 import { supabase } from '@/lib/api/supabase';
 import { Plus, Edit2, Trash2, Save, X, BookOpen } from 'lucide-react';
+import KnowledgeBaseSkeleton from '@/components/skeletons/KnowledgeBaseSkeleton';
 
 interface KnowledgeItem {
   id: string;
@@ -127,9 +128,7 @@ export default function KnowledgeBasePage() {
   if (!business || loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-full">
-          <div className="text-gray-500 dark:text-slate-400">Loading knowledge base...</div>
-        </div>
+        <KnowledgeBaseSkeleton />
       </DashboardLayout>
     );
   }
@@ -177,7 +176,7 @@ export default function KnowledgeBasePage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                   Question
                 </label>
                 <input
@@ -185,12 +184,12 @@ export default function KnowledgeBasePage() {
                   value={formData.question}
                   onChange={(e) => setFormData({ ...formData, question: e.target.value })}
                   placeholder="What are your business hours?"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                   Answer
                 </label>
                 <textarea
@@ -198,12 +197,12 @@ export default function KnowledgeBasePage() {
                   onChange={(e) => setFormData({ ...formData, answer: e.target.value })}
                   rows={4}
                   placeholder="We're open Monday-Friday 9am-5pm, Saturday 10am-4pm. Closed Sundays."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                   Category (Optional)
                 </label>
                 <input
@@ -211,7 +210,7 @@ export default function KnowledgeBasePage() {
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                   placeholder="hours, pricing, policies, etc."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -266,36 +265,36 @@ export default function KnowledgeBasePage() {
                   // Edit Mode
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                         Question
                       </label>
                       <input
                         type="text"
                         value={item.question}
                         onChange={(e) => updateItem(item.id, 'question', e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                         Answer
                       </label>
                       <textarea
                         value={item.answer}
                         onChange={(e) => updateItem(item.id, 'answer', e.target.value)}
                         rows={4}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                         Category
                       </label>
                       <input
                         type="text"
                         value={item.category || ''}
                         onChange={(e) => updateItem(item.id, 'category', e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
                     <div className="flex space-x-3">
@@ -332,7 +331,7 @@ export default function KnowledgeBasePage() {
                             </span>
                           )}
                         </div>
-                        <p className="text-gray-700 whitespace-pre-wrap">{item.answer}</p>
+                        <p className="text-gray-600 dark:text-slate-400 whitespace-pre-wrap">{item.answer}</p>
                         {item.usage_count > 0 && (
                           <p className="text-xs text-gray-500 dark:text-slate-400 mt-2">
                             Used {item.usage_count} time{item.usage_count !== 1 ? 's' : ''} by AI

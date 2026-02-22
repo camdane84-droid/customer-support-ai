@@ -140,12 +140,13 @@ async function handleEmailSend(message: Message, businessId: string) {
     throw new Error('Business email not found');
   }
 
-  logger.info(`📧 Sending email from ${business.email} to ${conversation.customer_email}`);
+  const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'hello@inbox-forge.com';
+  logger.info(`📧 Sending email from ${fromEmail} to ${conversation.customer_email}`);
 
   try {
     await sendEmail({
       to: conversation.customer_email,
-      from: business.email,
+      from: fromEmail,
       subject: `Re: Message from ${business.name}`,
       text: message.content,
     });

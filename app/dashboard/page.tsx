@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import LoadingScreen from '@/components/LoadingScreen';
 import DashboardSkeleton from '@/components/inbox/DashboardSkeleton';
 import { getConversations } from '@/lib/api/conversations';
 import { supabase } from '@/lib/api/supabase';
@@ -266,25 +265,10 @@ export default function DashboardPage() {
     }
   };
 
-  if (authLoading) {
-    return <LoadingScreen message="Loading your dashboard..." />;
-  }
-
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <DashboardLayout>
         <DashboardSkeleton />
-      </DashboardLayout>
-    );
-  }
-
-  // Show loading spinner while auth is initializing
-  if (authLoading) {
-    return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-        </div>
       </DashboardLayout>
     );
   }

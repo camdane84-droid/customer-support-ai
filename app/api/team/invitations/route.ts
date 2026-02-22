@@ -106,6 +106,10 @@ export async function PATCH(request: NextRequest) {
       businessName = business?.name || 'the team';
     }
 
+    if (!invitation.email) {
+      return NextResponse.json({ error: 'Invitation has no email address. Use the invite link instead.' }, { status: 400 });
+    }
+
     const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${invitation.token}`;
 
     // Calculate expiration date (7 days from now)
@@ -120,7 +124,7 @@ export async function PATCH(request: NextRequest) {
     // Send email
     await sendEmail({
       to: invitation.email,
-      from: process.env.SENDGRID_FROM_EMAIL || 'noreply@inbox-forge.com',
+      from: 'noreply@inbox-forge.com',
       subject: `You've been invited to join ${businessName} on InboxForge`,
       text: `You've been invited to join ${businessName} on InboxForge!\n\nClick the link below to accept the invitation:\n${inviteUrl}\n\n⏰ This invitation will expire on ${expirationDate}.\n\nIf you can't find this email later, ask your team admin to resend the invitation.`,
       html: `

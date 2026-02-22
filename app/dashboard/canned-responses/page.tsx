@@ -5,6 +5,7 @@ import { Plus, Edit2, Trash2, Save, X, Loader2 } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/lib/context/AuthContext';
 import Toast from '@/components/ui/Toast';
+import CannedResponsesSkeleton from '@/components/skeletons/CannedResponsesSkeleton';
 
 interface CannedResponse {
   id: string;
@@ -132,9 +133,7 @@ export default function CannedResponsesPage() {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-full">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
-        </div>
+        <CannedResponsesSkeleton />
       </DashboardLayout>
     );
   }

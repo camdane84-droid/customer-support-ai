@@ -28,10 +28,13 @@ export async function sendEmail(params: {
     logger.success('Email sent successfully', { to: params.to });
     return { success: true };
   } catch (error: any) {
+    const sgErrors = error?.response?.body?.errors;
+    const errorDetail = sgErrors?.[0]?.message || error.message || 'Unknown SendGrid error';
     logger.error('SendGrid error', error, {
       to: params.to,
+      from: params.from,
       responseBody: error?.response?.body
     });
-    throw new Error('Failed to send email');
+    throw new Error(`Failed to send email: ${errorDetail}`);
   }
 }

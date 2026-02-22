@@ -9,7 +9,6 @@ import { useAuth } from '@/lib/context/AuthContext';
 import { useTheme } from '@/lib/context/ThemeContext';
 import UsageDisplay from '@/components/ui/UsageDisplay';
 import { BusinessSwitcher } from '@/components/ui/BusinessSwitcher';
-import DashboardSkeleton from './DashboardSkeleton';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -35,10 +34,8 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
   const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
   const openMobileMenu = useCallback(() => setMobileMenuOpen(true), []);
 
-  // Show skeleton while auth and businesses are loading
-  if (loading || (user && !currentBusiness)) {
-    return <DashboardSkeleton />;
-  }
+  // While loading, still render the layout shell so page-level skeletons show inside it
+  const isLoading = loading || (user && !currentBusiness);
 
   async function handleLogout() {
     try {

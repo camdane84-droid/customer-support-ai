@@ -6,6 +6,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Crown, Shield, Users, Eye, Mail, Trash2, X, Loader2, Link2, Edit3, AlertCircle, CheckCircle, Copy, Send, RefreshCw } from 'lucide-react';
 import { hasPermission, canChangeRole } from '@/lib/permissions';
 import type { Role } from '@/lib/permissions';
+import TeamSkeleton from '@/components/skeletons/TeamSkeleton';
 
 interface TeamMember {
   id: string;
@@ -394,9 +395,7 @@ export default function TeamPage() {
   if (!currentBusiness) {
     return (
       <DashboardLayout>
-        <div className="p-6">
-          <div className="text-center text-gray-500">Loading...</div>
-        </div>
+        <TeamSkeleton />
       </DashboardLayout>
     );
   }
