@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
 import { logger } from '@/lib/logger';
+import { exchangeForLongLivedToken } from '@/lib/api/meta-tokens';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -34,9 +35,29 @@ export async function GET(request: NextRequest) {
       throw new Error(tokenData.error?.message || 'Failed to get access token');
     }
 
-    // Get user's Facebook pages (which have connected Instagram accounts)
+    // Exchange short-lived user token for long-lived user token (~60 days)
+    let longLivedUserToken: string;
+    let userTokenExpiresAt: string;
+    try {
+      const longLived = await exchangeForLongLivedToken(tokenData.access_token, 'instagram');
+      longLivedUserToken = longLived.access_token;
+      userTokenExpiresAt = new Date(Date.now() + longLived.expires_in * 1000).toISOString();
+      logger.info('Instagram long-lived token exchange succeeded', { expiresIn: longLived.expires_in });
+    } catch (exchangeError: any) {
+      // If exchange fails, fall back to short-lived token so connection still works
+      logger.warn('Long-lived token exchange failed, falling back to short-lived token', {
+        error: exchangeError.message,
+      });
+      longLivedUserToken = tokenData.access_token;
+      userTokenExpiresAt = tokenData.expires_in
+        ? new Date(Date.now() + tokenData.expires_in * 1000).toISOString()
+        : new Date(Date.now() + 3600 * 1000).toISOString(); // Default 1 hour
+    }
+
+    // Get user's Facebook pages using long-lived user token
+    // Page tokens derived from a long-lived user token are permanent (never expire)
     const pagesResponse = await fetch(
-      `https://graph.facebook.com/v21.0/me/accounts?access_token=${tokenData.access_token}`
+      `https://graph.facebook.com/v21.0/me/accounts?access_token=${longLivedUserToken}`
     );
     const pagesData = await pagesResponse.json();
 
@@ -45,6 +66,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get Instagram account connected to the first page
+    // This page token is permanent (derived from long-lived user token)
     const pageAccessToken = pagesData.data[0].access_token;
     const pageId = pagesData.data[0].id;
 
@@ -65,25 +87,28 @@ export async function GET(request: NextRequest) {
     );
     const userData = await igUserResponse.json();
 
-    // Save connection to database (use page access token for Instagram Business API)
-    // Use supabaseAdmin to bypass RLS policies
+    // Save connection to database
+    // access_token = permanent page token (for API calls)
+    // metadata.long_lived_user_token = long-lived user token (for future refresh)
+    // token_expires_at = user token expiry (for refresh scheduling)
     const { error: dbError } = await supabaseAdmin
       .from('social_connections')
       .upsert({
-        business_id: state, // state contains business_id
+        business_id: state,
         platform: 'instagram',
         platform_user_id: igUserId,
         platform_username: userData.username,
-        access_token: pageAccessToken, // Use page access token, not user token
-        token_expires_at: null, // Page tokens don't expire
+        access_token: pageAccessToken, // Permanent page token
+        token_expires_at: userTokenExpiresAt, // Track user token expiry for refresh
         is_active: true,
         metadata: {
           page_id: pageId,
           page_name: pagesData.data[0].name,
+          long_lived_user_token: longLivedUserToken, // For future token refresh
         },
       }, {
-        onConflict: 'business_id,platform,platform_user_id', // Specify conflict columns
-        ignoreDuplicates: false // Update on conflict
+        onConflict: 'business_id,platform,platform_user_id',
+        ignoreDuplicates: false
       });
 
     if (dbError) throw dbError;

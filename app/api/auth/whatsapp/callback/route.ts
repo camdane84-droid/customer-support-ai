@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
 import { logger } from '@/lib/logger';
+import { exchangeForLongLivedToken } from '@/lib/api/meta-tokens';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -34,9 +35,14 @@ export async function GET(request: NextRequest) {
       throw new Error(tokenData.error?.message || 'Failed to get access token');
     }
 
+    // Exchange short-lived token for long-lived token (~60 days)
+    const longLived = await exchangeForLongLivedToken(tokenData.access_token, 'whatsapp');
+    const longLivedToken = longLived.access_token;
+    const tokenExpiresAt = new Date(Date.now() + longLived.expires_in * 1000).toISOString();
+
     // Get user's WhatsApp Business Accounts
     const wabResponse = await fetch(
-      `https://graph.facebook.com/v21.0/me/businesses?access_token=${tokenData.access_token}`
+      `https://graph.facebook.com/v21.0/me/businesses?access_token=${longLivedToken}`
     );
     const businessData = await wabResponse.json();
 
@@ -49,7 +55,7 @@ export async function GET(request: NextRequest) {
 
     // Get WhatsApp Business Accounts for this business
     const wabaResponse = await fetch(
-      `https://graph.facebook.com/v21.0/${businessId}/owned_whatsapp_business_accounts?access_token=${tokenData.access_token}`
+      `https://graph.facebook.com/v21.0/${businessId}/owned_whatsapp_business_accounts?access_token=${longLivedToken}`
     );
     const wabaData = await wabaResponse.json();
 
@@ -61,7 +67,7 @@ export async function GET(request: NextRequest) {
 
     // Get phone numbers associated with this WABA
     const phoneResponse = await fetch(
-      `https://graph.facebook.com/v21.0/${wabaId}/phone_numbers?access_token=${tokenData.access_token}`
+      `https://graph.facebook.com/v21.0/${wabaId}/phone_numbers?access_token=${longLivedToken}`
     );
     const phoneData = await phoneResponse.json();
 
@@ -81,10 +87,8 @@ export async function GET(request: NextRequest) {
         platform: 'whatsapp',
         platform_user_id: wabaId,
         platform_username: displayPhoneNumber,
-        access_token: tokenData.access_token,
-        token_expires_at: tokenData.expires_in
-          ? new Date(Date.now() + tokenData.expires_in * 1000).toISOString()
-          : null,
+        access_token: longLivedToken,
+        token_expires_at: tokenExpiresAt,
         is_active: true,
         metadata: {
           phone_number_id: phoneNumberId,
@@ -105,7 +109,7 @@ export async function GET(request: NextRequest) {
     const subscribeResponse = await fetch(
       `https://graph.facebook.com/v21.0/${wabaId}/subscribed_apps?` +
       `subscribed_fields=messages&` +
-      `access_token=${tokenData.access_token}`,
+      `access_token=${longLivedToken}`,
       {
         method: 'POST',
         headers: {

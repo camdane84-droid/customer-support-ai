@@ -5,6 +5,7 @@ import { logError } from '@/lib/services/errorLogger';
 import { authenticateRequest } from '@/lib/api/auth-middleware';
 import type { Message } from '@/lib/api/supabase';
 import { logger } from '@/lib/logger';
+import { ensureValidMetaToken } from '@/lib/api/meta-tokens';
 
 export async function POST(request: NextRequest) {
   try {
@@ -182,12 +183,8 @@ async function handleInstagramSend(message: Message, businessId: string) {
     throw new Error('Instagram not connected');
   }
 
-  // Use access token from database, or fall back to env variable
-  const accessToken = connection.access_token || process.env.META_ACCESS_TOKEN;
-
-  if (!accessToken) {
-    throw new Error('Instagram access token missing');
-  }
+  // Ensure token is valid, refreshing if needed
+  const accessToken = await ensureValidMetaToken(connection, 'instagram');
 
   // Get conversation for recipient Instagram ID
   const { data: conversation } = await supabaseServer
@@ -239,12 +236,9 @@ async function handleWhatsAppSend(message: Message, businessId: string) {
     throw new Error('WhatsApp not connected');
   }
 
-  const accessToken = connection.access_token;
+  // Ensure token is valid, refreshing if needed
+  const accessToken = await ensureValidMetaToken(connection, 'whatsapp');
   const phoneNumberId = connection.metadata?.phone_number_id;
-
-  if (!accessToken) {
-    throw new Error('WhatsApp access token missing');
-  }
 
   if (!phoneNumberId) {
     throw new Error('WhatsApp phone number ID missing');

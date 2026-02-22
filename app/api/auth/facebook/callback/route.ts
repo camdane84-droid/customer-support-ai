@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/api/supabase';
+import { supabaseAdmin } from '@/lib/api/supabase-admin';
 import { logger } from '@/lib/logger';
+import { exchangeForLongLivedToken } from '@/lib/api/meta-tokens';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -29,9 +30,15 @@ export async function GET(request: NextRequest) {
       throw new Error(tokenData.error.message);
     }
 
-    // Get user's Facebook pages
+    // Exchange short-lived token for long-lived user token (~60 days)
+    const longLived = await exchangeForLongLivedToken(tokenData.access_token, 'facebook');
+    const longLivedUserToken = longLived.access_token;
+    const userTokenExpiresAt = new Date(Date.now() + longLived.expires_in * 1000).toISOString();
+
+    // Get user's Facebook pages using long-lived user token
+    // Page tokens derived from a long-lived user token are permanent
     const pagesResponse = await fetch(
-      `https://graph.facebook.com/me/accounts?access_token=${tokenData.access_token}`
+      `https://graph.facebook.com/me/accounts?access_token=${longLivedUserToken}`
     );
     const pagesData = await pagesResponse.json();
 
@@ -42,17 +49,24 @@ export async function GET(request: NextRequest) {
       throw new Error('No Facebook pages found');
     }
 
-    // Save connection
-    const { error: dbError } = await supabase
+    // Save connection using supabaseAdmin (server-side route, bypass RLS)
+    const { error: dbError } = await supabaseAdmin
       .from('social_connections')
       .upsert({
         business_id: state,
         platform: 'facebook',
         platform_user_id: firstPage.id,
         platform_username: firstPage.name,
-        access_token: firstPage.access_token, // Use page token, not user token
+        access_token: firstPage.access_token, // Permanent page token
+        token_expires_at: userTokenExpiresAt, // Track user token expiry for refresh
         is_active: true,
         last_synced_at: new Date().toISOString(),
+        metadata: {
+          long_lived_user_token: longLivedUserToken, // For future token refresh
+        },
+      }, {
+        onConflict: 'business_id,platform,platform_user_id',
+        ignoreDuplicates: false
       });
 
     if (dbError) throw dbError;

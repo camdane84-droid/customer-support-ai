@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/api/supabase-admin';
 import crypto from 'crypto';
 import { canCreateConversation, incrementConversationUsage } from '@/lib/usage/tracker';
 import { logger } from '@/lib/logger';
+import { ensureValidMetaToken } from '@/lib/api/meta-tokens';
 
 // GET - Webhook verification
 export async function GET(request: NextRequest) {
@@ -101,7 +102,7 @@ async function handleInstagramMessage(event: any) {
       // First, try to find business connection assuming this is an incoming message (recipient = business)
       let { data: connection, error: connectionError } = await supabaseAdmin
         .from('social_connections')
-        .select('business_id, platform_username, access_token, platform_user_id')
+        .select('id, business_id, platform_username, access_token, platform_user_id, token_expires_at, metadata')
         .eq('platform', 'instagram')
         .eq('platform_user_id', recipientId)
         .eq('is_active', true)
@@ -112,7 +113,7 @@ async function handleInstagramMessage(event: any) {
         logger.debug('Not found as incoming, trying as echo');
         const result = await supabaseAdmin
           .from('social_connections')
-          .select('business_id, platform_username, access_token, platform_user_id')
+          .select('id, business_id, platform_username, access_token, platform_user_id, token_expires_at, metadata')
           .eq('platform', 'instagram')
           .eq('platform_user_id', senderId)
           .eq('is_active', true)
@@ -154,10 +155,13 @@ async function handleInstagramMessage(event: any) {
       if (!isEcho) {
         // Only fetch username for incoming messages from customers
         try {
+          // Ensure token is valid before making API call
+          const validToken = await ensureValidMetaToken(connection, 'instagram');
+
           // Fetch customer's Instagram username using connection's access token
           // Use Facebook Graph API (not Instagram Graph API) for Instagram Business accounts
           const userResponse = await fetch(
-            `https://graph.facebook.com/v21.0/${customerAccountId}?fields=username&access_token=${connection.access_token}`
+            `https://graph.facebook.com/v21.0/${customerAccountId}?fields=username&access_token=${validToken}`
           );
 
           if (userResponse.ok) {
