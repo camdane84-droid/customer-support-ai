@@ -1,9 +1,89 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: 'Contact & Support | InboxForge',
+    description: 'Get help from the InboxForge support team. Find answers to common questions about account & billing, Instagram integration, AI features, and technical issues.',
+};
+
+const faqTopics = [
+    {
+        title: 'Account & Billing',
+        gradient: 'from-indigo-500 to-blue-500',
+        border: 'border-indigo-200 dark:border-indigo-800',
+        bg: 'bg-indigo-50 dark:bg-indigo-900/20',
+        dot: 'text-indigo-600 dark:text-indigo-400',
+        items: [
+            { q: 'How do I change my subscription plan?', a: 'Go to Dashboard → Settings → Billing to view and change your current plan. Changes take effect at the start of your next billing cycle.' },
+            { q: 'How do I update my payment method?', a: 'Navigate to Dashboard → Settings → Billing and click "Update Payment Method" to add a new card or switch payment options.' },
+            { q: 'Can I get a refund?', a: 'We offer refunds within 14 days of purchase. Contact our support team with your account email and reason for the request.' },
+            { q: 'How do I delete my account?', a: 'Go to Dashboard → Settings → Account and scroll to the "Danger Zone" section. Account deletion is permanent and cannot be undone.' },
+        ],
+    },
+    {
+        title: 'Instagram Integration',
+        gradient: 'from-pink-500 to-purple-500',
+        border: 'border-pink-200 dark:border-pink-800',
+        bg: 'bg-pink-50 dark:bg-pink-900/20',
+        dot: 'text-pink-600 dark:text-pink-400',
+        items: [
+            { q: 'How do I connect my Instagram account?', a: 'Go to Dashboard → Settings → Integrations and click "Connect Instagram." You\'ll be redirected to Meta to authorize access to your Instagram Professional account.' },
+            { q: 'Why are my Instagram messages not appearing?', a: 'Ensure your Instagram account is a Professional (Business or Creator) account and that you\'ve granted all required permissions during the OAuth flow. Try disconnecting and reconnecting.' },
+            { q: 'Does InboxForge support Instagram Story replies?', a: 'Yes, story replies and reactions appear in your inbox as regular conversations. You can respond to them directly from the dashboard.' },
+        ],
+    },
+    {
+        title: 'AI Features',
+        gradient: 'from-purple-500 to-blue-500',
+        border: 'border-purple-200 dark:border-purple-800',
+        bg: 'bg-purple-50 dark:bg-purple-900/20',
+        dot: 'text-purple-600 dark:text-purple-400',
+        items: [
+            { q: 'How do AI response suggestions work?', a: 'Our AI analyzes the conversation context and your knowledge base to generate relevant reply suggestions. Click any suggestion to use it as-is or edit it before sending.' },
+            { q: 'Can I train the AI on my own data?', a: 'Yes! Add articles, FAQs, and documents to your Knowledge Base (Dashboard → Knowledge). The AI uses this content to generate more accurate, brand-specific responses.' },
+            { q: 'How do I turn off AI suggestions?', a: 'Go to Dashboard → Settings → AI Configuration to enable or disable AI features, adjust suggestion frequency, and set tone preferences.' },
+        ],
+    },
+    {
+        title: 'Technical Issues',
+        gradient: 'from-orange-500 to-amber-500',
+        border: 'border-orange-200 dark:border-orange-800',
+        bg: 'bg-orange-50 dark:bg-orange-900/20',
+        dot: 'text-orange-600 dark:text-orange-400',
+        items: [
+            { q: 'The dashboard is loading slowly — what can I do?', a: 'Try clearing your browser cache, disabling extensions, or switching browsers. If the issue persists, check our status page or contact support.' },
+            { q: 'I\'m getting a "session expired" error', a: 'This usually means your authentication token has expired. Sign out, clear your cookies, and sign back in to refresh your session.' },
+            { q: 'How do I report a bug?', a: 'Email our support team with a description of the issue, steps to reproduce, your browser/OS info, and screenshots if possible. We\'ll investigate and follow up.' },
+            { q: 'Are there any known outages?', a: 'Check our status page for real-time updates on system health. We also send email notifications for any planned maintenance windows.' },
+        ],
+    },
+];
+
+// Build all FAQ items for JSON-LD structured data
+const faqStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqTopics.flatMap((topic) =>
+        topic.items.map((item) => ({
+            '@type': 'Question',
+            name: item.q,
+            acceptedAnswer: {
+                '@type': 'Answer',
+                text: item.a,
+            },
+        }))
+    ),
+};
+
 export default function ContactPage() {
     const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'inboxforgeapp@outlook.com';
     const companyName = process.env.NEXT_PUBLIC_COMPANY_NAME || 'InboxForge';
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
+            />
             <div className="max-w-4xl mx-auto px-4 py-16">
                 {/* Header */}
                 <div className="text-center mb-12">
@@ -103,34 +183,39 @@ export default function ContactPage() {
                     </div>
                 </div>
 
-                {/* Common Topics */}
+                {/* Common Topics - FAQ Accordions */}
                 <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-200 dark:border-slate-700 p-8 mb-8">
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Common Support Topics</h2>
-                    <div className="grid md:grid-cols-2 gap-4">
-                        <div className="p-4 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors">
-                            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Account & Billing</h3>
-                            <p className="text-sm text-gray-600 dark:text-slate-400">
-                                Subscription management, payment issues, account settings
-                            </p>
-                        </div>
-                        <div className="p-4 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors">
-                            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Instagram Integration</h3>
-                            <p className="text-sm text-gray-600 dark:text-slate-400">
-                                Connection issues, OAuth problems, message delivery
-                            </p>
-                        </div>
-                        <div className="p-4 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors">
-                            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">AI Features</h3>
-                            <p className="text-sm text-gray-600 dark:text-slate-400">
-                                Response suggestions, customer insights, AI configuration
-                            </p>
-                        </div>
-                        <div className="p-4 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors">
-                            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Technical Issues</h3>
-                            <p className="text-sm text-gray-600 dark:text-slate-400">
-                                Bugs, errors, performance problems, feature requests
-                            </p>
-                        </div>
+                    <div className="space-y-4">
+                        {faqTopics.map((topic) => (
+                            <details
+                                key={topic.title}
+                                className={`group rounded-lg border ${topic.border} overflow-hidden`}
+                            >
+                                <summary className={`flex items-center cursor-pointer p-4 ${topic.bg} select-none`}>
+                                    <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${topic.gradient} mr-3 shrink-0`} />
+                                    <h3 className="font-semibold text-gray-900 dark:text-white flex-1">{topic.title}</h3>
+                                    <svg
+                                        className="w-5 h-5 text-gray-500 dark:text-slate-400 transition-transform group-open:rotate-180"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </summary>
+                                <div className="px-4 pb-4 pt-2">
+                                    <ul className="space-y-3">
+                                        {topic.items.map((item) => (
+                                            <li key={item.q}>
+                                                <p className={`font-medium text-sm ${topic.dot} mb-1`}>{item.q}</p>
+                                                <p className="text-sm text-gray-600 dark:text-slate-400 ml-0">{item.a}</p>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </details>
+                        ))}
                     </div>
                 </div>
 
