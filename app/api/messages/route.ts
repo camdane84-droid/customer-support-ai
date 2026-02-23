@@ -130,9 +130,9 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleEmailSend(message: Message, businessId: string) {
-  // Only send if SendGrid is configured
-  if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_API_KEY.startsWith('SG.')) {
-    throw new Error('Email service not configured. Please add SENDGRID_API_KEY to your environment variables.');
+  // Only send if Resend is configured
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error('Email service not configured. Please add RESEND_API_KEY to your environment variables.');
   }
 
   // Get conversation details
@@ -166,7 +166,7 @@ async function handleEmailSend(message: Message, businessId: string) {
   }
 
   try {
-    const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'hello@inbox-forge.com';
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'hello@inbox-forge.com';
     await sendEmail({
       to: conversation.customer_email,
       from: fromEmail,
