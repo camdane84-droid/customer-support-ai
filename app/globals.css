@@ -184,8 +184,10 @@
   .typing-text {
     overflow: hidden;
     white-space: nowrap;
-    display: inline-block;
+    display: block;
     width: 0;
+    max-width: 100%;
+    text-overflow: ellipsis;
   }
 
   /* Typing animation synced with each message */

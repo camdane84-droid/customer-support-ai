@@ -22,7 +22,8 @@ import {
   Star,
   Music,
   Send,
-  Lightbulb
+  Lightbulb,
+  BotMessageSquare
 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -135,17 +136,17 @@ export default function LandingPage() {
                 Pricing
               </a>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <ThemeToggle />
               <Link
                 href="/login"
-                className={`text-sm transition-colors ${isScrolled ? 'text-primary hover:text-primary/80 dark:text-white/90 dark:hover:text-white' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`text-xs sm:text-sm transition-colors ${isScrolled ? 'text-primary hover:text-primary/80 dark:text-white/90 dark:hover:text-white' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Log in
               </Link>
               <Link
                 href="/signup"
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                   isScrolled
                     ? 'bg-white text-purple-600 hover:bg-white/90'
                     : 'bg-primary text-primary-foreground hover:opacity-90'
@@ -198,7 +199,7 @@ export default function LandingPage() {
 
           {/* Hero Image - Dashboard Preview */}
           <div ref={heroRef} className={`mt-16 rounded-xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-primary/10 overflow-hidden shadow-2xl relative hero-demo-container ${isHeroVisible ? 'hero-visible' : ''}`}>
-            <div className="aspect-video flex items-center justify-center p-4">
+            <div className="aspect-[3/4] sm:aspect-[4/3] md:aspect-video flex items-center justify-center p-2 md:p-4">
               {/* Mockup Browser Window */}
               <div className={`w-full rounded-lg border shadow-xl overflow-hidden flex ${
                 currentTheme === 'dark'
@@ -206,39 +207,39 @@ export default function LandingPage() {
                   : 'bg-white border-gray-200'
               }`}>
                 {/* Left Sidebar - Conversations List */}
-                <div className={`w-48 md:w-60 xl:w-72 border-r flex-col flex-shrink-0 flex ${
+                <div className={`w-14 md:w-60 xl:w-72 border-r flex-col flex-shrink-0 flex ${
                   currentTheme === 'dark'
                     ? 'bg-[#0f1621] border-slate-700'
                     : 'bg-gray-50 border-gray-200'
                 }`}>
                   {/* Inbox Header */}
-                  <div className={`p-4 border-b ${
+                  <div className={`p-2 md:p-4 border-b ${
                     currentTheme === 'dark' ? 'border-slate-700' : 'border-gray-200'
                   }`}>
-                    <h2 className={`font-semibold text-sm flex items-center gap-2 ${
+                    <h2 className={`font-semibold text-sm flex items-center justify-center md:justify-start gap-2 ${
                       currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
                     }`}>
                       <MessageSquare className="w-4 h-4 text-primary" />
-                      Inbox
+                      <span className="hidden md:inline">Inbox</span>
                     </h2>
-                    <p className={`text-xs mt-0.5 ${
+                    <p className={`text-xs mt-0.5 hidden md:block ${
                       currentTheme === 'dark' ? 'text-slate-400' : 'text-gray-500'
                     }`}>6 conversations</p>
                   </div>
 
                   {/* Conversation List */}
                   <div className="flex-1 overflow-hidden">
-                    <div className="p-2 space-y-1">
+                    <div className="p-1 md:p-2 space-y-1">
                       {/* Active Conversation */}
-                      <div className={`flex items-center gap-3 p-2 rounded-lg border animate-slide-up-fade-in animation-delay-sidebar ${
+                      <div className={`flex items-center justify-center md:justify-start gap-3 p-1.5 md:p-2 rounded-lg border animate-slide-up-fade-in animation-delay-sidebar ${
                         currentTheme === 'dark'
                           ? 'bg-slate-800/50 border-primary/20'
                           : 'bg-white border-gray-200 shadow-sm'
                       }`}>
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-[10px] md:text-xs font-bold flex-shrink-0">
                           SC
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 hidden md:block">
                           <div className="flex items-center gap-2">
                             <span className={`text-xs font-medium ${
                               currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
@@ -249,19 +250,19 @@ export default function LandingPage() {
                             currentTheme === 'dark' ? 'text-slate-400' : 'text-gray-500'
                           }`}>Do you have decaf options?</p>
                         </div>
-                        <span className="text-[10px] text-green-500 font-medium">open</span>
+                        <span className="text-[10px] text-green-500 font-medium hidden md:block">open</span>
                       </div>
 
                       {/* WhatsApp Conversation */}
-                      <div className={`flex items-center gap-3 p-2 rounded-lg animate-slide-up-fade-in animation-delay-sidebar ${
+                      <div className={`flex items-center justify-center md:justify-start gap-3 p-1.5 md:p-2 rounded-lg animate-slide-up-fade-in animation-delay-sidebar ${
                         currentTheme === 'dark'
                           ? 'hover:bg-slate-800/30'
                           : 'hover:bg-gray-100'
                       }`}>
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-white text-xs font-bold">
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-white text-[10px] md:text-xs font-bold flex-shrink-0">
                           JR
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 hidden md:block">
                           <div className="flex items-center gap-2">
                             <span className={`text-xs ${
                               currentTheme === 'dark' ? 'text-slate-300' : 'text-gray-700'
@@ -272,17 +273,17 @@ export default function LandingPage() {
                             currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
                           }`}>When do you open tomorrow?</p>
                         </div>
-                        <span className="text-[10px] text-green-500 font-medium">open</span>
+                        <span className="text-[10px] text-green-500 font-medium hidden md:block">open</span>
                       </div>
 
                       {/* TikTok Conversation */}
-                      <div className={`flex items-center gap-3 p-2 rounded-lg animate-slide-up-fade-in animation-delay-sidebar ${
+                      <div className={`flex items-center justify-center md:justify-start gap-3 p-1.5 md:p-2 rounded-lg animate-slide-up-fade-in animation-delay-sidebar ${
                         currentTheme === 'dark' ? 'hover:bg-slate-800/30' : 'hover:bg-gray-100'
                       }`}>
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-pink-600 flex items-center justify-center text-white text-xs font-bold">
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-cyan-400 to-pink-600 flex items-center justify-center text-white text-[10px] md:text-xs font-bold flex-shrink-0">
                           LC
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 hidden md:block">
                           <div className="flex items-center gap-2">
                             <span className={`text-xs ${
                               currentTheme === 'dark' ? 'text-slate-300' : 'text-gray-700'
@@ -295,17 +296,17 @@ export default function LandingPage() {
                             currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
                           }`}>Is this available for wholesale?</p>
                         </div>
-                        <span className="text-[10px] text-green-500 font-medium">open</span>
+                        <span className="text-[10px] text-green-500 font-medium hidden md:block">open</span>
                       </div>
 
                       {/* Email Conversation */}
-                      <div className={`flex items-center gap-3 p-2 rounded-lg animate-slide-up-fade-in animation-delay-sidebar ${
+                      <div className={`flex items-center justify-center md:justify-start gap-3 p-1.5 md:p-2 rounded-lg animate-slide-up-fade-in animation-delay-sidebar ${
                         currentTheme === 'dark' ? 'hover:bg-slate-800/30' : 'hover:bg-gray-100'
                       }`}>
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-[10px] md:text-xs font-bold flex-shrink-0">
                           MC
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 hidden md:block">
                           <div className="flex items-center gap-2">
                             <span className={`text-xs ${
                               currentTheme === 'dark' ? 'text-slate-300' : 'text-gray-700'
@@ -316,15 +317,17 @@ export default function LandingPage() {
                             currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
                           }`}>Thanks for the quick response!</p>
                         </div>
-                        <span className="text-[10px] text-green-500 font-medium">open</span>
+                        <span className="text-[10px] text-green-500 font-medium hidden md:block">open</span>
                       </div>
 
                       {/* Instagram */}
-                      <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800/30 animate-slide-up-fade-in animation-delay-sidebar">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-rose-600 flex items-center justify-center text-white text-xs font-bold">
+                      <div className={`flex items-center justify-center md:justify-start gap-3 p-1.5 md:p-2 rounded-lg animate-slide-up-fade-in animation-delay-sidebar ${
+                        currentTheme === 'dark' ? 'hover:bg-slate-800/30' : 'hover:bg-gray-100'
+                      }`}>
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-orange-400 to-rose-600 flex items-center justify-center text-white text-[10px] md:text-xs font-bold flex-shrink-0">
                           AB
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 hidden md:block">
                           <div className="flex items-center gap-2">
                             <span className={`text-xs ${
                               currentTheme === 'dark' ? 'text-slate-300' : 'text-gray-700'
@@ -335,15 +338,17 @@ export default function LandingPage() {
                             currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
                           }`}>Love your new blend!</p>
                         </div>
-                        <span className="text-[10px] text-green-500 font-medium">open</span>
+                        <span className="text-[10px] text-green-500 font-medium hidden md:block">open</span>
                       </div>
 
                       {/* WhatsApp */}
-                      <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800/30 animate-slide-up-fade-in animation-delay-sidebar">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-fuchsia-600 flex items-center justify-center text-white text-xs font-bold">
+                      <div className={`flex items-center justify-center md:justify-start gap-3 p-1.5 md:p-2 rounded-lg animate-slide-up-fade-in animation-delay-sidebar ${
+                        currentTheme === 'dark' ? 'hover:bg-slate-800/30' : 'hover:bg-gray-100'
+                      }`}>
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-violet-400 to-fuchsia-600 flex items-center justify-center text-white text-[10px] md:text-xs font-bold flex-shrink-0">
                           TS
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 hidden md:block">
                           <div className="flex items-center gap-2">
                             <span className={`text-xs ${
                               currentTheme === 'dark' ? 'text-slate-300' : 'text-gray-700'
@@ -354,47 +359,47 @@ export default function LandingPage() {
                             currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
                           }`}>Perfect, order received!</p>
                         </div>
-                        <span className="text-[10px] text-green-500 font-medium">open</span>
+                        <span className="text-[10px] text-green-500 font-medium hidden md:block">open</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Main Chat Area */}
-                <div className="flex-1 flex flex-col relative min-h-0">
+                <div className="flex-1 flex flex-col relative min-h-0 overflow-hidden">
                   {/* Chat Header */}
-                  <div className={`h-16 border-b flex items-center px-6 animate-slide-up-fade-in animation-delay-sidebar ${
+                  <div className={`h-10 md:h-16 border-b flex items-center px-3 md:px-6 animate-slide-up-fade-in animation-delay-sidebar ${
                     currentTheme === 'dark'
                       ? 'bg-[#0f1621] border-slate-700'
                       : 'bg-gray-50 border-gray-200'
                   }`}>
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-sm font-bold">
+                    <div className="flex items-center gap-2 md:gap-3">
+                      <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-[10px] md:text-sm font-bold">
                         SC
                       </div>
                       <div>
-                        <h3 className={`text-sm font-semibold ${
+                        <h3 className={`text-xs md:text-sm font-semibold ${
                           currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
                         }`}>@sarahcoffee</h3>
-                        <p className={`text-xs flex items-center gap-1 ${
+                        <p className={`text-[10px] md:text-xs flex items-center gap-1 ${
                           currentTheme === 'dark' ? 'text-slate-400' : 'text-gray-500'
                         }`}>
                           <Instagram className="w-3 h-3" />
-                          via Instagram
+                          <span className="hidden sm:inline">via</span> Instagram
                         </p>
                       </div>
                     </div>
                   </div>
 
                   {/* Messages Area */}
-                  <div className="flex-1 p-6 space-y-4">
+                  <div className="flex-1 p-2 md:p-6 space-y-2 md:space-y-4 overflow-y-auto overflow-x-hidden">
                     {/* Message 1: Customer asks about decaf */}
-                    <div className="flex gap-3 animate-slide-up-fade-in animation-delay-600">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                    <div className="flex gap-1.5 md:gap-3 animate-slide-up-fade-in animation-delay-600">
+                      <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-[8px] md:text-xs font-bold flex-shrink-0">
                         SC
                       </div>
-                      <div className="flex-1">
-                        <div className={`rounded-lg px-3 py-2 max-w-[80%] text-xs ${
+                      <div className="flex-1 min-w-0">
+                        <div className={`rounded-lg px-2 py-1.5 md:px-3 md:py-2 max-w-[85%] text-[10px] md:text-xs leading-relaxed overflow-hidden ${
                           currentTheme === 'dark'
                             ? 'bg-slate-700/50 text-slate-100'
                             : 'bg-gray-100 text-gray-900'
@@ -408,187 +413,201 @@ export default function LandingPage() {
                     </div>
 
                     {/* Reply 1: Human response */}
-                    <div className="flex gap-3 justify-end animate-slide-up-fade-in animation-delay-1000">
-                      <div className="flex-1 flex flex-col items-end">
-                        <div className="bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg px-3 py-2 max-w-[80%] text-xs text-white">
+                    <div className="flex gap-1.5 md:gap-3 justify-end animate-slide-up-fade-in animation-delay-1000">
+                      <div className="flex-1 min-w-0 flex flex-col items-end">
+                        <div className="bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg px-2 py-1.5 md:px-3 md:py-2 max-w-[85%] text-[10px] md:text-xs leading-relaxed overflow-hidden text-white">
                           <span className="typing-text">Yes! We have 3 delicious decaf options: Swiss Water Decaf, French Vanilla Decaf, and Hazelnut Decaf ☕</span>
                         </div>
-                        <span className={`text-[10px] mt-1 ${
+                        <span className={`text-[8px] md:text-[10px] mt-0.5 md:mt-1 ${
                           currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
                         }`}>1m ago • Support Team</span>
                       </div>
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                      <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-[8px] md:text-xs font-bold flex-shrink-0">
                         ST
                       </div>
                     </div>
 
                     {/* Message 2: Follow-up question */}
-                    <div className="flex gap-3 animate-slide-up-fade-in animation-delay-1400">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                    <div className="flex gap-1.5 md:gap-3 animate-slide-up-fade-in animation-delay-1400">
+                      <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-[8px] md:text-xs font-bold flex-shrink-0">
                         SC
                       </div>
-                      <div className="flex-1">
-                        <div className={`rounded-lg px-3 py-2 max-w-[80%] text-xs ${
+                      <div className="flex-1 min-w-0">
+                        <div className={`rounded-lg px-2 py-1.5 md:px-3 md:py-2 max-w-[85%] text-[10px] md:text-xs leading-relaxed overflow-hidden ${
                           currentTheme === 'dark'
                             ? 'bg-slate-700/50 text-slate-100'
                             : 'bg-gray-100 text-gray-900'
                         }`}>
                           <span className="typing-text">Perfect! Which one is most popular?</span>
                         </div>
-                        <span className={`text-[10px] mt-1 block ${
+                        <span className={`text-[8px] md:text-[10px] mt-0.5 md:mt-1 block ${
                           currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
                         }`}>30s ago</span>
                       </div>
                     </div>
 
                     {/* Generate AI Response button appears, clicks, then fades out */}
-                    <div className="absolute bottom-24 right-6 animate-slide-up-fade-in animation-delay-1500" style={{ animationFillMode: 'forwards' }}>
-                      <button className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-purple-500 text-white px-2.5 py-1.5 rounded-md text-[10px] font-semibold shadow-lg animate-button-click animation-delay-1800">
-                        <Sparkles className="w-2.5 h-2.5" />
+                    <div className="absolute bottom-16 md:bottom-24 right-2 md:right-6 animate-slide-up-fade-in animation-delay-1500" style={{ animationFillMode: 'forwards' }}>
+                      <button className="flex items-center gap-1 md:gap-1.5 bg-gradient-to-r from-purple-600 to-purple-500 text-white px-2 py-1 md:px-2.5 md:py-1.5 rounded-md text-[8px] md:text-[10px] font-semibold shadow-lg animate-button-click animation-delay-1800">
+                        <Sparkles className="w-2 h-2 md:w-2.5 md:h-2.5" />
                         Generate AI Response
                       </button>
                     </div>
 
                     {/* AI Suggestion Panel pops up after button click, stays visible, then fades out */}
-                    <div className="absolute bottom-20 left-6 right-6 animate-ai-panel animation-delay-2000" style={{ animationFillMode: 'forwards' }}>
-                      <div className={`border-2 border-purple-500 rounded-lg p-4 shadow-2xl ${
+                    <div className="absolute bottom-14 md:bottom-20 left-2 right-2 md:left-6 md:right-6 animate-ai-panel animation-delay-2000" style={{ animationFillMode: 'forwards' }}>
+                      <div className={`border-2 border-purple-500 rounded-lg p-2 md:p-4 shadow-2xl ${
                         currentTheme === 'dark' ? 'bg-slate-800' : 'bg-white'
                       }`}>
-                        <div className="flex items-center gap-2 mb-3">
-                          <Sparkles className="w-4 h-4 text-purple-400" />
-                          <span className={`text-xs font-semibold ${
+                        <div className="flex items-center gap-1.5 md:gap-2 mb-2 md:mb-3">
+                          <Sparkles className="w-3 h-3 md:w-4 md:h-4 text-purple-400" />
+                          <span className={`text-[10px] md:text-xs font-semibold ${
                             currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
                           }`}>AI Suggested Response</span>
                         </div>
-                        <div className={`rounded-lg p-3 mb-3 ${
+                        <div className={`rounded-lg p-2 md:p-3 mb-2 md:mb-3 ${
                           currentTheme === 'dark' ? 'bg-slate-700/50' : 'bg-gray-50'
                         }`}>
-                          <p className={`text-xs leading-relaxed ${
+                          <p className={`text-[10px] md:text-xs leading-relaxed ${
                             currentTheme === 'dark' ? 'text-slate-200' : 'text-gray-700'
                           }`}>
                             Our Swiss Water Decaf is definitely the customer favorite! It has a smooth, rich flavor and is processed without chemicals. Many customers say they can't even tell it's decaf 🌟
                           </p>
                         </div>
-                        <button className="w-full bg-gradient-to-r from-purple-600 to-purple-500 text-white text-xs font-semibold py-2 rounded-lg hover:opacity-90 transition-opacity animate-button-click animation-delay-2400">
+                        <button className="w-full bg-gradient-to-r from-purple-600 to-purple-500 text-white text-[10px] md:text-xs font-semibold py-1.5 md:py-2 rounded-lg hover:opacity-90 transition-opacity animate-button-click animation-delay-2400">
                           Use This Response
                         </button>
                       </div>
                     </div>
 
                     {/* Reply 2: AI-assisted response (appears instantly, no typing) */}
-                    <div className="flex gap-3 justify-end animate-slide-up-fade-in animation-delay-2600">
-                      <div className="flex-1 flex flex-col items-end">
-                        <div className="bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg px-3 py-2 max-w-[80%] text-xs text-white">
+                    <div className="flex gap-1.5 md:gap-3 justify-end animate-slide-up-fade-in animation-delay-2600">
+                      <div className="flex-1 min-w-0 flex flex-col items-end">
+                        <div className="bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg px-2 py-1.5 md:px-3 md:py-2 max-w-[85%] text-[10px] md:text-xs leading-relaxed overflow-hidden text-white">
                           <span className="no-typing">Our Swiss Water Decaf is definitely the customer favorite! It has a smooth, rich flavor 🌟</span>
                         </div>
-                        <span className="text-[10px] text-slate-500 mt-1 flex items-center gap-1">
+                        <span className="text-[8px] md:text-[10px] text-slate-500 mt-0.5 md:mt-1 flex items-center gap-1">
                           Just now • Support Team
-                          <Sparkles className="w-3 h-3 text-purple-400" />
+                          <Sparkles className="w-2.5 h-2.5 md:w-3 md:h-3 text-purple-400" />
                         </span>
                       </div>
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                      <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-[8px] md:text-xs font-bold flex-shrink-0">
                         ST
                       </div>
                     </div>
 
                     {/* Message 3: Customer thanks */}
-                    <div className="flex gap-3 animate-slide-up-fade-in animation-delay-3200">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                    <div className="flex gap-1.5 md:gap-3 animate-slide-up-fade-in animation-delay-3200">
+                      <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-[8px] md:text-xs font-bold flex-shrink-0">
                         SC
                       </div>
-                      <div className="flex-1">
-                        <div className={`rounded-lg px-3 py-2 max-w-[80%] text-xs ${
+                      <div className="flex-1 min-w-0">
+                        <div className={`rounded-lg px-2 py-1.5 md:px-3 md:py-2 max-w-[85%] text-[10px] md:text-xs leading-relaxed overflow-hidden ${
                           currentTheme === 'dark'
                             ? 'bg-slate-700/50 text-slate-100'
                             : 'bg-gray-100 text-gray-900'
                         }`}>
                           <span className="typing-text">Awesome! I'll order that one. Thanks so much! 💜</span>
                         </div>
-                        <span className={`text-[10px] mt-1 block ${
+                        <span className={`text-[8px] md:text-[10px] mt-0.5 md:mt-1 block ${
                           currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
                         }`}>Just now</span>
                       </div>
                     </div>
 
                     {/* Reply 3: Human closing */}
-                    <div className="flex gap-3 justify-end animate-slide-up-fade-in animation-delay-3800">
-                      <div className="flex-1 flex flex-col items-end">
-                        <div className="bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg px-3 py-2 max-w-[80%] text-xs text-white">
+                    <div className="flex gap-1.5 md:gap-3 justify-end animate-slide-up-fade-in animation-delay-3800">
+                      <div className="flex-1 min-w-0 flex flex-col items-end">
+                        <div className="bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg px-2 py-1.5 md:px-3 md:py-2 max-w-[85%] text-[10px] md:text-xs leading-relaxed overflow-hidden text-white">
                           <span className="typing-text">You're so welcome! Enjoy your coffee, and feel free to reach out anytime ☕✨</span>
                         </div>
-                        <span className={`text-[10px] mt-1 ${
+                        <span className={`text-[8px] md:text-[10px] mt-0.5 md:mt-1 ${
                           currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
                         }`}>Just now • Support Team</span>
                       </div>
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                      <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-[8px] md:text-xs font-bold flex-shrink-0">
                         ST
                       </div>
                     </div>
 
                     {/* Message 4: Customer follow-up */}
-                    <div className="flex gap-3 animate-slide-up-fade-in animation-delay-4200">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                    <div className="flex gap-1.5 md:gap-3 animate-slide-up-fade-in animation-delay-4200">
+                      <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-[8px] md:text-xs font-bold flex-shrink-0">
                         SC
                       </div>
-                      <div className="flex-1">
-                        <div className={`rounded-lg px-3 py-2 max-w-[80%] text-xs ${
+                      <div className="flex-1 min-w-0">
+                        <div className={`rounded-lg px-2 py-1.5 md:px-3 md:py-2 max-w-[85%] text-[10px] md:text-xs leading-relaxed overflow-hidden ${
                           currentTheme === 'dark'
                             ? 'bg-slate-700/50 text-slate-100'
                             : 'bg-gray-100 text-gray-900'
                         }`}>
                           <span className="typing-text">One more thing - do you offer subscriptions? Would love monthly deliveries!</span>
                         </div>
-                        <span className={`text-[10px] mt-1 block ${
+                        <span className={`text-[8px] md:text-[10px] mt-0.5 md:mt-1 block ${
                           currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
                         }`}>Just now</span>
                       </div>
                     </div>
 
                     {/* Reply 4: Support response */}
-                    <div className="flex gap-3 justify-end animate-slide-up-fade-in animation-delay-4600">
-                      <div className="flex-1 flex flex-col items-end">
-                        <div className="bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg px-3 py-2 max-w-[80%] text-xs text-white">
+                    <div className="flex gap-1.5 md:gap-3 justify-end animate-slide-up-fade-in animation-delay-4600">
+                      <div className="flex-1 min-w-0 flex flex-col items-end">
+                        <div className="bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg px-2 py-1.5 md:px-3 md:py-2 max-w-[85%] text-[10px] md:text-xs leading-relaxed overflow-hidden text-white">
                           <span className="typing-text">Absolutely! We have monthly subscriptions with 15% off. I'll send you the link now 🎉</span>
                         </div>
-                        <span className={`text-[10px] mt-1 ${
+                        <span className={`text-[8px] md:text-[10px] mt-0.5 md:mt-1 ${
                           currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
                         }`}>Just now • Support Team</span>
                       </div>
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                      <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-[8px] md:text-xs font-bold flex-shrink-0">
                         ST
                       </div>
                     </div>
                   </div>
 
                   {/* Chat Input Area */}
-                  <div className={`border-t p-4 ${
+                  <div className={`border-t p-2 md:p-4 ${
                     currentTheme === 'dark' ? 'border-slate-700 bg-[#0f1621]' : 'border-gray-200 bg-gray-50'
                   }`}>
                     {/* Input Row */}
-                    <div className="flex gap-2 items-center">
-                      <div className={`flex-1 rounded-lg px-3 py-2 text-xs ${
+                    <div className="flex gap-1.5 md:gap-2 items-center">
+                      <div className={`flex-1 rounded-lg px-2 py-1.5 md:px-3 md:py-2 text-[10px] md:text-xs ${
                         currentTheme === 'dark'
                           ? 'bg-slate-800 text-slate-400'
                           : 'bg-white border border-gray-300 text-gray-400'
                       }`}>
                         Type your reply...
                       </div>
-                      <button className="bg-gradient-to-r from-purple-600 to-purple-500 text-white px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-1.5">
-                        <Send className="w-3 h-3" />
-                        Send
+                      <button className="bg-gradient-to-r from-purple-600 to-purple-500 text-white px-2 py-1.5 md:px-3 md:py-2 rounded-lg text-[10px] md:text-xs font-medium flex items-center gap-1">
+                        <Send className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                        <span className="hidden sm:inline">Send</span>
                       </button>
                     </div>
                     {/* Quick Replies & Tip */}
-                    <div className="flex items-center justify-between mt-2">
-                      <button className={`flex items-center gap-1.5 px-2 py-1 rounded text-[10px] border ${
-                        currentTheme === 'dark'
-                          ? 'border-slate-600 text-slate-300 bg-slate-800'
-                          : 'border-gray-300 text-gray-600 bg-white'
-                      }`}>
-                        <MessageSquare className="w-3 h-3" />
-                        Quick Replies
-                      </button>
-                      <div className={`flex items-center gap-1 text-[10px] ${
+                    <div className="flex items-center justify-between mt-1 md:mt-2">
+                      <div className="flex items-center gap-1 md:gap-2">
+                        <button className={`flex items-center gap-1 md:gap-1.5 px-1.5 md:px-2 py-0.5 md:py-1 rounded text-[8px] md:text-[10px] border ${
+                          currentTheme === 'dark'
+                            ? 'border-slate-600 text-slate-300 bg-slate-800'
+                            : 'border-gray-300 text-gray-600 bg-white'
+                        }`}>
+                          <MessageSquare className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                          Quick Replies
+                        </button>
+                        <button className={`flex items-center gap-1 md:gap-1.5 px-1.5 md:px-2 py-0.5 md:py-1 rounded text-[8px] md:text-[10px] border font-medium ${
+                          currentTheme === 'dark'
+                            ? 'border-emerald-500/40 text-emerald-300 bg-emerald-500/15'
+                            : 'border-emerald-400 text-emerald-700 bg-emerald-50'
+                        }`}>
+                          <span className="relative flex h-1.5 w-1.5 md:h-2 md:w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 md:h-2 md:w-2 bg-emerald-500"></span>
+                          </span>
+                          <BotMessageSquare className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                          Auto Reply
+                        </button>
+                      </div>
+                      <div className={`items-center gap-1 text-[8px] md:text-[10px] hidden sm:flex ${
                         currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-400'
                       }`}>
                         <Lightbulb className="w-3 h-3 text-yellow-500" />
@@ -983,94 +1002,12 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 border-b border-purple-200 dark:border-purple-400/30">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Loved by Support Teams
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              See what businesses are saying about InboxForge
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-8 rounded-xl border-2 border-purple-200 bg-white/70 backdrop-blur-lg shadow-sm dark:border-purple-400/20 dark:bg-slate-900/40">
-              <div className="flex gap-1 mb-4">
-                <Star className="w-5 h-5 text-primary fill-primary" />
-                <Star className="w-5 h-5 text-primary fill-primary" />
-                <Star className="w-5 h-5 text-primary fill-primary" />
-                <Star className="w-5 h-5 text-primary fill-primary" />
-                <Star className="w-5 h-5 text-primary fill-primary" />
-              </div>
-              <p className="text-slate-600 dark:text-muted-foreground mb-6 italic">
-                "InboxForge has completely transformed how we handle customer support. The AI suggestions are incredibly accurate and have cut our response time in half."
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white font-bold">
-                  SJ
-                </div>
-                <div>
-                  <div className="font-semibold">Sarah Johnson</div>
-                  <div className="text-sm text-muted-foreground">CEO, TechStart</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-8 rounded-xl border-2 border-purple-200 bg-white/70 backdrop-blur-lg shadow-sm dark:border-purple-400/20 dark:bg-slate-900/40">
-              <div className="flex gap-1 mb-4">
-                <Star className="w-5 h-5 text-primary fill-primary" />
-                <Star className="w-5 h-5 text-primary fill-primary" />
-                <Star className="w-5 h-5 text-primary fill-primary" />
-                <Star className="w-5 h-5 text-primary fill-primary" />
-                <Star className="w-5 h-5 text-primary fill-primary" />
-              </div>
-              <p className="text-slate-600 dark:text-muted-foreground mb-6 italic">
-                "Managing Instagram DMs and emails separately was a nightmare. Now everything's in one place with smart AI assistance. Game changer!"
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white font-bold">
-                  MC
-                </div>
-                <div>
-                  <div className="font-semibold">Michael Chen</div>
-                  <div className="text-sm text-muted-foreground">Founder, StyleBox</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-8 rounded-xl border-2 border-purple-200 bg-white/70 backdrop-blur-lg shadow-sm dark:border-purple-400/20 dark:bg-slate-900/40">
-              <div className="flex gap-1 mb-4">
-                <Star className="w-5 h-5 text-primary fill-primary" />
-                <Star className="w-5 h-5 text-primary fill-primary" />
-                <Star className="w-5 h-5 text-primary fill-primary" />
-                <Star className="w-5 h-5 text-primary fill-primary" />
-                <Star className="w-5 h-5 text-primary fill-primary" />
-              </div>
-              <p className="text-slate-600 dark:text-muted-foreground mb-6 italic">
-                "The analytics dashboard gives us incredible insights into our customer service performance. We've improved our resolution rate by 40%."
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white font-bold">
-                  EP
-                </div>
-                <div>
-                  <div className="font-semibold">Emily Parker</div>
-                  <div className="text-sm text-muted-foreground">Support Lead, GrowthCo</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Final CTA */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         <div className="max-w-4xl mx-auto text-center relative">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm mb-6 border border-primary/20">
             <Sparkles className="w-4 h-4" />
-            Join 1,000+ growing businesses
+            Start your free trial today
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
             Ready to transform your customer support?
