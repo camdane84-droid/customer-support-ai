@@ -606,4 +606,20 @@
       send-pulse 0.3s ease 14800ms,
       send-pulse 0.3s ease 18800ms;
   }
+
+  /* Marquee animation for long text in narrow sidebar */
+  @keyframes marquee {
+    0%, 20% {
+      transform: translateX(0);
+    }
+    80%, 100% {
+      transform: translateX(calc(-100% + 60px));
+    }
+  }
+
+  .animate-marquee {
+    display: inline-block;
+    animation: marquee 3s ease-in-out infinite alternate;
+    animation-delay: 1s;
+  }
 }
