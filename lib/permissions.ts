@@ -15,7 +15,7 @@ export const PERMISSIONS = {
 
   // Team management
   INVITE_MEMBERS: ['owner', 'admin'],
-  REMOVE_MEMBERS: ['owner'], // Only owner can delete members
+  REMOVE_MEMBERS: ['owner', 'admin'], // Admin can remove agents/viewers, owner can remove anyone
   UPDATE_MEMBER_ROLES: ['owner', 'admin'], // Admin can change roles with restrictions
 
   // Conversations

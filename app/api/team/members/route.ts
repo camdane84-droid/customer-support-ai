@@ -48,6 +48,30 @@ export async function DELETE(request: NextRequest) {
   }
 
   try {
+    // Fetch the requesting user's role and the target member's role
+    const { data: requestingMember } = await supabaseAdmin
+      .from('business_members')
+      .select('role')
+      .eq('business_id', businessId)
+      .eq('user_id', auth.data.userId)
+      .single();
+
+    const { data: targetMember } = await supabaseAdmin
+      .from('business_members')
+      .select('role')
+      .eq('id', memberId)
+      .eq('business_id', businessId)
+      .single();
+
+    if (!targetMember) {
+      return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+    }
+
+    // Admins can only remove agents and viewers, not other admins or owners
+    if (requestingMember?.role === 'admin' && (targetMember.role === 'admin' || targetMember.role === 'owner')) {
+      return NextResponse.json({ error: 'Admins can only remove agents and viewers' }, { status: 403 });
+    }
+
     const { error } = await supabaseAdmin
       .from('business_members')
       .delete()
