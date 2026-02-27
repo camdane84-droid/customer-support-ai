@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import LoadingScreen from '@/components/LoadingScreen';
@@ -14,7 +14,7 @@ import { useAuth } from '@/lib/context/AuthContext';
 import type { Conversation } from '@/lib/api/supabase';
 import { MessageSquare, Clock, Mail } from 'lucide-react';
 
-export default function InboxPage() {
+function InboxContent() {
   const { currentBusiness: business, user, loading: authLoading } = useAuth();
   const searchParams = useSearchParams();
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -525,5 +525,13 @@ export default function InboxPage() {
         </div>
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function InboxPage() {
+  return (
+    <Suspense fallback={<DashboardLayout><div className="flex items-center justify-center h-full"><p className="text-gray-500">Loading inbox...</p></div></DashboardLayout>}>
+      <InboxContent />
+    </Suspense>
   );
 }
