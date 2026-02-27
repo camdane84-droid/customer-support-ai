@@ -31,59 +31,104 @@ import {
 // =============================================================================
 type ChannelType = 'instagram' | 'whatsapp' | 'tiktok' | 'email' | 'facebook' | 'sms';
 
+interface DemoMessage {
+  from: 'customer' | 'support';
+  text: string;
+  time: string;
+  isAiGenerated?: boolean;
+}
+
 interface DemoConversation {
+  id: string;
   initials: string;
   name: string;
   channel: ChannelType;
-  message: string;
   gradient: string;
-  isActive?: boolean;
+  messages: DemoMessage[];
 }
 
 // Just add a new object to this array to add a conversation!
 const demoConversations: DemoConversation[] = [
   {
+    id: 'sarah',
     initials: 'SC',
     name: '@sarahcoffee',
     channel: 'instagram',
-    message: 'Do you have decaf options?',
     gradient: 'from-purple-500 to-purple-700',
-    isActive: true,
+    messages: [
+      { from: 'customer', text: 'Hi! Do you have any decaf coffee options? I love coffee but can\'t have caffeine 😊', time: '2m ago' },
+      { from: 'support', text: 'Yes! We have 3 delicious decaf options: Swiss Water Decaf, French Vanilla Decaf, and Hazelnut Decaf ☕', time: '1m ago' },
+      { from: 'customer', text: 'Perfect! Which one is most popular?', time: '30s ago' },
+      { from: 'support', text: 'Our Swiss Water Decaf is definitely the customer favorite! It has a smooth, rich flavor 🌟', time: 'Just now', isAiGenerated: true },
+    ],
   },
   {
+    id: 'jr',
     initials: 'JR',
     name: '+1 415-555-0199',
     channel: 'whatsapp',
-    message: 'When do you open tomorrow?',
     gradient: 'from-emerald-400 to-teal-600',
+    messages: [
+      { from: 'customer', text: 'Hey! When do you open tomorrow?', time: '5m ago' },
+      { from: 'support', text: 'Hi there! We open at 7am tomorrow. See you then! ☀️', time: '4m ago' },
+      { from: 'customer', text: 'Great, do you have oat milk?', time: '3m ago' },
+      { from: 'support', text: 'Yes! We have oat, almond, and coconut milk available 🥛', time: '2m ago' },
+    ],
   },
   {
+    id: 'latte',
     initials: 'LC',
     name: '@lattecreator',
     channel: 'tiktok',
-    message: 'Is this available for wholesale?',
     gradient: 'from-cyan-400 to-pink-600',
+    messages: [
+      { from: 'customer', text: 'Love your videos! Is this available for wholesale?', time: '10m ago' },
+      { from: 'support', text: 'Thank you so much! 🙏 Yes, we do wholesale! What quantities are you looking for?', time: '8m ago' },
+      { from: 'customer', text: 'Around 50 bags per month for my cafe', time: '5m ago' },
+      { from: 'support', text: 'Perfect! I\'ll send you our wholesale pricing guide. You\'ll get 20% off at that volume! 📧', time: '3m ago' },
+    ],
   },
   {
+    id: 'mike',
     initials: 'MC',
     name: 'Mike Chen',
     channel: 'email',
-    message: 'Thanks for the quick response!',
     gradient: 'from-blue-400 to-indigo-600',
+    messages: [
+      { from: 'customer', text: 'Hi, I ordered last week but haven\'t received tracking info yet. Order #4521', time: '1h ago' },
+      { from: 'support', text: 'Hi Mike! Let me check on that for you right away.', time: '45m ago' },
+      { from: 'support', text: 'Found it! Your order shipped yesterday. Tracking: 1Z999AA10123456784. Should arrive Thursday! 📦', time: '40m ago' },
+      { from: 'customer', text: 'Thanks for the quick response!', time: '30m ago' },
+    ],
   },
   {
+    id: 'alex',
     initials: 'AB',
     name: '@alexbrews',
     channel: 'instagram',
-    message: 'Love your new blend!',
     gradient: 'from-orange-400 to-rose-600',
+    messages: [
+      { from: 'customer', text: 'Love your new blend! 🔥', time: '15m ago' },
+      { from: 'support', text: 'Thanks Alex! So glad you\'re enjoying it! ❤️', time: '12m ago' },
+      { from: 'customer', text: 'Can I get a discount code for my followers?', time: '10m ago' },
+      { from: 'support', text: 'Absolutely! Use code ALEXBREWS15 for 15% off. Thanks for spreading the word! 🎉', time: '5m ago' },
+    ],
   },
   {
+    id: 'taylor',
     initials: 'TS',
     name: 'Taylor Smith',
     channel: 'whatsapp',
-    message: 'Perfect, order received!',
     gradient: 'from-violet-400 to-fuchsia-600',
+    messages: [
+      { from: 'customer', text: 'Hi! Just placed order #4892', time: '20m ago' },
+      { from: 'support', text: 'Got it Taylor! We\'re packing it up now 📦', time: '18m ago' },
+      { from: 'customer', text: 'Can you add a gift note? It\'s for my mom\'s birthday', time: '15m ago' },
+      { from: 'support', text: 'Of course! What would you like it to say? 🎂', time: '12m ago' },
+      { from: 'customer', text: '"Happy Birthday Mom! Love, Taylor" ', time: '10m ago' },
+      { from: 'support', text: 'Perfect, added! She\'s going to love it ❤️', time: '8m ago' },
+      { from: 'customer', text: 'Perfect, order received!', time: '5m ago' },
+    ],
   },
 ];
 
@@ -150,6 +195,7 @@ export default function LandingPage() {
   const heroRef = useRef<HTMLDivElement>(null);
   const [isHeroVisible, setIsHeroVisible] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [selectedConvoId, setSelectedConvoId] = useState('sarah');
   const [mounted, setMounted] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -403,11 +449,11 @@ export default function LandingPage() {
 
           {/* Hero Image - Dashboard Preview */}
           <div ref={heroRef} className={`mt-16 rounded-xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-primary/10 overflow-hidden shadow-2xl relative hero-demo-container ${isHeroVisible ? 'hero-visible' : ''}`}>
-            <div className="aspect-video flex items-center justify-center p-4">
+            <div className="aspect-video flex items-center md:items-stretch justify-center p-4">
               {/* Mockup Browser Window */}
               <div
                 ref={containerRef}
-                className={`w-full rounded-lg border shadow-xl overflow-hidden flex ${
+                className={`w-full md:h-full rounded-lg border shadow-xl overflow-hidden flex ${
                 currentTheme === 'dark'
                   ? 'bg-[#1a2332] border-slate-700'
                   : 'bg-white border-gray-200'
@@ -450,17 +496,20 @@ export default function LandingPage() {
                   {/* Conversation List */}
                   <div className="flex-1 overflow-hidden">
                     <div className={`p-2 space-y-1 ${isCompact ? 'flex flex-col items-center' : ''}`}>
-                      {demoConversations.map((convo, index) => {
+                      {demoConversations.map((convo) => {
                         const channel = channelConfig[convo.channel];
                         const isPhone = isPhoneNumber(convo.name);
+                        const isSelected = selectedConvoId === convo.id;
+                        const lastMessage = convo.messages[convo.messages.length - 1];
 
                         return (
                           <div
-                            key={index}
-                            className={`flex items-center gap-3 p-2 rounded-lg animate-slide-up-fade-in animation-delay-sidebar transition-all ${
+                            key={convo.id}
+                            onClick={() => setSelectedConvoId(convo.id)}
+                            className={`flex items-center gap-3 p-2 rounded-lg animate-slide-up-fade-in animation-delay-sidebar transition-all cursor-pointer ${
                               isCompact ? 'p-1.5 justify-center w-fit' : ''
                             } ${
-                              convo.isActive
+                              isSelected
                                 ? currentTheme === 'dark'
                                   ? 'bg-slate-800/50 border border-primary/20'
                                   : 'bg-white border border-gray-200 shadow-sm'
@@ -493,7 +542,7 @@ export default function LandingPage() {
                                     <span className={`text-xs truncate ${
                                       isPhone && isNarrow ? 'whitespace-nowrap animate-marquee' : ''
                                     } ${
-                                      convo.isActive
+                                      isSelected
                                         ? currentTheme === 'dark' ? 'text-white font-medium' : 'text-gray-900 font-medium'
                                         : currentTheme === 'dark' ? 'text-slate-300' : 'text-gray-700'
                                     }`}>
@@ -506,7 +555,7 @@ export default function LandingPage() {
                                   {!isNarrow && (
                                     <p className={`text-xs truncate ${
                                       currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
-                                    }`}>{convo.message}</p>
+                                    }`}>{lastMessage.text}</p>
                                   )}
                                 </div>
                                 {!isNarrow && <span className="text-[10px] text-green-500 font-medium">open</span>}
@@ -543,240 +592,260 @@ export default function LandingPage() {
 
                 {/* Main Chat Area */}
                 <div className="flex-1 flex flex-col relative min-h-0">
-                  {/* Chat Header */}
-                  <div className={`h-16 border-b flex items-center px-6 animate-slide-up-fade-in animation-delay-sidebar ${
-                    currentTheme === 'dark'
-                      ? 'bg-[#0f1621] border-slate-700'
-                      : 'bg-gray-50 border-gray-200'
-                  }`}>
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-sm font-bold">
-                        SC
-                      </div>
-                      <div>
-                        <h3 className={`text-sm font-semibold ${
-                          currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
-                        }`}>@sarahcoffee</h3>
-                        <p className={`text-xs flex items-center gap-1 ${
-                          currentTheme === 'dark' ? 'text-slate-400' : 'text-gray-500'
-                        }`}>
-                          <Instagram className="w-3 h-3" />
-                          via Instagram
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  {(() => {
+                    const selectedConvo = demoConversations.find(c => c.id === selectedConvoId) || demoConversations[0];
+                    const channel = channelConfig[selectedConvo.channel];
+                    const channelName = selectedConvo.channel.charAt(0).toUpperCase() + selectedConvo.channel.slice(1);
+                    const isSarahDemo = selectedConvoId === 'sarah';
 
-                  {/* Messages Area */}
-                  <div className="flex-1 p-6 space-y-4">
-                    {/* Message 1: Customer asks about decaf */}
-                    <div className="flex gap-3 animate-slide-up-fade-in animation-delay-600">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                        SC
-                      </div>
-                      <div className="flex-1">
-                        <div className={`rounded-lg px-3 py-2 max-w-[80%] text-xs ${
+                    return (
+                      <>
+                        {/* Chat Header */}
+                        <div className={`h-16 border-b flex items-center px-6 animate-slide-up-fade-in animation-delay-sidebar ${
                           currentTheme === 'dark'
-                            ? 'bg-slate-700/50 text-slate-100'
-                            : 'bg-gray-100 text-gray-900'
+                            ? 'bg-[#0f1621] border-slate-700'
+                            : 'bg-gray-50 border-gray-200'
                         }`}>
-                          <span className="typing-text">Hi! Do you have any decaf coffee options? I love coffee but can't have caffeine 😊</span>
+                          <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${selectedConvo.gradient} flex items-center justify-center text-white text-sm font-bold`}>
+                              {selectedConvo.initials}
+                            </div>
+                            <div>
+                              <h3 className={`text-sm font-semibold ${
+                                currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
+                              }`}>{selectedConvo.name}</h3>
+                              <p className={`text-xs flex items-center gap-1 ${
+                                currentTheme === 'dark' ? 'text-slate-400' : 'text-gray-500'
+                              }`}>
+                                <span className={channel.iconColor}>{channel.icon}</span>
+                                via {channelName}
+                              </p>
+                            </div>
+                          </div>
                         </div>
-                        <span className={`text-[10px] mt-1 block ${
-                          currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
-                        }`}>2m ago</span>
-                      </div>
-                    </div>
 
-                    {/* Reply 1: Human response */}
-                    <div className="flex gap-3 justify-end animate-slide-up-fade-in animation-delay-1000">
-                      <div className="flex-1 flex flex-col items-end">
-                        <div className="bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg px-3 py-2 max-w-[80%] text-xs text-white">
-                          <span className="typing-text">Yes! We have 3 delicious decaf options: Swiss Water Decaf, French Vanilla Decaf, and Hazelnut Decaf ☕</span>
+                        {/* Messages Area */}
+                        <div className="flex-1 p-6 space-y-4 overflow-y-auto">
+                          {isSarahDemo ? (
+                            <>
+                              {/* ANIMATED DEMO for Sarah - typing effects, AI panel, etc. */}
+                              {/* Message 1: Customer asks about decaf */}
+                              <div className="flex gap-3 animate-slide-up-fade-in animation-delay-600">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                                  SC
+                                </div>
+                                <div className="flex-1">
+                                  <div className={`rounded-lg px-3 py-2 max-w-[80%] text-xs ${
+                                    currentTheme === 'dark'
+                                      ? 'bg-slate-700/50 text-slate-100'
+                                      : 'bg-gray-100 text-gray-900'
+                                  }`}>
+                                    <span className="typing-text">Hi! Do you have any decaf coffee options? I love coffee but can&apos;t have caffeine 😊</span>
+                                  </div>
+                                  <span className={`text-[10px] mt-1 block ${
+                                    currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+                                  }`}>2m ago</span>
+                                </div>
+                              </div>
+
+                              {/* Reply 1: Human response */}
+                              <div className="flex gap-3 justify-end animate-slide-up-fade-in animation-delay-1000">
+                                <div className="flex-1 flex flex-col items-end">
+                                  <div className="bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg px-3 py-2 max-w-[80%] text-xs text-white">
+                                    <span className="typing-text">Yes! We have 3 delicious decaf options: Swiss Water Decaf, French Vanilla Decaf, and Hazelnut Decaf ☕</span>
+                                  </div>
+                                  <span className={`text-[10px] mt-1 ${
+                                    currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+                                  }`}>1m ago • Support Team</span>
+                                </div>
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                                  ST
+                                </div>
+                              </div>
+
+                              {/* Message 2: Follow-up question */}
+                              <div className="flex gap-3 animate-slide-up-fade-in animation-delay-1400">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                                  SC
+                                </div>
+                                <div className="flex-1">
+                                  <div className={`rounded-lg px-3 py-2 max-w-[80%] text-xs ${
+                                    currentTheme === 'dark'
+                                      ? 'bg-slate-700/50 text-slate-100'
+                                      : 'bg-gray-100 text-gray-900'
+                                  }`}>
+                                    <span className="typing-text">Perfect! Which one is most popular?</span>
+                                  </div>
+                                  <span className={`text-[10px] mt-1 block ${
+                                    currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+                                  }`}>30s ago</span>
+                                </div>
+                              </div>
+
+                              {/* Generate AI Response button */}
+                              <div className="absolute bottom-24 right-6 animate-slide-up-fade-in animation-delay-1500" style={{ animationFillMode: 'forwards' }}>
+                                <button className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-purple-500 text-white px-2.5 py-1.5 rounded-md text-[10px] font-semibold shadow-lg animate-button-click animation-delay-1800">
+                                  <Sparkles className="w-2.5 h-2.5" />
+                                  Generate AI Response
+                                </button>
+                              </div>
+
+                              {/* AI Suggestion Panel */}
+                              <div className="absolute bottom-20 left-6 right-6 animate-ai-panel animation-delay-2000" style={{ animationFillMode: 'forwards' }}>
+                                <div className={`border-2 border-purple-500 rounded-lg p-4 shadow-2xl ${
+                                  currentTheme === 'dark' ? 'bg-slate-800' : 'bg-white'
+                                }`}>
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <Sparkles className="w-4 h-4 text-purple-400" />
+                                    <span className={`text-xs font-semibold ${
+                                      currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
+                                    }`}>AI Suggested Response</span>
+                                  </div>
+                                  <div className={`rounded-lg p-3 mb-3 ${
+                                    currentTheme === 'dark' ? 'bg-slate-700/50' : 'bg-gray-50'
+                                  }`}>
+                                    <p className={`text-xs leading-relaxed ${
+                                      currentTheme === 'dark' ? 'text-slate-200' : 'text-gray-700'
+                                    }`}>
+                                      Our Swiss Water Decaf is definitely the customer favorite! It has a smooth, rich flavor and is processed without chemicals. Many customers say they can&apos;t even tell it&apos;s decaf 🌟
+                                    </p>
+                                  </div>
+                                  <button className="w-full bg-gradient-to-r from-purple-600 to-purple-500 text-white text-xs font-semibold py-2 rounded-lg hover:opacity-90 transition-opacity animate-button-click animation-delay-2400">
+                                    Use This Response
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Reply 2: AI-assisted response */}
+                              <div className="flex gap-3 justify-end animate-slide-up-fade-in animation-delay-2600">
+                                <div className="flex-1 flex flex-col items-end">
+                                  <div className="bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg px-3 py-2 max-w-[80%] text-xs text-white">
+                                    <span className="no-typing">Our Swiss Water Decaf is definitely the customer favorite! It has a smooth, rich flavor 🌟</span>
+                                  </div>
+                                  <span className="text-[10px] text-slate-500 mt-1 flex items-center gap-1">
+                                    Just now • Support Team
+                                    <Sparkles className="w-3 h-3 text-purple-400" />
+                                  </span>
+                                </div>
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                                  ST
+                                </div>
+                              </div>
+
+                              {/* Message 3: Customer thanks */}
+                              <div className="flex gap-3 animate-slide-up-fade-in animation-delay-3200">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                                  SC
+                                </div>
+                                <div className="flex-1">
+                                  <div className={`rounded-lg px-3 py-2 max-w-[80%] text-xs ${
+                                    currentTheme === 'dark'
+                                      ? 'bg-slate-700/50 text-slate-100'
+                                      : 'bg-gray-100 text-gray-900'
+                                  }`}>
+                                    <span className="typing-text">Awesome! I&apos;ll order that one. Thanks so much! 💜</span>
+                                  </div>
+                                  <span className={`text-[10px] mt-1 block ${
+                                    currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+                                  }`}>Just now</span>
+                                </div>
+                              </div>
+
+                              {/* Reply 3: Human closing */}
+                              <div className="flex gap-3 justify-end animate-slide-up-fade-in animation-delay-3800">
+                                <div className="flex-1 flex flex-col items-end">
+                                  <div className="bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg px-3 py-2 max-w-[80%] text-xs text-white">
+                                    <span className="typing-text">You&apos;re so welcome! Enjoy your coffee, and feel free to reach out anytime ☕✨</span>
+                                  </div>
+                                  <span className={`text-[10px] mt-1 ${
+                                    currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+                                  }`}>Just now • Support Team</span>
+                                </div>
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                                  ST
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            /* Simple message list for other conversations */
+                            selectedConvo.messages.map((msg, idx) => (
+                              <div
+                                key={idx}
+                                className={`flex gap-3 ${msg.from === 'support' ? 'justify-end' : ''} animate-message-in`}
+                                style={{ animationDelay: `${idx * 100}ms` }}
+                              >
+                                {msg.from === 'customer' && (
+                                  <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${selectedConvo.gradient} flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}>
+                                    {selectedConvo.initials}
+                                  </div>
+                                )}
+                                <div className={`flex-1 ${msg.from === 'support' ? 'flex flex-col items-end' : ''}`}>
+                                  <div className={`rounded-lg px-3 py-2 max-w-[80%] text-xs ${
+                                    msg.from === 'support'
+                                      ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white'
+                                      : currentTheme === 'dark'
+                                        ? 'bg-slate-700/50 text-slate-100'
+                                        : 'bg-gray-100 text-gray-900'
+                                  }`}>
+                                    {msg.text}
+                                  </div>
+                                  <span className={`text-[10px] mt-1 flex items-center gap-1 ${
+                                    currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+                                  }`}>
+                                    {msg.time}
+                                    {msg.from === 'support' && ' • Support Team'}
+                                    {msg.isAiGenerated && <Sparkles className="w-3 h-3 text-purple-400" />}
+                                  </span>
+                                </div>
+                                {msg.from === 'support' && (
+                                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                                    ST
+                                  </div>
+                                )}
+                              </div>
+                            ))
+                          )}
                         </div>
-                        <span className={`text-[10px] mt-1 ${
-                          currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
-                        }`}>1m ago • Support Team</span>
-                      </div>
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                        ST
-                      </div>
-                    </div>
 
-                    {/* Message 2: Follow-up question */}
-                    <div className="flex gap-3 animate-slide-up-fade-in animation-delay-1400">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                        SC
-                      </div>
-                      <div className="flex-1">
-                        <div className={`rounded-lg px-3 py-2 max-w-[80%] text-xs ${
-                          currentTheme === 'dark'
-                            ? 'bg-slate-700/50 text-slate-100'
-                            : 'bg-gray-100 text-gray-900'
+                        {/* Chat Input Area */}
+                        <div className={`border-t p-4 ${
+                          currentTheme === 'dark' ? 'border-slate-700 bg-[#0f1621]' : 'border-gray-200 bg-gray-50'
                         }`}>
-                          <span className="typing-text">Perfect! Which one is most popular?</span>
+                          {/* Input Row */}
+                          <div className="flex gap-2 items-center">
+                            <div className={`flex-1 rounded-lg px-3 py-2 text-xs ${
+                              currentTheme === 'dark'
+                                ? 'bg-slate-800 text-slate-400'
+                                : 'bg-white border border-gray-300 text-gray-400'
+                            }`}>
+                              Type your reply...
+                            </div>
+                            <button className="bg-gradient-to-r from-purple-600 to-purple-500 text-white px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-1.5">
+                              <Send className="w-3 h-3" />
+                              Send
+                            </button>
+                          </div>
+                          {/* Quick Replies & Tip */}
+                          <div className="flex items-center justify-between mt-2">
+                            <button className={`flex items-center gap-1.5 px-2 py-1 rounded text-[10px] border ${
+                              currentTheme === 'dark'
+                                ? 'border-slate-600 text-slate-300 bg-slate-800'
+                                : 'border-gray-300 text-gray-600 bg-white'
+                            }`}>
+                              <MessageSquare className="w-3 h-3" />
+                              Quick Replies
+                            </button>
+                            <div className={`flex items-center gap-1 text-[8px] ${
+                              currentTheme === 'dark' ? 'text-slate-500/70' : 'text-gray-400/70'
+                            }`}>
+                              <Lightbulb className="w-2.5 h-2.5 text-yellow-500/70" />
+                              Enter to send, Shift+Enter for new line
+                            </div>
+                          </div>
                         </div>
-                        <span className={`text-[10px] mt-1 block ${
-                          currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
-                        }`}>30s ago</span>
-                      </div>
-                    </div>
-
-                    {/* Generate AI Response button appears, clicks, then fades out */}
-                    <div className="absolute bottom-24 right-6 animate-slide-up-fade-in animation-delay-1500" style={{ animationFillMode: 'forwards' }}>
-                      <button className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-purple-500 text-white px-2.5 py-1.5 rounded-md text-[10px] font-semibold shadow-lg animate-button-click animation-delay-1800">
-                        <Sparkles className="w-2.5 h-2.5" />
-                        Generate AI Response
-                      </button>
-                    </div>
-
-                    {/* AI Suggestion Panel pops up after button click, stays visible, then fades out */}
-                    <div className="absolute bottom-20 left-6 right-6 animate-ai-panel animation-delay-2000" style={{ animationFillMode: 'forwards' }}>
-                      <div className={`border-2 border-purple-500 rounded-lg p-4 shadow-2xl ${
-                        currentTheme === 'dark' ? 'bg-slate-800' : 'bg-white'
-                      }`}>
-                        <div className="flex items-center gap-2 mb-3">
-                          <Sparkles className="w-4 h-4 text-purple-400" />
-                          <span className={`text-xs font-semibold ${
-                            currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
-                          }`}>AI Suggested Response</span>
-                        </div>
-                        <div className={`rounded-lg p-3 mb-3 ${
-                          currentTheme === 'dark' ? 'bg-slate-700/50' : 'bg-gray-50'
-                        }`}>
-                          <p className={`text-xs leading-relaxed ${
-                            currentTheme === 'dark' ? 'text-slate-200' : 'text-gray-700'
-                          }`}>
-                            Our Swiss Water Decaf is definitely the customer favorite! It has a smooth, rich flavor and is processed without chemicals. Many customers say they can't even tell it's decaf 🌟
-                          </p>
-                        </div>
-                        <button className="w-full bg-gradient-to-r from-purple-600 to-purple-500 text-white text-xs font-semibold py-2 rounded-lg hover:opacity-90 transition-opacity animate-button-click animation-delay-2400">
-                          Use This Response
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Reply 2: AI-assisted response (appears instantly, no typing) */}
-                    <div className="flex gap-3 justify-end animate-slide-up-fade-in animation-delay-2600">
-                      <div className="flex-1 flex flex-col items-end">
-                        <div className="bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg px-3 py-2 max-w-[80%] text-xs text-white">
-                          <span className="no-typing">Our Swiss Water Decaf is definitely the customer favorite! It has a smooth, rich flavor 🌟</span>
-                        </div>
-                        <span className="text-[10px] text-slate-500 mt-1 flex items-center gap-1">
-                          Just now • Support Team
-                          <Sparkles className="w-3 h-3 text-purple-400" />
-                        </span>
-                      </div>
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                        ST
-                      </div>
-                    </div>
-
-                    {/* Message 3: Customer thanks */}
-                    <div className="flex gap-3 animate-slide-up-fade-in animation-delay-3200">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                        SC
-                      </div>
-                      <div className="flex-1">
-                        <div className={`rounded-lg px-3 py-2 max-w-[80%] text-xs ${
-                          currentTheme === 'dark'
-                            ? 'bg-slate-700/50 text-slate-100'
-                            : 'bg-gray-100 text-gray-900'
-                        }`}>
-                          <span className="typing-text">Awesome! I'll order that one. Thanks so much! 💜</span>
-                        </div>
-                        <span className={`text-[10px] mt-1 block ${
-                          currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
-                        }`}>Just now</span>
-                      </div>
-                    </div>
-
-                    {/* Reply 3: Human closing */}
-                    <div className="flex gap-3 justify-end animate-slide-up-fade-in animation-delay-3800">
-                      <div className="flex-1 flex flex-col items-end">
-                        <div className="bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg px-3 py-2 max-w-[80%] text-xs text-white">
-                          <span className="typing-text">You're so welcome! Enjoy your coffee, and feel free to reach out anytime ☕✨</span>
-                        </div>
-                        <span className={`text-[10px] mt-1 ${
-                          currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
-                        }`}>Just now • Support Team</span>
-                      </div>
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                        ST
-                      </div>
-                    </div>
-
-                    {/* Message 4: Customer follow-up */}
-                    <div className="flex gap-3 animate-slide-up-fade-in animation-delay-4200">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                        SC
-                      </div>
-                      <div className="flex-1">
-                        <div className={`rounded-lg px-3 py-2 max-w-[80%] text-xs ${
-                          currentTheme === 'dark'
-                            ? 'bg-slate-700/50 text-slate-100'
-                            : 'bg-gray-100 text-gray-900'
-                        }`}>
-                          <span className="typing-text">One more thing - do you offer subscriptions? Would love monthly deliveries!</span>
-                        </div>
-                        <span className={`text-[10px] mt-1 block ${
-                          currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
-                        }`}>Just now</span>
-                      </div>
-                    </div>
-
-                    {/* Reply 4: Support response */}
-                    <div className="flex gap-3 justify-end animate-slide-up-fade-in animation-delay-4600">
-                      <div className="flex-1 flex flex-col items-end">
-                        <div className="bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg px-3 py-2 max-w-[80%] text-xs text-white">
-                          <span className="typing-text">Absolutely! We have monthly subscriptions with 15% off. I'll send you the link now 🎉</span>
-                        </div>
-                        <span className={`text-[10px] mt-1 ${
-                          currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
-                        }`}>Just now • Support Team</span>
-                      </div>
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                        ST
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Chat Input Area */}
-                  <div className={`border-t p-4 ${
-                    currentTheme === 'dark' ? 'border-slate-700 bg-[#0f1621]' : 'border-gray-200 bg-gray-50'
-                  }`}>
-                    {/* Input Row */}
-                    <div className="flex gap-2 items-center">
-                      <div className={`flex-1 rounded-lg px-3 py-2 text-xs ${
-                        currentTheme === 'dark'
-                          ? 'bg-slate-800 text-slate-400'
-                          : 'bg-white border border-gray-300 text-gray-400'
-                      }`}>
-                        Type your reply...
-                      </div>
-                      <button className="bg-gradient-to-r from-purple-600 to-purple-500 text-white px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-1.5">
-                        <Send className="w-3 h-3" />
-                        Send
-                      </button>
-                    </div>
-                    {/* Quick Replies & Tip */}
-                    <div className="flex items-center justify-between mt-2">
-                      <button className={`flex items-center gap-1.5 px-2 py-1 rounded text-[10px] border ${
-                        currentTheme === 'dark'
-                          ? 'border-slate-600 text-slate-300 bg-slate-800'
-                          : 'border-gray-300 text-gray-600 bg-white'
-                      }`}>
-                        <MessageSquare className="w-3 h-3" />
-                        Quick Replies
-                      </button>
-                      <div className={`flex items-center gap-1 text-[10px] ${
-                        currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-400'
-                      }`}>
-                        <Lightbulb className="w-3 h-3 text-yellow-500" />
-                        Tip: Press Enter to send, Shift+Enter for new line
-                      </div>
-                    </div>
-                  </div>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
