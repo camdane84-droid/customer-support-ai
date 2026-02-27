@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/context/AuthContext';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Crown, Shield, Users, Eye, Mail, Trash2, X, Loader2, Link2, Edit3, AlertCircle, CheckCircle, Copy, Send, RefreshCw } from 'lucide-react';
-import { hasPermission, canChangeRole } from '@/lib/permissions';
+import { hasPermission, canChangeRole, canManageRole } from '@/lib/permissions';
 import type { Role } from '@/lib/permissions';
 import TeamSkeleton from '@/components/skeletons/TeamSkeleton';
 
@@ -566,8 +566,8 @@ export default function TeamPage() {
                       </>
                     )}
 
-                    {/* Remove Member Button - Only owners can delete members */}
-                    {canRemoveMembers && (
+                    {/* Remove Member Button - Owner can remove anyone, admin can remove agents/viewers */}
+                    {canRemoveMembers && canManageRole(currentBusiness.member_role, member.role) && (
                       <button
                         onClick={() => handleRemoveMember(member.id)}
                         className="group text-red-600 hover:text-white p-2 hover:bg-red-600 rounded-lg transition-all duration-200 hover:scale-110 hover:shadow-md active:scale-95"
