@@ -22,8 +22,126 @@ import {
   Star,
   Music,
   Send,
-  Lightbulb
+  Lightbulb,
+  Facebook
 } from 'lucide-react';
+
+// =============================================================================
+// DEMO CONVERSATIONS - Add new conversations here!
+// =============================================================================
+type ChannelType = 'instagram' | 'whatsapp' | 'tiktok' | 'email' | 'facebook' | 'sms';
+
+interface DemoConversation {
+  initials: string;
+  name: string;
+  channel: ChannelType;
+  message: string;
+  gradient: string;
+  isActive?: boolean;
+}
+
+// Just add a new object to this array to add a conversation!
+const demoConversations: DemoConversation[] = [
+  {
+    initials: 'SC',
+    name: '@sarahcoffee',
+    channel: 'instagram',
+    message: 'Do you have decaf options?',
+    gradient: 'from-purple-500 to-purple-700',
+    isActive: true,
+  },
+  {
+    initials: 'JR',
+    name: '+1 415-555-0199',
+    channel: 'whatsapp',
+    message: 'When do you open tomorrow?',
+    gradient: 'from-emerald-400 to-teal-600',
+  },
+  {
+    initials: 'LC',
+    name: '@lattecreator',
+    channel: 'tiktok',
+    message: 'Is this available for wholesale?',
+    gradient: 'from-cyan-400 to-pink-600',
+  },
+  {
+    initials: 'MC',
+    name: 'Mike Chen',
+    channel: 'email',
+    message: 'Thanks for the quick response!',
+    gradient: 'from-blue-400 to-indigo-600',
+  },
+  {
+    initials: 'AB',
+    name: '@alexbrews',
+    channel: 'instagram',
+    message: 'Love your new blend!',
+    gradient: 'from-orange-400 to-rose-600',
+  },
+  {
+    initials: 'TS',
+    name: 'Taylor Smith',
+    channel: 'whatsapp',
+    message: 'Perfect, order received!',
+    gradient: 'from-violet-400 to-fuchsia-600',
+  },
+];
+
+// Channel configuration - icons and colors
+const channelConfig: Record<ChannelType, {
+  icon: React.ReactNode;
+  badgeColor: string;
+  iconColor: string;
+}> = {
+  instagram: {
+    icon: <Instagram className="w-3 h-3" />,
+    badgeColor: 'bg-gradient-to-br from-pink-500 to-purple-600',
+    iconColor: 'text-pink-400',
+  },
+  whatsapp: {
+    icon: <MessageCircle className="w-3 h-3" />,
+    badgeColor: 'bg-emerald-500',
+    iconColor: 'text-emerald-400',
+  },
+  tiktok: {
+    icon: (
+      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+      </svg>
+    ),
+    badgeColor: 'bg-black',
+    iconColor: 'text-current',
+  },
+  email: {
+    icon: <Mail className="w-3 h-3" />,
+    badgeColor: 'bg-blue-500',
+    iconColor: 'text-slate-400',
+  },
+  facebook: {
+    icon: <Facebook className="w-3 h-3" />,
+    badgeColor: 'bg-blue-600',
+    iconColor: 'text-blue-400',
+  },
+  sms: {
+    icon: <MessageSquare className="w-3 h-3" />,
+    badgeColor: 'bg-green-500',
+    iconColor: 'text-green-400',
+  },
+};
+
+// Helper to format phone numbers for narrow mode
+const formatNameForNarrow = (name: string): string => {
+  // If it's a phone number, remove country code
+  if (name.startsWith('+')) {
+    return name.replace(/^\+\d+\s*/, '');
+  }
+  return name;
+};
+
+// Check if name is a phone number (for marquee animation)
+const isPhoneNumber = (name: string): boolean => {
+  return name.startsWith('+') || /^\d{3}[-.\s]?\d{3}[-.\s]?\d{4}$/.test(name);
+};
 
 export default function LandingPage() {
   const { user, loading } = useAuth();
@@ -33,13 +151,100 @@ export default function LandingPage() {
   const [isHeroVisible, setIsHeroVisible] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Use dark theme as default for SSR
   const currentTheme = mounted ? theme : 'dark';
 
+  // Determine display mode based on sidebar width
+  const isCompact = sidebarWidth !== null && sidebarWidth < 140;
+  const isNarrow = sidebarWidth !== null && sidebarWidth < 200;
+
+  // Get responsive constraints based on container width
+  const getConstraints = () => {
+    if (!containerRef.current) return { min: 100, max: 200, initial: 150 };
+    const containerWidth = containerRef.current.offsetWidth;
+    // On mobile/small screens, use percentage-based constraints
+    const minWidth = Math.max(80, containerWidth * 0.2);  // 20% min, at least 80px
+    const maxWidth = Math.min(400, containerWidth * 0.5); // 50% max, at most 400px
+    const initialWidth = Math.min(280, containerWidth * 0.35); // 35% initial, at most 280px
+    return { min: minWidth, max: maxWidth, initial: initialWidth };
+  };
+
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Set initial sidebar width based on container size
+  useEffect(() => {
+    if (mounted && containerRef.current && sidebarWidth === null) {
+      const { initial } = getConstraints();
+      setSidebarWidth(initial);
+    }
+  }, [mounted, sidebarWidth]);
+
+  // Update sidebar width on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current && sidebarWidth !== null) {
+        const { min, max } = getConstraints();
+        // Constrain current width to new bounds
+        setSidebarWidth(prev => Math.min(Math.max(prev || min, min), max));
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [sidebarWidth]);
+
+  // Handle resizable sidebar drag (mouse + touch)
+  useEffect(() => {
+    const handleMove = (clientX: number) => {
+      if (!isDragging || !containerRef.current) return;
+
+      const container = containerRef.current;
+      const containerRect = container.getBoundingClientRect();
+      const newWidth = clientX - containerRect.left;
+
+      const { min, max } = getConstraints();
+      const constrainedWidth = Math.min(Math.max(newWidth, min), max);
+      setSidebarWidth(constrainedWidth);
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      handleMove(e.clientX);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        handleMove(e.touches[0].clientX);
+      }
+    };
+
+    const handleEnd = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleEnd);
+      document.addEventListener('touchmove', handleTouchMove, { passive: true });
+      document.addEventListener('touchend', handleEnd);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleEnd);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleEnd);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isDragging]);
 
   useEffect(() => {
     // If user is logged in, redirect to dashboard (Supabase-style)
@@ -200,163 +405,139 @@ export default function LandingPage() {
           <div ref={heroRef} className={`mt-16 rounded-xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-primary/10 overflow-hidden shadow-2xl relative hero-demo-container ${isHeroVisible ? 'hero-visible' : ''}`}>
             <div className="aspect-video flex items-center justify-center p-4">
               {/* Mockup Browser Window */}
-              <div className={`w-full rounded-lg border shadow-xl overflow-hidden flex ${
+              <div
+                ref={containerRef}
+                className={`w-full rounded-lg border shadow-xl overflow-hidden flex ${
                 currentTheme === 'dark'
                   ? 'bg-[#1a2332] border-slate-700'
                   : 'bg-white border-gray-200'
               }`}>
                 {/* Left Sidebar - Conversations List */}
-                <div className={`w-48 md:w-60 xl:w-72 border-r flex-col flex-shrink-0 flex ${
+                <div
+                  style={sidebarWidth ? { width: `${sidebarWidth}px`, minWidth: `${sidebarWidth}px` } : undefined}
+                  className={`border-r flex-col flex-shrink-0 flex ${
+                    !sidebarWidth ? 'w-[35%] min-w-[80px] max-w-[280px]' : ''
+                  } ${
                   currentTheme === 'dark'
                     ? 'bg-[#0f1621] border-slate-700'
                     : 'bg-gray-50 border-gray-200'
                 }`}>
                   {/* Inbox Header */}
-                  <div className={`p-4 border-b ${
+                  <div className={`p-4 border-b transition-all ${
+                    isCompact ? 'p-2 flex justify-center' : ''
+                  } ${
                     currentTheme === 'dark' ? 'border-slate-700' : 'border-gray-200'
                   }`}>
-                    <h2 className={`font-semibold text-sm flex items-center gap-2 ${
-                      currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
-                    }`}>
-                      <MessageSquare className="w-4 h-4 text-primary" />
-                      Inbox
-                    </h2>
-                    <p className={`text-xs mt-0.5 ${
-                      currentTheme === 'dark' ? 'text-slate-400' : 'text-gray-500'
-                    }`}>6 conversations</p>
+                    {isCompact ? (
+                      <MessageSquare className="w-5 h-5 text-primary" />
+                    ) : (
+                      <>
+                        <h2 className={`font-semibold text-sm flex items-center gap-2 ${
+                          currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
+                        }`}>
+                          <MessageSquare className="w-4 h-4 text-primary" />
+                          {!isNarrow && 'Inbox'}
+                        </h2>
+                        {!isNarrow && (
+                          <p className={`text-xs mt-0.5 ${
+                            currentTheme === 'dark' ? 'text-slate-400' : 'text-gray-500'
+                          }`}>{demoConversations.length} conversations</p>
+                        )}
+                      </>
+                    )}
                   </div>
 
                   {/* Conversation List */}
                   <div className="flex-1 overflow-hidden">
-                    <div className="p-2 space-y-1">
-                      {/* Active Conversation */}
-                      <div className={`flex items-center gap-3 p-2 rounded-lg border animate-slide-up-fade-in animation-delay-sidebar ${
-                        currentTheme === 'dark'
-                          ? 'bg-slate-800/50 border-primary/20'
-                          : 'bg-white border-gray-200 shadow-sm'
-                      }`}>
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                          SC
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className={`text-xs font-medium ${
-                              currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
-                            }`}>@sarahcoffee</span>
-                            <Instagram className="w-3 h-3 text-pink-400" />
-                          </div>
-                          <p className={`text-xs truncate ${
-                            currentTheme === 'dark' ? 'text-slate-400' : 'text-gray-500'
-                          }`}>Do you have decaf options?</p>
-                        </div>
-                        <span className="text-[10px] text-green-500 font-medium">open</span>
-                      </div>
+                    <div className={`p-2 space-y-1 ${isCompact ? 'flex flex-col items-center' : ''}`}>
+                      {demoConversations.map((convo, index) => {
+                        const channel = channelConfig[convo.channel];
+                        const isPhone = isPhoneNumber(convo.name);
 
-                      {/* WhatsApp Conversation */}
-                      <div className={`flex items-center gap-3 p-2 rounded-lg animate-slide-up-fade-in animation-delay-sidebar ${
-                        currentTheme === 'dark'
-                          ? 'hover:bg-slate-800/30'
-                          : 'hover:bg-gray-100'
-                      }`}>
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-white text-xs font-bold">
-                          JR
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className={`text-xs ${
-                              currentTheme === 'dark' ? 'text-slate-300' : 'text-gray-700'
-                            }`}>+1 415-555-0199</span>
-                            <MessageCircle className="w-3 h-3 text-emerald-400" />
-                          </div>
-                          <p className={`text-xs truncate ${
-                            currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
-                          }`}>When do you open tomorrow?</p>
-                        </div>
-                        <span className="text-[10px] text-green-500 font-medium">open</span>
-                      </div>
+                        return (
+                          <div
+                            key={index}
+                            className={`flex items-center gap-3 p-2 rounded-lg animate-slide-up-fade-in animation-delay-sidebar transition-all ${
+                              isCompact ? 'p-1.5 justify-center w-fit' : ''
+                            } ${
+                              convo.isActive
+                                ? currentTheme === 'dark'
+                                  ? 'bg-slate-800/50 border border-primary/20'
+                                  : 'bg-white border border-gray-200 shadow-sm'
+                                : currentTheme === 'dark'
+                                  ? 'hover:bg-slate-800/30'
+                                  : 'hover:bg-gray-100'
+                            }`}
+                          >
+                            {/* Avatar */}
+                            <div className="relative flex-shrink-0">
+                              <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${convo.gradient} flex items-center justify-center text-white text-xs font-bold`}>
+                                {convo.initials}
+                              </div>
+                              {isCompact && (
+                                <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full ${channel.badgeColor} flex items-center justify-center border-2 ${
+                                  currentTheme === 'dark' ? 'border-slate-800' : 'border-gray-100'
+                                }`}>
+                                  <span className="w-2 h-2 text-white flex items-center justify-center [&>svg]:w-2 [&>svg]:h-2">
+                                    {channel.icon}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
 
-                      {/* TikTok Conversation */}
-                      <div className={`flex items-center gap-3 p-2 rounded-lg animate-slide-up-fade-in animation-delay-sidebar ${
-                        currentTheme === 'dark' ? 'hover:bg-slate-800/30' : 'hover:bg-gray-100'
-                      }`}>
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-pink-600 flex items-center justify-center text-white text-xs font-bold">
-                          LC
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className={`text-xs ${
-                              currentTheme === 'dark' ? 'text-slate-300' : 'text-gray-700'
-                            }`}>@lattecreator</span>
-                            <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" fill="currentColor"/>
-                            </svg>
+                            {/* Content */}
+                            {!isCompact && (
+                              <>
+                                <div className={`flex-1 min-w-0 ${isPhone ? 'overflow-hidden' : ''}`}>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`text-xs truncate ${
+                                      isPhone && isNarrow ? 'whitespace-nowrap animate-marquee' : ''
+                                    } ${
+                                      convo.isActive
+                                        ? currentTheme === 'dark' ? 'text-white font-medium' : 'text-gray-900 font-medium'
+                                        : currentTheme === 'dark' ? 'text-slate-300' : 'text-gray-700'
+                                    }`}>
+                                      {isNarrow ? formatNameForNarrow(convo.name) : convo.name}
+                                    </span>
+                                    <span className={`flex-shrink-0 ${channel.iconColor}`}>
+                                      {channel.icon}
+                                    </span>
+                                  </div>
+                                  {!isNarrow && (
+                                    <p className={`text-xs truncate ${
+                                      currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+                                    }`}>{convo.message}</p>
+                                  )}
+                                </div>
+                                {!isNarrow && <span className="text-[10px] text-green-500 font-medium">open</span>}
+                              </>
+                            )}
                           </div>
-                          <p className={`text-xs truncate ${
-                            currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
-                          }`}>Is this available for wholesale?</p>
-                        </div>
-                        <span className="text-[10px] text-green-500 font-medium">open</span>
-                      </div>
-
-                      {/* Email Conversation */}
-                      <div className={`flex items-center gap-3 p-2 rounded-lg animate-slide-up-fade-in animation-delay-sidebar ${
-                        currentTheme === 'dark' ? 'hover:bg-slate-800/30' : 'hover:bg-gray-100'
-                      }`}>
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">
-                          MC
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className={`text-xs ${
-                              currentTheme === 'dark' ? 'text-slate-300' : 'text-gray-700'
-                            }`}>Mike Chen</span>
-                            <Mail className="w-3 h-3 text-slate-400" />
-                          </div>
-                          <p className={`text-xs truncate ${
-                            currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
-                          }`}>Thanks for the quick response!</p>
-                        </div>
-                        <span className="text-[10px] text-green-500 font-medium">open</span>
-                      </div>
-
-                      {/* Instagram */}
-                      <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800/30 animate-slide-up-fade-in animation-delay-sidebar">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-rose-600 flex items-center justify-center text-white text-xs font-bold">
-                          AB
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className={`text-xs ${
-                              currentTheme === 'dark' ? 'text-slate-300' : 'text-gray-700'
-                            }`}>@alexbrews</span>
-                            <Instagram className="w-3 h-3 text-pink-400" />
-                          </div>
-                          <p className={`text-xs truncate ${
-                            currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
-                          }`}>Love your new blend!</p>
-                        </div>
-                        <span className="text-[10px] text-green-500 font-medium">open</span>
-                      </div>
-
-                      {/* WhatsApp */}
-                      <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800/30 animate-slide-up-fade-in animation-delay-sidebar">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-fuchsia-600 flex items-center justify-center text-white text-xs font-bold">
-                          TS
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className={`text-xs ${
-                              currentTheme === 'dark' ? 'text-slate-300' : 'text-gray-700'
-                            }`}>Taylor Smith</span>
-                            <MessageCircle className="w-3 h-3 text-emerald-400" />
-                          </div>
-                          <p className={`text-xs truncate ${
-                            currentTheme === 'dark' ? 'text-slate-500' : 'text-gray-500'
-                          }`}>Perfect, order received!</p>
-                        </div>
-                        <span className="text-[10px] text-green-500 font-medium">open</span>
-                      </div>
+                        );
+                      })}
                     </div>
+                  </div>
+                </div>
+
+                {/* Resizable Divider */}
+                <div
+                  onMouseDown={() => setIsDragging(true)}
+                  onTouchStart={() => setIsDragging(true)}
+                  className={`w-2 sm:w-1.5 cursor-col-resize flex-shrink-0 group relative transition-colors touch-none ${
+                    isDragging
+                      ? 'bg-primary'
+                      : currentTheme === 'dark'
+                        ? 'bg-slate-700 hover:bg-primary/60 active:bg-primary'
+                        : 'bg-gray-200 hover:bg-primary/40 active:bg-primary/60'
+                  }`}
+                >
+                  {/* Larger touch target area (invisible) */}
+                  <div className="absolute inset-y-0 -left-2 -right-2 sm:-left-1 sm:-right-1" />
+                  {/* Visual grip indicator */}
+                  <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col gap-0.5 transition-opacity ${isDragging ? 'opacity-100' : 'opacity-60 sm:opacity-0 sm:group-hover:opacity-100'}`}>
+                    <div className="w-1 h-1 sm:w-0.5 sm:h-0.5 rounded-full bg-white/80"></div>
+                    <div className="w-1 h-1 sm:w-0.5 sm:h-0.5 rounded-full bg-white/80"></div>
+                    <div className="w-1 h-1 sm:w-0.5 sm:h-0.5 rounded-full bg-white/80"></div>
                   </div>
                 </div>
 
