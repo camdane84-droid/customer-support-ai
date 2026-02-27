@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signUp } from '@/lib/auth';
 import { useAuth } from '@/lib/context/AuthContext';
@@ -17,6 +17,7 @@ function SignupForm() {
   const [businessNameError, setBusinessNameError] = useState('');
   const [checkingName, setCheckingName] = useState(false);
   const [loadingInvite, setLoadingInvite] = useState(false);
+  const passwordRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const urlInviteToken = searchParams.get('invite');
@@ -39,12 +40,12 @@ function SignupForm() {
 
   const inviteToken = getInviteToken();
 
-  // Fetch business name when invite token is present
+  // Fetch invitation details (including email) when invite token is present from URL
   useEffect(() => {
-    if (inviteToken) {
-      fetchInvitationDetails(inviteToken);
+    if (urlInviteToken) {
+      fetchInvitationDetails(urlInviteToken);
     }
-  }, [inviteToken]);
+  }, [urlInviteToken]);
 
   async function fetchInvitationDetails(token: string) {
     setLoadingInvite(true);
@@ -53,6 +54,10 @@ function SignupForm() {
       if (response.ok) {
         const data = await response.json();
         setBusinessName(data.businessName);
+        if (data.email) {
+          setEmail(data.email);
+          setTimeout(() => passwordRef.current?.focus(), 0);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch invitation details:', error);
@@ -88,6 +93,13 @@ function SignupForm() {
       setCheckingName(false);
     }
   };
+
+  // Fetch invitation details when user manually pastes an invite link
+  useEffect(() => {
+    if (!urlInviteToken && inviteToken) {
+      fetchInvitationDetails(inviteToken);
+    }
+  }, [inviteInput]);
 
   // Debounced business name check
   useEffect(() => {
@@ -248,9 +260,16 @@ function SignupForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400"
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-400 ${
+                  inviteToken && email ? 'border-green-300' : 'border-gray-300'
+                }`}
                 placeholder="you@example.com"
               />
+              {inviteToken && email && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Pre-filled from your invitation. You can change it if needed.
+                </p>
+              )}
             </div>
 
             <div>
@@ -258,6 +277,7 @@ function SignupForm() {
                 Password
               </label>
               <input
+                ref={passwordRef}
                 id="password"
                 type="password"
                 value={password}

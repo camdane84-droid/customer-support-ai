@@ -1,4 +1,4 @@
-import sgMail from '@sendgrid/mail';
+import { Resend } from 'resend';
 import { logger } from '@/lib/logger';
 
 export async function sendEmail(params: {
@@ -8,16 +8,14 @@ export async function sendEmail(params: {
   text: string;
   html?: string;
 }) {
-  // Set API key before each send to ensure it's properly initialized
-  // This is important in serverless environments where env vars may not be available at module load time
-  if (!process.env.SENDGRID_API_KEY) {
-    throw new Error('SENDGRID_API_KEY environment variable is not set');
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error('RESEND_API_KEY environment variable is not set');
   }
 
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  const resend = new Resend(process.env.RESEND_API_KEY);
 
   try {
-    await sgMail.send({
+    const { data, error } = await resend.emails.send({
       to: params.to,
       from: params.from,
       subject: params.subject,
@@ -25,15 +23,17 @@ export async function sendEmail(params: {
       html: params.html || params.text,
     });
 
-    logger.success('Email sent successfully', { to: params.to });
+    if (error) {
+      throw error;
+    }
+
+    logger.success('Email sent successfully', { to: params.to, id: data?.id });
     return { success: true };
   } catch (error: any) {
-    const sgErrors = error?.response?.body?.errors;
-    const errorDetail = sgErrors?.[0]?.message || error.message || 'Unknown SendGrid error';
-    logger.error('SendGrid error', error, {
+    const errorDetail = error?.message || 'Unknown Resend error';
+    logger.error('Resend error', error, {
       to: params.to,
       from: params.from,
-      responseBody: error?.response?.body
     });
     throw new Error(`Failed to send email: ${errorDetail}`);
   }

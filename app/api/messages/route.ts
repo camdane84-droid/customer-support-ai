@@ -67,8 +67,17 @@ export async function POST(request: NextRequest) {
 
     // If this is a business reply, try to send it
     if (message.sender_type === 'business') {
+      // Check if this conversation was created by the simulator
+      const isSimulated = await checkIfSimulated(message.conversation_id);
+
       try {
-        if (message.channel === 'email') {
+        if (isSimulated) {
+          // Simulated conversations: skip external API, just mark as sent
+          logger.info('[MESSAGES] Simulated conversation - skipping external delivery', {
+            conversationId: message.conversation_id,
+            channel: message.channel,
+          });
+        } else if (message.channel === 'email') {
           await handleEmailSend(data, message.business_id);
         } else if (message.channel === 'instagram') {
           await handleInstagramSend(data, message.business_id);
@@ -121,9 +130,9 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleEmailSend(message: Message, businessId: string) {
-  // Only send if SendGrid is configured
-  if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_API_KEY.startsWith('SG.')) {
-    throw new Error('Email service not configured. Please add SENDGRID_API_KEY to your environment variables.');
+  // Only send if Resend is configured
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error('Email service not configured. Please add RESEND_API_KEY to your environment variables.');
   }
 
   // Get conversation details
@@ -157,7 +166,7 @@ async function handleEmailSend(message: Message, businessId: string) {
   }
 
   try {
-    const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'hello@inbox-forge.com';
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'hello@inbox-forge.com';
     await sendEmail({
       to: conversation.customer_email,
       from: fromEmail,
@@ -381,6 +390,18 @@ async function handleTikTokSend(message: Message, businessId: string) {
       })
       .eq('id', message.id);
   }
+}
+
+async function checkIfSimulated(conversationId: string): Promise<boolean> {
+  // Check if any message in this conversation has simulated metadata
+  const { data } = await supabaseServer
+    .from('messages')
+    .select('metadata')
+    .eq('conversation_id', conversationId)
+    .contains('metadata', { simulated: true })
+    .limit(1);
+
+  return (data && data.length > 0) || false;
 }
 
 async function refreshTikTokToken(refreshToken: string, connectionId: string): Promise<string | null> {

@@ -124,7 +124,7 @@ export async function PATCH(request: NextRequest) {
     // Send email
     await sendEmail({
       to: invitation.email,
-      from: 'noreply@inbox-forge.com',
+      from: process.env.RESEND_FROM_EMAIL || 'hello@inbox-forge.com',
       subject: `You've been invited to join ${businessName} on InboxForge`,
       text: `You've been invited to join ${businessName} on InboxForge!\n\nClick the link below to accept the invitation:\n${inviteUrl}\n\n⏰ This invitation will expire on ${expirationDate}.\n\nIf you can't find this email later, ask your team admin to resend the invitation.`,
       html: `
@@ -154,8 +154,11 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    logger.error('Failed to send invitation email', error);
-    return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
+    logger.error('Failed to send invitation email', error, {
+      from: process.env.RESEND_FROM_EMAIL || '(env not set)',
+      to: invitationId,
+    });
+    return NextResponse.json({ error: error.message || 'Failed to send email' }, { status: 500 });
   }
 }
 
