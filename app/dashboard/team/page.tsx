@@ -40,6 +40,7 @@ export default function TeamPage() {
   const [inviteUrl, setInviteUrl] = useState('');
   const [createdInvitationId, setCreatedInvitationId] = useState<string | null>(null);
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [inviteSentViaEmail, setInviteSentViaEmail] = useState(false);
   const [viewingInviteId, setViewingInviteId] = useState<string | null>(null);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [newRole, setNewRole] = useState<Role>('agent');
@@ -180,6 +181,7 @@ export default function TeamPage() {
             if (emails.length === 1) {
               setInviteUrl(url);
               setCreatedInvitationId(invitation.id);
+              setInviteSentViaEmail(true);
             }
           } catch (emailError: any) {
             failed.push({ email, error: emailError.message || 'Failed to send email' });
@@ -223,11 +225,15 @@ export default function TeamPage() {
     setError('');
 
     try {
-      // Create invitation without email
+      // Create invitation with email if a valid one was provided
+      const trimmedEmail = inviteEmail.trim().toLowerCase();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const validEmail = trimmedEmail && emailRegex.test(trimmedEmail) ? trimmedEmail : null;
       const response = await fetch(`/api/team/invitations?businessId=${currentBusiness.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          ...(validEmail ? { email: validEmail } : {}),
           role: inviteRole,
         }),
       });
@@ -240,6 +246,7 @@ export default function TeamPage() {
       const { inviteUrl: url, invitation } = await response.json();
       setInviteUrl(url);
       setCreatedInvitationId(invitation.id);
+      setInviteSentViaEmail(false);
       setActionSuccess('Invite link generated successfully!');
       await fetchTeamData();
     } catch (error: any) {
@@ -586,12 +593,12 @@ export default function TeamPage() {
             </h2>
           </div>
           <div className="divide-y divide-gray-200 dark:divide-slate-700">
-            {invitations.map((invitation) => (
+            {invitations.map((invitation, index) => (
               <div key={invitation.id} className="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-700/50">
                 <div className="flex items-center gap-3">
                   <Mail className="w-10 h-10 text-gray-400 dark:text-slate-500" />
                   <div>
-                    <div className="font-medium text-gray-900 dark:text-white">{invitation.email}</div>
+                    <div className="font-medium text-gray-900 dark:text-white">{invitation.email || `Team Member ${index + 1}`}</div>
                     <div className="text-sm text-gray-500 dark:text-slate-400 flex items-center gap-2">
                       {getRoleIcon(invitation.role)}
                       <span className="capitalize">{invitation.role}</span>
@@ -647,6 +654,7 @@ export default function TeamPage() {
                   setShowInviteModal(false);
                   setInviteUrl('');
                   setError('');
+                  setInviteSentViaEmail(false);
                 }}
                 className="text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-200"
               >
@@ -663,7 +671,7 @@ export default function TeamPage() {
                       <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
                       <div>
                         <p className="text-sm text-green-800 dark:text-green-200 font-medium">
-                          {inviteEmail ? 'Invitation email sent successfully!' : 'Invite link generated successfully!'}
+                          {inviteSentViaEmail ? 'Invitation email sent successfully!' : 'Link generated! Share it with your new team member.'}
                         </p>
                         <p className="text-xs text-green-700 dark:text-green-300 mt-1">
                           This invitation will expire in 7 days
@@ -671,7 +679,7 @@ export default function TeamPage() {
                       </div>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-slate-300 mb-3">
-                      {inviteEmail ? 'Backup invitation link (in case the email doesn\'t arrive):' : 'Share this link with the person you want to invite:'}
+                      {inviteSentViaEmail ? 'Backup invitation link (in case the email doesn\'t arrive):' : 'Copy and share this link with the person you want to invite:'}
                     </p>
                     <div className="p-3 bg-gray-50 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600 mb-4">
                       <code className="text-sm text-gray-800 dark:text-slate-200 break-all">{inviteUrl}</code>
@@ -748,6 +756,7 @@ export default function TeamPage() {
                       setInviteUrl('');
                       setError('');
                       setBulkInviteResults(null);
+                      setInviteSentViaEmail(false);
                     }}
                     className={`${inviteUrl ? '' : 'flex-1'} px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-2`}
                   >
@@ -901,7 +910,7 @@ export default function TeamPage() {
 
               <div className="mb-4">
                 <p className="text-sm text-gray-600 dark:text-slate-300 mb-1">
-                  Invited: <span className="font-medium text-gray-900 dark:text-white">{invitation.email}</span>
+                  Invited: <span className="font-medium text-gray-900 dark:text-white">{invitation.email || 'Anyone with link'}</span>
                 </p>
                 <p className="text-sm text-gray-600 dark:text-slate-300">
                   Role: <span className="font-medium text-gray-900 dark:text-white capitalize">{invitation.role}</span>
