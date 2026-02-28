@@ -298,11 +298,11 @@ export default function ArchivesPage() {
 
   const getChannelColor = (channel: string) => {
     switch (channel) {
-      case 'email': return 'text-indigo-500 bg-blue-50';
-      case 'instagram': return 'text-pink-500 bg-pink-50';
-      case 'whatsapp': return 'text-green-500 bg-green-50';
-      case 'sms': return 'text-green-500 bg-green-50';
-      default: return 'text-gray-500 dark:text-slate-400 bg-gray-50';
+      case 'email': return 'text-indigo-500 bg-blue-50 dark:bg-blue-900/20';
+      case 'instagram': return 'text-pink-500 bg-pink-50 dark:bg-pink-900/20';
+      case 'whatsapp': return 'text-green-500 bg-green-50 dark:bg-green-900/20';
+      case 'sms': return 'text-green-500 bg-green-50 dark:bg-green-900/20';
+      default: return 'text-gray-500 dark:text-slate-400 bg-gray-50 dark:bg-slate-700';
     }
   };
 

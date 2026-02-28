@@ -739,7 +739,7 @@ function ConnectionCard({
           {canDisconnect && (
             <button
               onClick={onDisconnect}
-              className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className="px-3 py-1 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
             >
               Disconnect
             </button>

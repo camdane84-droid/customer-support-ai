@@ -111,7 +111,11 @@ export default function TeamPage() {
 
       if (membersRes.ok) {
         const { members: membersList } = await membersRes.json();
-        setMembers(membersList || []);
+        const roleOrder: Record<string, number> = { owner: 0, admin: 1, agent: 2, viewer: 3 };
+        const sorted = (membersList || []).sort((a: TeamMember, b: TeamMember) =>
+          (roleOrder[a.role] ?? 4) - (roleOrder[b.role] ?? 4)
+        );
+        setMembers(sorted);
       }
 
       if (invitationsRes.ok) {
@@ -432,17 +436,17 @@ export default function TeamPage() {
 
       {/* Error Banner */}
       {actionError && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between">
+        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start justify-between">
           <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-red-800">Error</p>
-              <p className="text-sm text-red-700 mt-1">{actionError}</p>
+              <p className="text-sm font-medium text-red-800 dark:text-red-300">Error</p>
+              <p className="text-sm text-red-700 dark:text-red-400 mt-1">{actionError}</p>
             </div>
           </div>
           <button
             onClick={() => setActionError('')}
-            className="text-red-400 hover:text-red-600 transition-colors"
+            className="text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors"
             title="Dismiss"
           >
             <X className="w-5 h-5" />
@@ -452,17 +456,17 @@ export default function TeamPage() {
 
       {/* Success Banner */}
       {actionSuccess && (
-        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start justify-between">
+        <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-start justify-between">
           <div className="flex items-start gap-3">
-            <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+            <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-green-800">Success</p>
-              <p className="text-sm text-green-700 mt-1">{actionSuccess}</p>
+              <p className="text-sm font-medium text-green-800 dark:text-green-300">Success</p>
+              <p className="text-sm text-green-700 dark:text-green-400 mt-1">{actionSuccess}</p>
             </div>
           </div>
           <button
             onClick={() => setActionSuccess('')}
-            className="text-green-400 hover:text-green-600 transition-colors"
+            className="text-green-400 hover:text-green-600 dark:hover:text-green-300 transition-colors"
             title="Dismiss"
           >
             <X className="w-5 h-5" />
