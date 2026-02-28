@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/context/AuthContext';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Crown, Shield, Users, Eye, Mail, Trash2, X, Loader2, Link2, Edit3, AlertCircle, CheckCircle, Copy, Send, RefreshCw } from 'lucide-react';
+import { Crown, Shield, Users, Eye, Mail, Trash2, X, Loader2, Link2, Edit3, AlertCircle, CheckCircle, Copy, Send, RefreshCw, ChevronDown } from 'lucide-react';
 import { hasPermission, canChangeRole, canManageRole } from '@/lib/permissions';
 import type { Role } from '@/lib/permissions';
 import TeamSkeleton from '@/components/skeletons/TeamSkeleton';
@@ -44,6 +44,8 @@ export default function TeamPage() {
   const [viewingInviteId, setViewingInviteId] = useState<string | null>(null);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [newRole, setNewRole] = useState<Role>('agent');
+  const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
+  const roleDropdownRef = useRef<HTMLDivElement>(null);
   const [actionError, setActionError] = useState('');
   const [actionSuccess, setActionSuccess] = useState('');
   const [bulkInviteResults, setBulkInviteResults] = useState<{
@@ -55,6 +57,17 @@ export default function TeamPage() {
   const currentMember = members.find(m => m.user_id === currentBusiness?.member_role);
   const canManageTeam = currentBusiness && hasPermission(currentBusiness.member_role, 'INVITE_MEMBERS');
   const canRemoveMembers = currentBusiness && hasPermission(currentBusiness.member_role, 'REMOVE_MEMBERS');
+
+  // Close role dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (roleDropdownRef.current && !roleDropdownRef.current.contains(e.target as Node)) {
+        setRoleDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (currentBusiness) {
@@ -515,28 +528,41 @@ export default function TeamPage() {
                       <>
                         {editingMemberId === member.id ? (
                           <div className="flex items-center gap-2">
-                            <select
-                              value={newRole}
-                              onChange={(e) => setNewRole(e.target.value as Role)}
-                              className="px-3 py-1 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
-                            >
-                              {/* Viewer option - available if admin can change to viewer or owner can */}
-                              {canChangeRole(currentBusiness.member_role, member.role, 'viewer') && (
-                                <option value="viewer">Viewer</option>
-                              )}
-                              {/* Agent option - available if admin can change to agent or owner can */}
-                              {canChangeRole(currentBusiness.member_role, member.role, 'agent') && (
-                                <option value="agent">Agent</option>
-                              )}
-                              {/* Admin option - only owner can assign/demote admins */}
-                              {canChangeRole(currentBusiness.member_role, member.role, 'admin') && (
-                                <option value="admin">Admin</option>
-                              )}
-                              {/* Owner option - only owner can assign owner role */}
-                              {canChangeRole(currentBusiness.member_role, member.role, 'owner') && (
-                                <option value="owner">Owner</option>
-                              )}
-                            </select>
+                            <div ref={roleDropdownRef} className="relative">
+                              <button
+                                type="button"
+                                onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
+                                className="px-3 py-1 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white flex items-center gap-2"
+                              >
+                                <span className="capitalize">{newRole}</span>
+                                <ChevronDown className={`w-3 h-3 text-gray-400 dark:text-slate-500 transition-transform ${roleDropdownOpen ? 'rotate-180' : ''}`} />
+                              </button>
+                              <div className={`absolute z-10 mt-1 w-full min-w-[120px] bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg shadow-lg overflow-hidden transition-all duration-200 origin-top ${
+                                roleDropdownOpen ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0 pointer-events-none'
+                              }`}>
+                                {([
+                                  { value: 'viewer', label: 'Viewer' },
+                                  { value: 'agent', label: 'Agent' },
+                                  { value: 'admin', label: 'Admin' },
+                                  { value: 'owner', label: 'Owner' },
+                                ] as { value: Role; label: string }[])
+                                  .filter(option => canChangeRole(currentBusiness.member_role, member.role, option.value))
+                                  .map((option) => (
+                                    <button
+                                      key={option.value}
+                                      type="button"
+                                      onClick={() => { setNewRole(option.value); setRoleDropdownOpen(false); }}
+                                      className={`w-full px-3 py-1.5 text-left text-sm transition-colors ${
+                                        newRole === option.value
+                                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                                          : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-slate-600'
+                                      }`}
+                                    >
+                                      {option.label}
+                                    </button>
+                                  ))}
+                              </div>
+                            </div>
                             <button
                               onClick={() => handleChangeRole(member.id, newRole)}
                               disabled={!canChangeRole(currentBusiness.member_role, member.role, newRole)}
@@ -545,7 +571,7 @@ export default function TeamPage() {
                               Save
                             </button>
                             <button
-                              onClick={() => setEditingMemberId(null)}
+                              onClick={() => { setEditingMemberId(null); setRoleDropdownOpen(false); }}
                               className="px-3 py-1 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-sm"
                             >
                               Cancel

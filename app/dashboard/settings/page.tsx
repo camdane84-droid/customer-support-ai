@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/lib/context/AuthContext';
 import { supabase } from '@/lib/api/supabase';
-import { Save, Building, Clock, Share2, Mail, MessageCircle, Instagram, Facebook, CheckCircle, FileText, Sparkles, Trash2, AlertTriangle, Star, ShoppingBag, AlertCircle, Ruler, Heart } from 'lucide-react';
+import { Save, Building, Clock, Share2, Mail, MessageCircle, Instagram, Facebook, CheckCircle, FileText, Sparkles, Trash2, AlertTriangle, Star, ShoppingBag, AlertCircle, Ruler, Heart, ChevronDown } from 'lucide-react';
 import TikTokIcon from '@/components/icons/TikTokIcon';
 import BillingSection from '@/components/ui/BillingSection';
 import { useRouter } from 'next/navigation';
@@ -30,6 +30,8 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [bottomSaveVisible, setBottomSaveVisible] = useState(false);
+  const [businessTypeOpen, setBusinessTypeOpen] = useState(false);
+  const businessTypeRef = useRef<HTMLDivElement>(null);
   const bottomSaveRef = useRef<HTMLDivElement>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
@@ -52,6 +54,17 @@ export default function SettingsPage() {
       });
     }
   }, [business]);
+
+  // Close business type dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (businessTypeRef.current && !businessTypeRef.current.contains(e.target as Node)) {
+        setBusinessTypeOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Track when bottom save button is visible
   useEffect(() => {
@@ -443,37 +456,64 @@ export default function SettingsPage() {
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                 Business Name
               </label>
               <input
                 type="text"
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                 Business Type
               </label>
-              <select
-                value={businessType}
-                onChange={(e) => setBusinessType(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select type...</option>
-                <option value="restaurant">Restaurant / Cafe</option>
-                <option value="retail">Retail / Shop</option>
-                <option value="services">Services</option>
-                <option value="ecommerce">E-commerce</option>
-                <option value="other">Other</option>
-              </select>
+              <div ref={businessTypeRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setBusinessTypeOpen(!businessTypeOpen)}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white flex items-center justify-between"
+                >
+                  <span className={businessType ? '' : 'text-gray-400 dark:text-slate-500'}>
+                    {businessType
+                      ? { restaurant: 'Restaurant / Cafe', retail: 'Retail / Shop', services: 'Services', ecommerce: 'E-commerce', other: 'Other' }[businessType]
+                      : 'Select type...'}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 text-gray-400 dark:text-slate-500 transition-transform ${businessTypeOpen ? 'rotate-180' : ''}`} />
+                </button>
+                <div className={`absolute z-10 mt-1 w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg shadow-lg overflow-hidden transition-all duration-200 origin-top ${
+                  businessTypeOpen ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0 pointer-events-none'
+                }`}>
+                  {[
+                    { value: '', label: 'Select type...' },
+                    { value: 'restaurant', label: 'Restaurant / Cafe' },
+                    { value: 'retail', label: 'Retail / Shop' },
+                    { value: 'services', label: 'Services' },
+                    { value: 'ecommerce', label: 'E-commerce' },
+                    { value: 'other', label: 'Other' },
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => { setBusinessType(option.value); setBusinessTypeOpen(false); }}
+                      className={`w-full px-4 py-2 text-left text-sm transition-colors ${
+                        businessType === option.value
+                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                          : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-slate-600'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                 Policies & Information
               </label>
               <textarea
@@ -481,7 +521,7 @@ export default function SettingsPage() {
                 onChange={(e) => setPolicies(e.target.value)}
                 rows={6}
                 placeholder="Enter your business policies, return policy, shipping info, etc. This helps the AI provide better responses."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
               />
               <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
                 This information will be used by AI to generate better response suggestions
