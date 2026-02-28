@@ -511,7 +511,7 @@ export default function TeamPage() {
                 {canManageTeam && member.role !== 'owner' && (
                   <div className="flex items-center gap-2">
                     {/* Change Role Button - Only show if user can change this member's role */}
-                    {hasPermission(currentBusiness.member_role, 'UPDATE_MEMBER_ROLES') && (
+                    {hasPermission(currentBusiness.member_role, 'UPDATE_MEMBER_ROLES') && canManageRole(currentBusiness.member_role, member.role) && (
                       <>
                         {editingMemberId === member.id ? (
                           <div className="flex items-center gap-2">
