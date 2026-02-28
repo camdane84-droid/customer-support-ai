@@ -110,10 +110,21 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Invitation has no email address. Use the invite link instead.' }, { status: 400 });
     }
 
-    const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${invitation.token}`;
+    // Generate new token and reset expiration to 7 days from now
+    const newToken = randomBytes(32).toString('hex');
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
 
-    // Calculate expiration date (7 days from now)
-    const expiresAt = new Date(invitation.expires_at);
+    const { error: updateError } = await supabaseAdmin
+      .from('team_invitations')
+      .update({ token: newToken, expires_at: expiresAt.toISOString() })
+      .eq('id', invitationId)
+      .eq('business_id', businessId);
+
+    if (updateError) throw updateError;
+
+    const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${newToken}`;
+
     const expirationDate = expiresAt.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
