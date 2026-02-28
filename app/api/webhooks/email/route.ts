@@ -1,31 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Resend } from 'resend';
 import { supabaseServer } from '@/lib/supabase-server';
 import { canCreateConversation, incrementConversationUsage } from '@/lib/usage/tracker';
 import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData();
+    const body = await request.json();
 
-    // SendGrid sends email data as form fields
-    const from = formData.get('from') as string;
-    const to = formData.get('to') as string;
-    const subject = formData.get('subject') as string;
-    const text = formData.get('text') as string;
-    const html = formData.get('html') as string;
+    // Resend sends inbound emails as JSON with type "email.received"
+    if (body.type !== 'email.received') {
+      return NextResponse.json({ status: 'ignored' });
+    }
 
-    // Extract sender email and name
+    const { data: eventData } = body;
+    const { email_id, from, to, subject } = eventData;
+
+    // Extract sender email and name from "Name <email>" format
     const fromMatch = from.match(/(.*?)\s*<(.+?)>/) || [null, from, from];
     const senderName = fromMatch[1]?.trim() || fromMatch[2];
     const senderEmail = fromMatch[2] || from;
 
-    logger.info('Email received', { from: senderEmail, to, subject });
+    // "to" is an array in Resend
+    const toAddress = Array.isArray(to) ? to[0] : to;
+
+    logger.info('Email received via Resend', { from: senderEmail, to: toAddress, subject });
+
+    // Fetch the email body from Resend (not included in webhook payload)
+    let text = '';
+    let html = '';
+    if (process.env.RESEND_API_KEY) {
+      try {
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        const emailContent = await (resend as any).emails.receiving.get(email_id);
+        text = emailContent?.data?.text || '';
+        html = emailContent?.data?.html || '';
+      } catch (fetchError: any) {
+        logger.warn('Failed to fetch email body from Resend', { error: fetchError.message, email_id });
+      }
+    }
 
     // Get business by support email (the "to" address)
-    let businessEmail = to.match(/<(.+?)>/)?.[1] || to;
-    // Strip parse subdomain if routed through SendGrid Inbound Parse
-    // e.g. hello@parse.inbox-forge.com → hello@inbox-forge.com
-    businessEmail = businessEmail.replace('@parse.', '@');
+    let businessEmail = toAddress.match(/<(.+?)>/)?.[1] || toAddress;
+    // Strip inbound subdomain if routed through a subdomain
+    // e.g. hello@inbound.inbox-forge.com → hello@inbox-forge.com
+    businessEmail = businessEmail.replace('@inbound.', '@');
+
     const { data: business } = await supabaseServer
       .from('businesses')
       .select('*')
@@ -77,7 +97,6 @@ export async function POST(request: NextRequest) {
       const canCreate = await canCreateConversation(business.id);
       if (!canCreate) {
         logger.warn('Conversation limit reached for business', { businessId: business.id });
-        // Return error response - the email won't be processed
         return NextResponse.json(
           {
             error: 'Conversation limit reached',
@@ -130,6 +149,7 @@ export async function POST(request: NextRequest) {
       metadata: {
         subject: subject,
         from_email: senderEmail,
+        resend_email_id: email_id,
       },
     });
 
