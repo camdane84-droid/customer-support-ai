@@ -157,7 +157,7 @@ function extractLatestReply(body: string): string {
   if (!body) return body;
 
   // First try: regex on the full body for multi-line "On ... wrote:" (Gmail wraps this across lines)
-  const gmailPattern = /\r?\nOn .+wrote:\s*\r?\n/is;
+  const gmailPattern = /\r?\nOn [\s\S]+?wrote:\s*\r?\n/i;
   const gmailMatch = body.search(gmailPattern);
   if (gmailMatch > 0) {
     const newContent = body.slice(0, gmailMatch).trim();
