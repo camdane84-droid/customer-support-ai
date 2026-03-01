@@ -1,50 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
 import { supabaseServer } from '@/lib/supabase-server';
 import { canCreateConversation, incrementConversationUsage } from '@/lib/usage/tracker';
 import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const formData = await request.formData();
 
-    // Resend sends inbound emails as JSON with type "email.received"
-    if (body.type !== 'email.received') {
-      return NextResponse.json({ status: 'ignored' });
-    }
+    // SendGrid Inbound Parse sends email data as form fields
+    const from = formData.get('from') as string;
+    const to = formData.get('to') as string;
+    const subject = formData.get('subject') as string;
+    const text = formData.get('text') as string;
+    const html = formData.get('html') as string;
 
-    const { data: eventData } = body;
-    const { email_id, from, to, subject } = eventData;
-
-    // Extract sender email and name from "Name <email>" format
+    // Extract sender email and name
     const fromMatch = from.match(/(.*?)\s*<(.+?)>/) || [null, from, from];
     const senderName = fromMatch[1]?.trim() || fromMatch[2];
     const senderEmail = fromMatch[2] || from;
 
-    // "to" is an array in Resend
-    const toAddress = Array.isArray(to) ? to[0] : to;
-
-    logger.info('Email received via Resend', { from: senderEmail, to: toAddress, subject });
-
-    // Fetch the email body from Resend (not included in webhook payload)
-    let text = '';
-    let html = '';
-    if (process.env.RESEND_API_KEY) {
-      try {
-        const resend = new Resend(process.env.RESEND_API_KEY);
-        const emailContent = await (resend as any).emails.receiving.get(email_id);
-        text = emailContent?.data?.text || '';
-        html = emailContent?.data?.html || '';
-      } catch (fetchError: any) {
-        logger.warn('Failed to fetch email body from Resend', { error: fetchError.message, email_id });
-      }
-    }
+    logger.info('Email received', { from: senderEmail, to, subject });
 
     // Get business by support email (the "to" address)
-    let businessEmail = toAddress.match(/<(.+?)>/)?.[1] || toAddress;
-    // Strip inbound subdomain if routed through a subdomain
-    // e.g. hello@inbound.inbox-forge.com → hello@inbox-forge.com
-    businessEmail = businessEmail.replace('@inbound.', '@');
+    let businessEmail = to.match(/<(.+?)>/)?.[1] || to;
+    // Strip mail subdomain if routed through SendGrid Inbound Parse
+    // e.g. acme@mail.inbox-forge.com → acme@inbox-forge.com
+    businessEmail = businessEmail.replace('@mail.', '@');
 
     const { data: business } = await supabaseServer
       .from('businesses')
@@ -149,7 +130,6 @@ export async function POST(request: NextRequest) {
       metadata: {
         subject: subject,
         from_email: senderEmail,
-        resend_email_id: email_id,
       },
     });
 
