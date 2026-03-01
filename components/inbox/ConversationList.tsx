@@ -14,6 +14,7 @@ interface ConversationListProps {
   onSelectConversation: (conversation: Conversation) => void;
   onBulkArchive?: (conversationIds: string[]) => Promise<void>;
   onBulkDelete?: (conversationIds: string[]) => Promise<void>;
+  collapsed?: boolean;
 }
 
 export default function ConversationList({
@@ -22,6 +23,7 @@ export default function ConversationList({
   onSelectConversation,
   onBulkArchive,
   onBulkDelete,
+  collapsed = false,
 }: ConversationListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectionMode, setSelectionMode] = useState(false);
@@ -169,6 +171,76 @@ export default function ConversationList({
       setSelectionMode(false);
     }
     setShowDeleteConfirm(false);
+  }
+
+  // Collapsed mode: show only avatars
+  if (collapsed) {
+    return (
+      <div className="flex flex-col h-full">
+        <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-slate-900">
+          {filteredConversations.map((conversation) => {
+            const isSelected = selectedConversation?.id === conversation.id;
+            const displayName = getCustomerDisplayName(conversation);
+            const initials = getCustomerInitials(displayName);
+
+            return (
+              <button
+                key={conversation.id}
+                onClick={() => onSelectConversation(conversation)}
+                className={`
+                  w-full flex items-center justify-center py-3 transition-all
+                  ${isSelected
+                    ? 'bg-indigo-50 dark:bg-indigo-900/30 border-l-4 border-l-indigo-500'
+                    : 'bg-white dark:bg-slate-800 border-l-4 border-l-transparent hover:bg-gray-50 dark:hover:bg-slate-700'
+                  }
+                  border-b border-gray-200 dark:border-slate-700
+                `}
+                title={displayName}
+              >
+                <div className="relative">
+                  <div className={`
+                    w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0
+                    bg-gradient-to-br from-purple-600 to-violet-500
+                    ${isSelected ? 'ring-2 ring-indigo-500 ring-offset-2 dark:ring-offset-slate-800' : ''}
+                  `}>
+                    <span className="text-white font-semibold text-sm">
+                      {initials}
+                    </span>
+                  </div>
+                  {conversation.unread_count > 0 && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-indigo-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                      {conversation.unread_count > 9 ? '9+' : conversation.unread_count}
+                    </span>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Confirmation Dialogs */}
+        <ConfirmDialog
+          isOpen={showArchiveConfirm}
+          title="Archive Conversations"
+          message={`Are you sure you want to archive ${selectedIds.size} conversation${selectedIds.size === 1 ? '' : 's'}? You can view archived conversations later.`}
+          confirmText="Archive"
+          cancelText="Cancel"
+          confirmColor="blue"
+          onConfirm={confirmBulkArchive}
+          onCancel={() => setShowArchiveConfirm(false)}
+        />
+        <ConfirmDialog
+          isOpen={showDeleteConfirm}
+          title="Delete Conversations"
+          message={`Are you sure you want to permanently delete ${selectedIds.size} conversation${selectedIds.size === 1 ? '' : 's'}? This action cannot be undone.`}
+          confirmText="Delete"
+          cancelText="Cancel"
+          confirmColor="red"
+          onConfirm={confirmBulkDelete}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
+      </div>
+    );
   }
 
   return (
