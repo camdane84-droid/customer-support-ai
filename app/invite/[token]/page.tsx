@@ -183,18 +183,18 @@ export default function InvitePage() {
             </p>
           )}
           <div className="space-y-3">
-            <Link
+            <a
               href={`/login?redirect=/invite/${token}`}
               className="block w-full px-4 py-2 bg-blue-600 text-white text-center rounded-lg hover:bg-blue-700 transition-colors"
             >
               Sign In
-            </Link>
-            <Link
+            </a>
+            <a
               href={`/signup?invite=${token}`}
               className="block w-full px-4 py-2 bg-gray-100 text-gray-900 text-center rounded-lg hover:bg-gray-200 transition-colors"
             >
               Create Account
-            </Link>
+            </a>
           </div>
         </div>
       </div>

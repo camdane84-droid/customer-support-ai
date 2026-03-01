@@ -275,14 +275,14 @@ export default function CannedResponsesPage() {
                   <div className="flex items-center space-x-2 ml-4">
                     <button
                       onClick={() => startEdit(response)}
-                      className="p-2 text-gray-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="p-2 text-gray-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                       title="Edit"
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(response.id)}
-                      className="p-2 text-gray-600 dark:text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-2 text-gray-600 dark:text-slate-300 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                       title="Delete"
                     >
                       <Trash2 className="w-4 h-4" />

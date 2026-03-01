@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
 
-    // SendGrid sends email data as form fields
+    // SendGrid Inbound Parse sends email data as form fields
     const from = formData.get('from') as string;
     const to = formData.get('to') as string;
     const subject = formData.get('subject') as string;
@@ -23,9 +23,10 @@ export async function POST(request: NextRequest) {
 
     // Get business by support email (the "to" address)
     let businessEmail = to.match(/<(.+?)>/)?.[1] || to;
-    // Strip parse subdomain if routed through SendGrid Inbound Parse
-    // e.g. hello@parse.inbox-forge.com → hello@inbox-forge.com
-    businessEmail = businessEmail.replace('@parse.', '@');
+    // Strip mail subdomain if routed through SendGrid Inbound Parse
+    // e.g. acme@mail.inbox-forge.com → acme@inbox-forge.com
+    businessEmail = businessEmail.replace('@mail.', '@');
+
     const { data: business } = await supabaseServer
       .from('businesses')
       .select('*')
@@ -77,7 +78,6 @@ export async function POST(request: NextRequest) {
       const canCreate = await canCreateConversation(business.id);
       if (!canCreate) {
         logger.warn('Conversation limit reached for business', { businessId: business.id });
-        // Return error response - the email won't be processed
         return NextResponse.json(
           {
             error: 'Conversation limit reached',
