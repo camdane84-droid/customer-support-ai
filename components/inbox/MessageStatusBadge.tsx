@@ -9,7 +9,7 @@ export default function MessageStatusBadge({ status, errorMessage }: MessageStat
   switch (status) {
     case 'sending':
       return (
-        <div className="flex items-center space-x-1 text-gray-500">
+        <div className="flex items-center space-x-1 text-gray-500 dark:text-slate-400">
           <Clock className="w-3 h-3 animate-pulse" />
           <span className="text-xs">Sending...</span>
         </div>
@@ -17,7 +17,7 @@ export default function MessageStatusBadge({ status, errorMessage }: MessageStat
 
     case 'sent':
       return (
-        <div className="flex items-center space-x-1 text-indigo-500">
+        <div className="flex items-center space-x-1 text-indigo-500 dark:text-indigo-400">
           <Check className="w-3 h-3" />
           <span className="text-xs">Sent</span>
         </div>
@@ -25,7 +25,7 @@ export default function MessageStatusBadge({ status, errorMessage }: MessageStat
 
     case 'delivered':
       return (
-        <div className="flex items-center space-x-1 text-green-500">
+        <div className="flex items-center space-x-1 text-green-500 dark:text-green-400">
           <CheckCheck className="w-3 h-3" />
           <span className="text-xs">Delivered</span>
         </div>
@@ -33,7 +33,7 @@ export default function MessageStatusBadge({ status, errorMessage }: MessageStat
 
     case 'failed':
       return (
-        <div className="flex items-center space-x-1 text-red-500" title={errorMessage || 'Failed to send'}>
+        <div className="flex items-center space-x-1 text-red-500 dark:text-red-400" title={errorMessage || 'Failed to send'}>
           <AlertCircle className="w-3 h-3" />
           <span className="text-xs">Failed</span>
         </div>

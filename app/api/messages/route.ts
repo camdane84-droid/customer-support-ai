@@ -166,10 +166,12 @@ async function handleEmailSend(message: Message, businessId: string) {
   }
 
   try {
-    const fromEmail = process.env.RESEND_FROM_EMAIL || 'hello@inbox-forge.com';
+    // Send from the business's mail subdomain address so replies route back through SendGrid
+    // e.g. acme@inbox-forge.com → acme@mail.inbox-forge.com
+    const fromEmail = business.email.replace('@', '@mail.');
     await sendEmail({
       to: conversation.customer_email,
-      from: fromEmail,
+      from: `${business.name} <${fromEmail}>`,
       subject: `Re: Message from ${business.name}`,
       text: message.content,
     });

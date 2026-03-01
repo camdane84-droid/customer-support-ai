@@ -249,9 +249,17 @@ export default function MessageThread({ conversation, businessId, onConversation
         channel: conversation.channel,
       });
 
-      // Success! The optimistic message will remain visible until the Realtime
-      // subscription receives the INSERT event and removes it
-      console.log('✅ [SEND] API success - waiting for Realtime confirmation to replace optimistic message');
+      // Update optimistic message to 'sent' immediately on API success
+      // Realtime will eventually replace it with the real message
+      console.log('✅ [SEND] API success - updating optimistic message to sent');
+      setOptimisticMessages((prev) => {
+        const next = new Map(prev);
+        const msg = next.get(tempId);
+        if (msg) {
+          next.set(tempId, { ...msg, status: 'sent', sent_at: new Date().toISOString() });
+        }
+        return next;
+      });
     } catch (error) {
       console.error('❌ [SEND] Failed to send message:', error);
 
@@ -295,7 +303,7 @@ export default function MessageThread({ conversation, businessId, onConversation
       if (errorMessage.includes('Email service not configured')) {
         setToast({
           type: 'warning',
-          message: 'Email service not configured. Please contact your administrator to set up SendGrid.',
+          message: 'Email service not configured. Please contact your administrator to set up the email service.',
         });
       } else if (errorMessage.includes('not found')) {
         setToast({
