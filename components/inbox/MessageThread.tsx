@@ -293,7 +293,24 @@ export default function MessageThread({ conversation, businessId, onConversation
       setRetryingMessageId(messageId);
       await retryFailedMessage(messageId);
       setToast({ type: 'success', message: 'Message sent successfully!' });
-      // Status will update via realtime subscription
+
+      // Update message status locally since Realtime may not fire
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === messageId
+            ? { ...msg, status: 'sent', sent_at: new Date().toISOString(), failed_at: null, error_message: null }
+            : msg
+        )
+      );
+      // Also update optimistic messages if the retry was on an optimistic message
+      setOptimisticMessages((prev) => {
+        const next = new Map(prev);
+        const msg = next.get(messageId);
+        if (msg) {
+          next.set(messageId, { ...msg, status: 'sent', sent_at: new Date().toISOString(), failed_at: null, error_message: null });
+        }
+        return next;
+      });
     } catch (error: any) {
       console.error('Failed to retry message:', error);
 
