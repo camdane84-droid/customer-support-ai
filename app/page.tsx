@@ -205,6 +205,7 @@ export default function LandingPage() {
   const currentTheme = mounted ? theme : 'dark';
 
   // Determine display mode based on sidebar width
+  const isIconOnly = sidebarWidth !== null && sidebarWidth < 80;
   const isCompact = sidebarWidth !== null && sidebarWidth < 140;
   const isNarrow = sidebarWidth !== null && sidebarWidth < 200;
 
@@ -213,7 +214,7 @@ export default function LandingPage() {
     if (!containerRef.current) return { min: 100, max: 200, initial: 150 };
     const containerWidth = containerRef.current.offsetWidth;
     // On mobile/small screens, use percentage-based constraints
-    const minWidth = Math.max(80, containerWidth * 0.2);  // 20% min, at least 80px
+    const minWidth = Math.max(52, containerWidth * 0.05);  // Allow collapsing to icon-only (~52px)
     const maxWidth = Math.min(400, containerWidth * 0.5); // 50% max, at most 400px
     const initialWidth = Math.min(280, containerWidth * 0.35); // 35% initial, at most 280px
     return { min: minWidth, max: maxWidth, initial: initialWidth };
@@ -462,7 +463,7 @@ export default function LandingPage() {
                 <div
                   style={sidebarWidth ? { width: `${sidebarWidth}px`, minWidth: `${sidebarWidth}px` } : undefined}
                   className={`border-r flex-col flex-shrink-0 flex ${
-                    !sidebarWidth ? 'w-[35%] min-w-[80px] max-w-[280px]' : ''
+                    !sidebarWidth ? 'w-[35%] min-w-[52px] max-w-[280px]' : ''
                   } ${
                   currentTheme === 'dark'
                     ? 'bg-[#0f1621] border-slate-700'
@@ -470,12 +471,12 @@ export default function LandingPage() {
                 }`}>
                   {/* Inbox Header */}
                   <div className={`p-4 border-b transition-all ${
-                    isCompact ? 'p-2 flex justify-center' : ''
+                    isIconOnly ? 'p-2 flex justify-center' : isCompact ? 'p-2 flex justify-center' : ''
                   } ${
                     currentTheme === 'dark' ? 'border-slate-700' : 'border-gray-200'
                   }`}>
                     {isCompact ? (
-                      <MessageSquare className="w-5 h-5 text-primary" />
+                      <MessageSquare className={`text-primary ${isIconOnly ? 'w-4 h-4' : 'w-5 h-5'}`} />
                     ) : (
                       <>
                         <h2 className={`font-semibold text-sm flex items-center gap-2 ${
@@ -495,7 +496,7 @@ export default function LandingPage() {
 
                   {/* Conversation List */}
                   <div className="flex-1 overflow-hidden">
-                    <div className={`p-2 space-y-1 ${isCompact ? 'flex flex-col items-center' : ''}`}>
+                    <div className={`p-2 space-y-1 ${isCompact ? 'flex flex-col items-center' : ''} ${isIconOnly ? 'p-1 space-y-0.5' : ''}`}>
                       {demoConversations.map((convo) => {
                         const channel = channelConfig[convo.channel];
                         const isPhone = isPhoneNumber(convo.name);
@@ -506,13 +507,18 @@ export default function LandingPage() {
                           <div
                             key={convo.id}
                             onClick={() => setSelectedConvoId(convo.id)}
+                            title={convo.name}
                             className={`flex items-center gap-3 p-2 rounded-lg animate-slide-up-fade-in animation-delay-sidebar transition-all cursor-pointer ${
-                              isCompact ? 'p-1.5 justify-center w-fit' : ''
+                              isIconOnly ? 'p-1 justify-center w-full' : isCompact ? 'p-1.5 justify-center w-fit' : ''
                             } ${
                               isSelected
-                                ? currentTheme === 'dark'
-                                  ? 'bg-slate-800/50 border border-primary/20'
-                                  : 'bg-white border border-gray-200 shadow-sm'
+                                ? isIconOnly
+                                  ? currentTheme === 'dark'
+                                    ? 'bg-primary/20 border-l-2 border-l-primary rounded-none'
+                                    : 'bg-primary/10 border-l-2 border-l-primary rounded-none'
+                                  : currentTheme === 'dark'
+                                    ? 'bg-slate-800/50 border border-primary/20'
+                                    : 'bg-white border border-gray-200 shadow-sm'
                                 : currentTheme === 'dark'
                                   ? 'hover:bg-slate-800/30'
                                   : 'hover:bg-gray-100'
@@ -520,10 +526,12 @@ export default function LandingPage() {
                           >
                             {/* Avatar */}
                             <div className="relative flex-shrink-0">
-                              <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${convo.gradient} flex items-center justify-center text-white text-xs font-bold`}>
+                              <div className={`rounded-full bg-gradient-to-br ${convo.gradient} flex items-center justify-center text-white font-bold ${
+                                isIconOnly ? 'w-8 h-8 text-[10px]' : 'w-10 h-10 text-xs'
+                              }`}>
                                 {convo.initials}
                               </div>
-                              {isCompact && (
+                              {isCompact && !isIconOnly && (
                                 <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full ${channel.badgeColor} flex items-center justify-center border-2 ${
                                   currentTheme === 'dark' ? 'border-slate-800' : 'border-gray-100'
                                 }`}>
@@ -591,7 +599,7 @@ export default function LandingPage() {
                 </div>
 
                 {/* Main Chat Area */}
-                <div className="flex-1 flex flex-col relative min-h-0">
+                <div className="flex-1 flex flex-col relative min-h-0 min-w-0 overflow-hidden">
                   {(() => {
                     const selectedConvo = demoConversations.find(c => c.id === selectedConvoId) || demoConversations[0];
                     const channel = channelConfig[selectedConvo.channel];
@@ -601,7 +609,7 @@ export default function LandingPage() {
                     return (
                       <>
                         {/* Chat Header */}
-                        <div className={`h-16 border-b flex items-center px-6 animate-slide-up-fade-in animation-delay-sidebar ${
+                        <div className={`h-16 border-b flex items-center px-4 sm:px-6 animate-slide-up-fade-in animation-delay-sidebar ${
                           currentTheme === 'dark'
                             ? 'bg-[#0f1621] border-slate-700'
                             : 'bg-gray-50 border-gray-200'
@@ -625,17 +633,17 @@ export default function LandingPage() {
                         </div>
 
                         {/* Messages Area */}
-                        <div className="flex-1 p-6 space-y-4 overflow-y-auto">
+                        <div className="flex-1 p-4 sm:p-6 space-y-4 overflow-y-auto overflow-x-hidden">
                           {isSarahDemo ? (
                             <>
                               {/* ANIMATED DEMO for Sarah - typing effects, AI panel, etc. */}
                               {/* Message 1: Customer asks about decaf */}
-                              <div className="flex gap-3 animate-slide-up-fade-in animation-delay-600">
+                              <div className="flex gap-3 animate-slide-up-fade-in animation-delay-600 min-w-0">
                                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                                   SC
                                 </div>
-                                <div className="flex-1">
-                                  <div className={`rounded-lg px-3 py-2 max-w-[80%] text-xs ${
+                                <div className="min-w-0 max-w-[80%]">
+                                  <div className={`rounded-lg px-3 py-2 text-xs overflow-hidden ${
                                     currentTheme === 'dark'
                                       ? 'bg-slate-700/50 text-slate-100'
                                       : 'bg-gray-100 text-gray-900'
@@ -649,9 +657,9 @@ export default function LandingPage() {
                               </div>
 
                               {/* Reply 1: Human response */}
-                              <div className="flex gap-3 justify-end animate-slide-up-fade-in animation-delay-1000">
-                                <div className="flex-1 flex flex-col items-end">
-                                  <div className="bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg px-3 py-2 max-w-[80%] text-xs text-white">
+                              <div className="flex gap-3 justify-end animate-slide-up-fade-in animation-delay-1000 min-w-0">
+                                <div className="min-w-0 max-w-[80%] flex flex-col items-end">
+                                  <div className="typing-bubble-wrap bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg px-3 py-2 text-xs text-white">
                                     <span className="typing-text">Yes! We have 3 delicious decaf options: Swiss Water Decaf, French Vanilla Decaf, and Hazelnut Decaf ☕</span>
                                   </div>
                                   <span className={`text-[10px] mt-1 ${
@@ -664,12 +672,12 @@ export default function LandingPage() {
                               </div>
 
                               {/* Message 2: Follow-up question */}
-                              <div className="flex gap-3 animate-slide-up-fade-in animation-delay-1400">
+                              <div className="flex gap-3 animate-slide-up-fade-in animation-delay-1400 min-w-0">
                                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                                   SC
                                 </div>
-                                <div className="flex-1">
-                                  <div className={`rounded-lg px-3 py-2 max-w-[80%] text-xs ${
+                                <div className="min-w-0 max-w-[80%]">
+                                  <div className={`rounded-lg px-3 py-2 text-xs overflow-hidden ${
                                     currentTheme === 'dark'
                                       ? 'bg-slate-700/50 text-slate-100'
                                       : 'bg-gray-100 text-gray-900'
@@ -683,7 +691,7 @@ export default function LandingPage() {
                               </div>
 
                               {/* Generate AI Response button */}
-                              <div className="absolute bottom-24 right-6 animate-slide-up-fade-in animation-delay-1500" style={{ animationFillMode: 'forwards' }}>
+                              <div className="absolute bottom-24 right-4 sm:right-6 animate-slide-up-fade-in animation-delay-1500" style={{ animationFillMode: 'forwards' }}>
                                 <button className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-purple-500 text-white px-2.5 py-1.5 rounded-md text-[10px] font-semibold shadow-lg animate-button-click animation-delay-1800">
                                   <Sparkles className="w-2.5 h-2.5" />
                                   Generate AI Response
@@ -691,7 +699,7 @@ export default function LandingPage() {
                               </div>
 
                               {/* AI Suggestion Panel */}
-                              <div className="absolute bottom-20 left-6 right-6 animate-ai-panel animation-delay-2000" style={{ animationFillMode: 'forwards' }}>
+                              <div className="absolute bottom-20 left-4 right-4 sm:left-6 sm:right-6 animate-ai-panel animation-delay-2000" style={{ animationFillMode: 'forwards' }}>
                                 <div className={`border-2 border-purple-500 rounded-lg p-4 shadow-2xl ${
                                   currentTheme === 'dark' ? 'bg-slate-800' : 'bg-white'
                                 }`}>
@@ -717,9 +725,9 @@ export default function LandingPage() {
                               </div>
 
                               {/* Reply 2: AI-assisted response */}
-                              <div className="flex gap-3 justify-end animate-slide-up-fade-in animation-delay-2600">
-                                <div className="flex-1 flex flex-col items-end">
-                                  <div className="bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg px-3 py-2 max-w-[80%] text-xs text-white">
+                              <div className="flex gap-3 justify-end animate-slide-up-fade-in animation-delay-2600 min-w-0">
+                                <div className="min-w-0 max-w-[80%] flex flex-col items-end">
+                                  <div className="typing-bubble-wrap bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg px-3 py-2 text-xs text-white">
                                     <span className="no-typing">Our Swiss Water Decaf is definitely the customer favorite! It has a smooth, rich flavor 🌟</span>
                                   </div>
                                   <span className="text-[10px] text-slate-500 mt-1 flex items-center gap-1">
@@ -733,12 +741,12 @@ export default function LandingPage() {
                               </div>
 
                               {/* Message 3: Customer thanks */}
-                              <div className="flex gap-3 animate-slide-up-fade-in animation-delay-3200">
+                              <div className="flex gap-3 animate-slide-up-fade-in animation-delay-3200 min-w-0">
                                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                                   SC
                                 </div>
-                                <div className="flex-1">
-                                  <div className={`rounded-lg px-3 py-2 max-w-[80%] text-xs ${
+                                <div className="min-w-0 max-w-[80%]">
+                                  <div className={`rounded-lg px-3 py-2 text-xs overflow-hidden ${
                                     currentTheme === 'dark'
                                       ? 'bg-slate-700/50 text-slate-100'
                                       : 'bg-gray-100 text-gray-900'
@@ -752,9 +760,9 @@ export default function LandingPage() {
                               </div>
 
                               {/* Reply 3: Human closing */}
-                              <div className="flex gap-3 justify-end animate-slide-up-fade-in animation-delay-3800">
-                                <div className="flex-1 flex flex-col items-end">
-                                  <div className="bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg px-3 py-2 max-w-[80%] text-xs text-white">
+                              <div className="flex gap-3 justify-end animate-slide-up-fade-in animation-delay-3800 min-w-0">
+                                <div className="min-w-0 max-w-[80%] flex flex-col items-end">
+                                  <div className="typing-bubble-wrap bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg px-3 py-2 text-xs text-white">
                                     <span className="typing-text">You&apos;re so welcome! Enjoy your coffee, and feel free to reach out anytime ☕✨</span>
                                   </div>
                                   <span className={`text-[10px] mt-1 ${
@@ -771,7 +779,7 @@ export default function LandingPage() {
                             selectedConvo.messages.map((msg, idx) => (
                               <div
                                 key={idx}
-                                className={`flex gap-3 ${msg.from === 'support' ? 'justify-end' : ''} animate-message-in`}
+                                className={`flex gap-3 min-w-0 ${msg.from === 'support' ? 'justify-end' : ''} animate-message-in`}
                                 style={{ animationDelay: `${idx * 100}ms` }}
                               >
                                 {msg.from === 'customer' && (
@@ -779,8 +787,8 @@ export default function LandingPage() {
                                     {selectedConvo.initials}
                                   </div>
                                 )}
-                                <div className={`flex-1 ${msg.from === 'support' ? 'flex flex-col items-end' : ''}`}>
-                                  <div className={`rounded-lg px-3 py-2 max-w-[80%] text-xs ${
+                                <div className={`min-w-0 max-w-[80%] ${msg.from === 'support' ? 'flex flex-col items-end' : ''}`}>
+                                  <div className={`rounded-lg px-3 py-2 text-xs ${
                                     msg.from === 'support'
                                       ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white'
                                       : currentTheme === 'dark'

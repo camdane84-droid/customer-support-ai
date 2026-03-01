@@ -204,7 +204,7 @@
     }
   }
 
-  /* Typing text effect */
+  /* Typing text effect - for left-aligned (customer) messages */
   @keyframes typing-then-wrap {
     0% {
       width: 0;
@@ -229,15 +229,17 @@
     text-overflow: ellipsis;
   }
 
-  /* Typing animation synced with each message */
+  /* Support (right-aligned) message bubble: shrink-wraps to typed text, stays right-aligned */
+  .typing-bubble-wrap {
+    width: fit-content;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  /* Customer (left) typing animations */
   .hero-visible .animation-delay-600 .typing-text {
     animation: typing-then-wrap 1.5s steps(60, end) forwards;
     animation-delay: 1000ms;
-  }
-
-  .hero-visible .animation-delay-1000 .typing-text {
-    animation: typing-then-wrap 1.5s steps(60, end) forwards;
-    animation-delay: 3000ms;
   }
 
   .hero-visible .animation-delay-1400 .typing-text {
@@ -248,6 +250,12 @@
   .hero-visible .animation-delay-3200 .typing-text {
     animation: typing-then-wrap 1.5s steps(60, end) forwards;
     animation-delay: 12000ms;
+  }
+
+  /* Support (right) typing animations - same keyframes, on inner span */
+  .hero-visible .animation-delay-1000 .typing-text {
+    animation: typing-then-wrap 1.5s steps(60, end) forwards;
+    animation-delay: 3000ms;
   }
 
   .hero-visible .animation-delay-3800 .typing-text {
@@ -338,6 +346,7 @@
 
   /* GPU acceleration for other animated elements */
   .typing-text,
+  .typing-bubble-wrap,
   .animate-ai-panel,
   .animate-button-click {
     will-change: opacity, transform;
