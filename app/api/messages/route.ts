@@ -166,15 +166,13 @@ async function handleEmailSend(message: Message, businessId: string) {
   }
 
   try {
-    // Send from the root domain (verified in Resend), with reply-to on the mail
-    // subdomain so customer replies route back through SendGrid Inbound Parse
-    const replyToEmail = business.email.replace('@', '@mail.');
+    // Send from the business email (verified domain in Resend)
+    // Customer replies go to the same address → SendGrid Inbound Parse → webhook → dashboard
     await sendEmail({
       to: conversation.customer_email,
       from: `${business.name} <${business.email}>`,
       subject: `Re: Message from ${business.name}`,
       text: message.content,
-      replyTo: replyToEmail,
     });
   } catch (emailError: any) {
     throw new Error(`Email delivery failed: ${emailError.message}`);
