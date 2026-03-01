@@ -441,7 +441,7 @@ export default function LandingPage() {
               All plans include a 14-day free trial. No credit card required.
             </p>
             <p className="text-sm text-muted-foreground">
-              Need more? <a href="mailto:sales@inboxforge.com" className="text-primary hover:underline">Contact us</a> for Enterprise pricing
+              Need more? <a href="mailto:inboxforgeapp@outlook.com" className="text-primary hover:underline">Contact us</a> for Enterprise pricing
             </p>
           </div>
         </div>
