@@ -19,7 +19,8 @@ export async function getConversations(businessId: string): Promise<Conversation
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // Critical: Include cookies with request
+        credentials: 'include',
+        cache: 'no-store',
       });
 
       if (!response.ok) {
@@ -71,6 +72,7 @@ export async function getConversationMessages(conversationId: string): Promise<M
       headers: {
         'Content-Type': 'application/json',
       },
+      cache: 'no-store',
     });
 
     if (!response.ok) {
