@@ -142,39 +142,29 @@ function InboxContent() {
   }, [business]); // Only depend on business - searchParams and selectedConversation accessed via closure/functional updates
 
   useEffect(() => {
-    console.log('🔄 [INBOX] useEffect triggered:', {
-      user: !!user,
-      business: !!business,
-      businessId: business?.id,
-      authLoading,
-      hasLoaded: hasLoadedRef.current
-    });
-
-    if (!authLoading && business && !hasLoadedRef.current) {
-      console.log('✅ [INBOX] Auth ready, setting up polling and loading conversations');
-      hasLoadedRef.current = true;
-      loadConversations();
-
-      // Poll for conversation updates (unread counts, new conversations)
-      const pollInterval = setInterval(() => {
-        if (!document.hidden) {
-          loadConversations(false);
-        }
-      }, 3000); // Poll every 3 seconds
-
-      // Return cleanup function
-      return () => {
-        clearInterval(pollInterval);
-        console.log('🔌 [INBOX] Stopped polling');
-      };
-    } else if (!authLoading && !business) {
-      console.log('❌ [INBOX] No business after auth loaded, setting loading=false');
-      setLoading(false);
-      setError('No business found');
-    } else {
-      console.log('⏸️ [INBOX] Waiting - authLoading:', authLoading, 'business:', !!business, 'hasLoaded:', hasLoadedRef.current);
+    if (authLoading || !business) {
+      if (!authLoading && !business) {
+        setLoading(false);
+        setError('No business found');
+      }
+      return;
     }
-  }, [business, authLoading]);
+
+    // Only show loading spinner on first load
+    if (!hasLoadedRef.current) {
+      hasLoadedRef.current = true;
+      loadConversations(true);
+    }
+
+    // Always set up polling (re-creates with latest loadConversations if deps change)
+    const pollInterval = setInterval(() => {
+      if (!document.hidden) {
+        loadConversations(false);
+      }
+    }, 3000);
+
+    return () => clearInterval(pollInterval);
+  }, [loadConversations, authLoading]);
 
   function setupRealtimeSubscription() {
     if (!business) return;
