@@ -94,8 +94,8 @@ export default function TermsOfService() {
             <h2 className="text-2xl font-semibold mb-3 text-white">Contact</h2>
             <p>
               If you have questions about these Terms of Service, please contact us at{' '}
-              <a href="mailto:hello@inbox-forge.com" className="text-blue-400 hover:text-blue-300 underline">
-                hello@inbox-forge.com
+              <a href="mailto:inboxforgeapp@outlook.com" className="text-blue-400 hover:text-blue-300 underline">
+                inboxforgeapp@outlook.com
               </a>.
             </p>
           </section>
