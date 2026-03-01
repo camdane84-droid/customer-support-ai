@@ -59,76 +59,47 @@ export default function MessageThread({ conversation, businessId, onConversation
     loadMessages();
     markConversationAsRead();
 
-    // Subscribe to new messages and message updates in this conversation
-    const channel = supabase
-      .channel(`messages:${conversation.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `conversation_id=eq.${conversation.id}`,
-        },
-        (payload) => {
-          const newMessage = payload.new as Message;
-          console.log('📨 [REALTIME] Received INSERT:', newMessage.id, 'Content:', newMessage.content.substring(0, 50));
-
-          // Check if this is a confirmation of an optimistic message
-          // Use setState callback to access current optimistic messages (avoid stale closure)
-          setOptimisticMessages((currentOptimistic) => {
-            console.log('🔍 [REALTIME] Checking', currentOptimistic.size, 'optimistic messages for match');
-            let foundMatch = false;
-            const next = new Map(currentOptimistic);
-
-            // Check each optimistic message for a match
-            currentOptimistic.forEach((optMsg, tempId) => {
-              if (
-                optMsg.content === newMessage.content &&
-                optMsg.sender_type === newMessage.sender_type &&
-                Math.abs(new Date(optMsg.created_at).getTime() - new Date(newMessage.created_at).getTime()) < 5000
-              ) {
-                // This is the DB confirmation - remove optimistic version
-                console.log('✅ [REALTIME] Found matching optimistic message:', tempId, '- removing it');
-                next.delete(tempId);
-                foundMatch = true;
-              }
+    // Poll for new messages every 3 seconds as primary update mechanism
+    const pollInterval = setInterval(async () => {
+      if (document.hidden) return;
+      try {
+        const msgs = await getConversationMessages(conversation.id);
+        setMessages((prev) => {
+          // Only update if message count changed or last message differs
+          if (
+            msgs.length !== prev.length ||
+            (msgs.length > 0 && prev.length > 0 && msgs[msgs.length - 1].id !== prev[prev.length - 1].id)
+          ) {
+            // Clear optimistic messages that now have real counterparts
+            setOptimisticMessages((currentOptimistic) => {
+              if (currentOptimistic.size === 0) return currentOptimistic;
+              const next = new Map(currentOptimistic);
+              currentOptimistic.forEach((optMsg, tempId) => {
+                const match = msgs.find(
+                  (m) =>
+                    m.content === optMsg.content &&
+                    m.sender_type === optMsg.sender_type &&
+                    Math.abs(new Date(m.created_at).getTime() - new Date(optMsg.created_at).getTime()) < 10000
+                );
+                if (match) next.delete(tempId);
+              });
+              return next;
             });
-
-            if (!foundMatch && currentOptimistic.size > 0) {
-              console.log('⚠️ [REALTIME] No matching optimistic message found');
-            }
-
-            return next;
-          });
-
-          // Always add to messages (whether optimistic confirmation or new customer message)
-          console.log('➕ [REALTIME] Adding message to confirmed messages');
-          setMessages((prev) => [...prev, newMessage]);
-
-          // Mark as read again when new messages arrive while viewing
-          markConversationAsRead();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'messages',
-          filter: `conversation_id=eq.${conversation.id}`,
-        },
-        (payload) => {
-          const updatedMessage = payload.new as Message;
-          setMessages((prev) =>
-            prev.map((msg) => (msg.id === updatedMessage.id ? updatedMessage : msg))
-          );
-        }
-      )
-      .subscribe();
+            markConversationAsRead();
+            return msgs;
+          }
+          // Update statuses even if count is same (e.g. sending → sent)
+          const statusChanged = msgs.some((m, i) => prev[i] && m.status !== prev[i].status);
+          if (statusChanged) return msgs;
+          return prev;
+        });
+      } catch (error) {
+        // Silent fail on poll
+      }
+    }, 3000);
 
     return () => {
-      supabase.removeChannel(channel);
+      clearInterval(pollInterval);
     };
   }, [conversation.id]);
 

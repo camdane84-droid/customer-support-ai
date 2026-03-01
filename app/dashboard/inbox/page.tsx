@@ -155,14 +155,12 @@ function InboxContent() {
       hasLoadedRef.current = true;
       loadConversations();
 
-      // Set up polling instead of realtime
+      // Poll for conversation updates (unread counts, new conversations)
       const pollInterval = setInterval(() => {
-        // Only poll if tab is visible
         if (!document.hidden) {
-          console.log('🔄 Polling for updates...');
-          loadConversations(false); // Don't show loading spinner when polling
+          loadConversations(false);
         }
-      }, 1000); // Poll every 1 second
+      }, 3000); // Poll every 3 seconds
 
       // Return cleanup function
       return () => {
