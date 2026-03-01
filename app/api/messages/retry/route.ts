@@ -141,17 +141,18 @@ async function handleEmailSend(message: Message, businessId: string) {
     throw new Error('Business email not found');
   }
 
-  // Send from the business's mail subdomain address so replies route back through SendGrid
-  // e.g. acme@inbox-forge.com → acme@mail.inbox-forge.com
-  const fromEmail = business.email.replace('@', '@mail.');
-  logger.info(`📧 Sending email from ${fromEmail} to ${conversation.customer_email}`);
+  // Send from the root domain (verified in Resend), with reply-to on the mail
+  // subdomain so customer replies route back through SendGrid Inbound Parse
+  const replyToEmail = business.email.replace('@', '@mail.');
+  logger.info(`📧 Sending email from ${business.email} (reply-to: ${replyToEmail}) to ${conversation.customer_email}`);
 
   try {
     await sendEmail({
       to: conversation.customer_email,
-      from: `${business.name} <${fromEmail}>`,
+      from: `${business.name} <${business.email}>`,
       subject: `Re: Message from ${business.name}`,
       text: message.content,
+      replyTo: replyToEmail,
     });
     logger.info('✅ Email sent successfully');
   } catch (emailError: any) {
