@@ -14,6 +14,12 @@ import { useAuth } from '@/lib/context/AuthContext';
 import type { Conversation } from '@/lib/api/supabase';
 import { MessageSquare, Clock, Mail } from 'lucide-react';
 
+const PANEL_MIN_WIDTH = 68;
+const PANEL_MAX_WIDTH = 480;
+const PANEL_DEFAULT_WIDTH = 320;
+const PANEL_COLLAPSED_THRESHOLD = 100;
+const PANEL_STORAGE_KEY = 'inbox-panel-width';
+
 function InboxContent() {
   const { currentBusiness: business, user, loading: authLoading } = useAuth();
   const searchParams = useSearchParams();
@@ -22,6 +28,58 @@ function InboxContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const hasLoadedRef = useRef(false);
+
+  // Resizable panel state
+  const [panelWidth, setPanelWidth] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(PANEL_STORAGE_KEY);
+      if (saved) {
+        const parsed = parseInt(saved, 10);
+        if (!isNaN(parsed) && parsed >= PANEL_MIN_WIDTH && parsed <= PANEL_MAX_WIDTH) {
+          return parsed;
+        }
+      }
+    }
+    return PANEL_DEFAULT_WIDTH;
+  });
+  const isResizingRef = useRef(false);
+
+  // Persist panel width to localStorage
+  useEffect(() => {
+    localStorage.setItem(PANEL_STORAGE_KEY, String(panelWidth));
+  }, [panelWidth]);
+
+  // Drag handle handlers
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isResizingRef.current = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizingRef.current) return;
+      // Get the left edge of the panel container
+      const container = document.getElementById('inbox-panel-container');
+      if (!container) return;
+      const containerRect = container.getBoundingClientRect();
+      const newWidth = e.clientX - containerRect.left;
+      const clamped = Math.max(PANEL_MIN_WIDTH, Math.min(PANEL_MAX_WIDTH, newWidth));
+      setPanelWidth(clamped);
+    };
+
+    const handleMouseUp = () => {
+      isResizingRef.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, []);
+
+  const isCollapsed = panelWidth < PANEL_COLLAPSED_THRESHOLD;
 
   console.log('🔍 [INBOX] Component render:', {
     authLoading,
@@ -482,16 +540,29 @@ function InboxContent() {
         </div>
 
         {/* Main Content */}
-        <div className="flex flex-1 overflow-hidden">
-        <div className="w-80 border-r border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex-shrink-0 hidden md:block">
+        <div id="inbox-panel-container" className="flex flex-1 overflow-hidden">
+        <div
+          className="border-r border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex-shrink-0 hidden md:block"
+          style={{ width: panelWidth }}
+        >
           <ConversationList
             conversations={conversations}
             selectedConversation={selectedConversation}
             onSelectConversation={handleSelectConversation}
             onBulkArchive={handleBulkArchive}
             onBulkDelete={handleBulkDelete}
+            collapsed={isCollapsed}
           />
         </div>
+
+        {/* Drag Handle */}
+        <div
+          className="hidden md:flex w-1 cursor-col-resize items-center justify-center hover:bg-indigo-300 dark:hover:bg-indigo-600 bg-gray-200 dark:bg-slate-700 transition-colors flex-shrink-0"
+          onMouseDown={handleMouseDown}
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Resize conversation list"
+        />
 
         <div className="flex-1 flex flex-col">
           {selectedConversation ? (
