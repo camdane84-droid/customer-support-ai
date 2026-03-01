@@ -166,14 +166,15 @@ async function handleEmailSend(message: Message, businessId: string) {
   }
 
   try {
-    // Send from the business's mail subdomain address so replies route back through SendGrid
-    // e.g. acme@inbox-forge.com → acme@mail.inbox-forge.com
-    const fromEmail = business.email.replace('@', '@mail.');
+    // Send from the root domain (verified in Resend), with reply-to on the mail
+    // subdomain so customer replies route back through SendGrid Inbound Parse
+    const replyToEmail = business.email.replace('@', '@mail.');
     await sendEmail({
       to: conversation.customer_email,
-      from: `${business.name} <${fromEmail}>`,
+      from: `${business.name} <${business.email}>`,
       subject: `Re: Message from ${business.name}`,
       text: message.content,
+      replyTo: replyToEmail,
     });
   } catch (emailError: any) {
     throw new Error(`Email delivery failed: ${emailError.message}`);

@@ -7,6 +7,7 @@ export async function sendEmail(params: {
   subject: string;
   text: string;
   html?: string;
+  replyTo?: string;
 }) {
   if (!process.env.RESEND_API_KEY) {
     throw new Error('RESEND_API_KEY environment variable is not set');
@@ -21,6 +22,7 @@ export async function sendEmail(params: {
       subject: params.subject,
       text: params.text,
       html: params.html || params.text,
+      ...(params.replyTo && { reply_to: params.replyTo }),
     });
 
     if (error) {
