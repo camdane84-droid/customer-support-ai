@@ -117,8 +117,9 @@ export async function POST(request: NextRequest) {
       throw new Error('Failed to create/find conversation');
     }
 
-    // Create message
-    const content = text || html || subject;
+    // Create message - strip quoted thread from replies so only the new content is saved
+    const rawContent = text || html || subject;
+    const content = extractLatestReply(rawContent);
     await supabaseServer.from('messages').insert({
       conversation_id: conversationId,
       business_id: business.id,
@@ -146,4 +147,47 @@ export async function POST(request: NextRequest) {
 // GET endpoint for webhook verification
 export async function GET(request: NextRequest) {
   return new NextResponse('Email webhook is ready', { status: 200 });
+}
+
+/**
+ * Strips quoted reply content from an email, returning only the new message.
+ * Handles common patterns from Gmail, Outlook, Apple Mail, Yahoo, etc.
+ */
+function extractLatestReply(body: string): string {
+  if (!body) return body;
+
+  // Split into lines for processing
+  const lines = body.split('\n');
+  const cutIndex = lines.findIndex((line) => {
+    const trimmed = line.trim();
+
+    // "On [date], [name] wrote:" (Gmail, Apple Mail)
+    if (/^On .+ wrote:$/i.test(trimmed)) return true;
+
+    // "> " quoted lines preceded by a blank line (start of quote block)
+    // We don't cut on a single ">" line since users might use it in text
+
+    // "-----Original Message-----" (Outlook)
+    if (/^-{2,}\s*Original Message\s*-{2,}$/i.test(trimmed)) return true;
+
+    // "From: " header block (Outlook, some clients)
+    if (/^From:\s*.+/i.test(trimmed)) return true;
+
+    // "________" divider (some clients)
+    if (/^_{5,}$/.test(trimmed)) return true;
+
+    // "Sent from my iPhone/iPad" etc.
+    if (/^Sent from my /i.test(trimmed)) return true;
+
+    return false;
+  });
+
+  if (cutIndex > 0) {
+    const newContent = lines.slice(0, cutIndex).join('\n').trim();
+    // Only use stripped version if there's actually content left
+    if (newContent.length > 0) return newContent;
+  }
+
+  // Fallback: return original trimmed
+  return body.trim();
 }
