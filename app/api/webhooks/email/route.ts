@@ -156,22 +156,21 @@ export async function GET(request: NextRequest) {
 function extractLatestReply(body: string): string {
   if (!body) return body;
 
-  // Split into lines for processing
+  // First try: regex on the full body for multi-line "On ... wrote:" (Gmail wraps this across lines)
+  const gmailPattern = /\r?\nOn .+wrote:\s*\r?\n/is;
+  const gmailMatch = body.search(gmailPattern);
+  if (gmailMatch > 0) {
+    const newContent = body.slice(0, gmailMatch).trim();
+    if (newContent.length > 0) return newContent;
+  }
+
+  // Second try: line-by-line checks for other patterns
   const lines = body.split('\n');
   const cutIndex = lines.findIndex((line) => {
     const trimmed = line.trim();
 
-    // "On [date], [name] wrote:" (Gmail, Apple Mail)
-    if (/^On .+ wrote:$/i.test(trimmed)) return true;
-
-    // "> " quoted lines preceded by a blank line (start of quote block)
-    // We don't cut on a single ">" line since users might use it in text
-
     // "-----Original Message-----" (Outlook)
     if (/^-{2,}\s*Original Message\s*-{2,}$/i.test(trimmed)) return true;
-
-    // "From: " header block (Outlook, some clients)
-    if (/^From:\s*.+/i.test(trimmed)) return true;
 
     // "________" divider (some clients)
     if (/^_{5,}$/.test(trimmed)) return true;
@@ -179,12 +178,14 @@ function extractLatestReply(body: string): string {
     // "Sent from my iPhone/iPad" etc.
     if (/^Sent from my /i.test(trimmed)) return true;
 
+    // Line starting with ">" (quoted text) — only if preceded by a blank line
+    if (/^>/.test(trimmed)) return true;
+
     return false;
   });
 
   if (cutIndex > 0) {
     const newContent = lines.slice(0, cutIndex).join('\n').trim();
-    // Only use stripped version if there's actually content left
     if (newContent.length > 0) return newContent;
   }
 
