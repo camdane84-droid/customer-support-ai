@@ -56,10 +56,14 @@ export default function SettingsPage() {
         preferences: true,
         best_times: true,
       });
-      setAutoReplyEnabled((business as any).auto_reply_enabled || false);
-      setAutoReplyMode((business as any).auto_reply_mode || 'after_hours');
-      setAutoReplyStart((business as any).auto_reply_start || '18:00');
-      setAutoReplyEnd((business as any).auto_reply_end || '06:00');
+      // Only reset auto-reply state if the fields actually exist on the business object
+      // (avoids clobbering local state when columns haven't been migrated yet)
+      if ('auto_reply_enabled' in (business as any)) {
+        setAutoReplyEnabled((business as any).auto_reply_enabled || false);
+        setAutoReplyMode((business as any).auto_reply_mode || 'after_hours');
+        setAutoReplyStart((business as any).auto_reply_start || '18:00');
+        setAutoReplyEnd((business as any).auto_reply_end || '06:00');
+      }
     }
   }, [business]);
 
@@ -99,15 +103,41 @@ export default function SettingsPage() {
     try {
       console.log('💾 Saving settings...');
 
-      // Try to update with auto_generate_notes and profile_categories
+      // Step 1: Save base fields + known columns (always works)
+      const baseFields: Record<string, any> = {
+        name: businessName,
+        business_type: businessType,
+        policies: policies,
+      };
+
+      // Try adding auto_generate_notes + profile_categories
       let { error } = await supabase
         .from('businesses')
         .update({
-          name: businessName,
-          business_type: businessType,
-          policies: policies,
+          ...baseFields,
           auto_generate_notes: autoGenerateNotes,
           profile_categories: profileCategories,
+        })
+        .eq('id', business.id);
+
+      if (error && (error.message.includes('auto_generate_notes') || error.message.includes('profile_categories'))) {
+        console.warn('⚠️ auto_generate_notes/profile_categories columns not found, saving base fields only');
+        const result = await supabase
+          .from('businesses')
+          .update(baseFields)
+          .eq('id', business.id);
+        error = result.error;
+      }
+
+      if (error) {
+        console.error('❌ Save error:', error);
+        throw error;
+      }
+
+      // Step 2: Try saving auto-reply fields separately (may fail if migration not run yet)
+      const { error: autoReplyError } = await supabase
+        .from('businesses')
+        .update({
           auto_reply_enabled: autoReplyEnabled,
           auto_reply_mode: autoReplyMode,
           auto_reply_start: autoReplyStart,
@@ -115,24 +145,8 @@ export default function SettingsPage() {
         })
         .eq('id', business.id);
 
-      // If column doesn't exist, save without it
-      if (error && (error.message.includes('auto_generate_notes') || error.message.includes('auto_reply'))) {
-        console.warn('⚠️ Some columns not found, saving base fields');
-        const result = await supabase
-          .from('businesses')
-          .update({
-            name: businessName,
-            business_type: businessType,
-            policies: policies,
-          })
-          .eq('id', business.id);
-
-        error = result.error;
-      }
-
-      if (error) {
-        console.error('❌ Save error:', error);
-        throw error;
+      if (autoReplyError) {
+        console.warn('⚠️ Auto-reply columns not saved (migration may not be applied yet):', autoReplyError.message);
       }
 
       console.log('✅ Settings saved successfully');

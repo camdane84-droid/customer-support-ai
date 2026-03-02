@@ -32,12 +32,13 @@ export function shouldAutoReply(business: Business): boolean {
 }
 
 /**
- * Check if the current UTC time falls within the start–end window.
+ * Check if the current local time falls within the start–end window.
+ * Uses local time because users set schedule hours in their own timezone.
  * Handles overnight ranges (e.g. 18:00–06:00) where end < start.
  */
-function isWithinSchedule(start: string, end: string): boolean {
+export function isWithinSchedule(start: string, end: string): boolean {
   const now = new Date();
-  const currentMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
   const startMinutes = parseTime(start);
   const endMinutes = parseTime(end);
