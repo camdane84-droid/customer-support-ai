@@ -38,6 +38,10 @@ export type Business = {
   services: string[] | null;
   policies: string | null;
   auto_generate_notes?: boolean;
+  auto_reply_enabled?: boolean;
+  auto_reply_mode?: 'after_hours' | 'all_day' | 'custom';
+  auto_reply_start?: string;   // "18:00"
+  auto_reply_end?: string;     // "06:00"
   profile_categories?: {
     allergies: boolean;
     favorite_category: boolean;

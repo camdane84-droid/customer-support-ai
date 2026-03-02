@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/lib/context/AuthContext';
 import { supabase } from '@/lib/api/supabase';
-import { Save, Building, Clock, Share2, Mail, MessageCircle, Instagram, Facebook, CheckCircle, FileText, Sparkles, Trash2, AlertTriangle, Star, ShoppingBag, AlertCircle, Ruler, Heart, ChevronDown } from 'lucide-react';
+import { Save, Building, Clock, Share2, Mail, MessageCircle, Instagram, Facebook, CheckCircle, FileText, Sparkles, Trash2, AlertTriangle, Star, ShoppingBag, AlertCircle, Ruler, Heart, ChevronDown, Moon, Lock } from 'lucide-react';
 import TikTokIcon from '@/components/icons/TikTokIcon';
 import BillingSection from '@/components/ui/BillingSection';
 import { useRouter } from 'next/navigation';
@@ -27,6 +27,10 @@ export default function SettingsPage() {
     preferences: true,
     best_times: true,
   });
+  const [autoReplyEnabled, setAutoReplyEnabled] = useState(false);
+  const [autoReplyMode, setAutoReplyMode] = useState<'after_hours' | 'all_day' | 'custom'>('after_hours');
+  const [autoReplyStart, setAutoReplyStart] = useState('18:00');
+  const [autoReplyEnd, setAutoReplyEnd] = useState('06:00');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [bottomSaveVisible, setBottomSaveVisible] = useState(false);
@@ -52,6 +56,10 @@ export default function SettingsPage() {
         preferences: true,
         best_times: true,
       });
+      setAutoReplyEnabled((business as any).auto_reply_enabled || false);
+      setAutoReplyMode((business as any).auto_reply_mode || 'after_hours');
+      setAutoReplyStart((business as any).auto_reply_start || '18:00');
+      setAutoReplyEnd((business as any).auto_reply_end || '06:00');
     }
   }, [business]);
 
@@ -100,12 +108,16 @@ export default function SettingsPage() {
           policies: policies,
           auto_generate_notes: autoGenerateNotes,
           profile_categories: profileCategories,
+          auto_reply_enabled: autoReplyEnabled,
+          auto_reply_mode: autoReplyMode,
+          auto_reply_start: autoReplyStart,
+          auto_reply_end: autoReplyEnd,
         })
         .eq('id', business.id);
 
       // If column doesn't exist, save without it
-      if (error && error.message.includes('auto_generate_notes')) {
-        console.warn('⚠️ auto_generate_notes column not found, saving other fields');
+      if (error && (error.message.includes('auto_generate_notes') || error.message.includes('auto_reply'))) {
+        console.warn('⚠️ Some columns not found, saving base fields');
         const result = await supabase
           .from('businesses')
           .update({
@@ -322,11 +334,11 @@ export default function SettingsPage() {
               </div>
               <button
                 onClick={() => setAutoGenerateNotes(!autoGenerateNotes)}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${autoGenerateNotes ? 'bg-purple-600' : 'bg-gray-200'
+                className={`relative inline-flex items-center h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out focus:outline-none ${autoGenerateNotes ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'
                   }`}
               >
                 <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${autoGenerateNotes ? 'translate-x-5' : 'translate-x-0'
+                  className={`pointer-events-none inline-block h-5 w-5 ml-px transform rounded-full shadow ring-0 transition duration-200 ease-in-out ${autoGenerateNotes ? 'bg-white translate-x-5' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'
                     }`}
                 />
               </button>
@@ -352,9 +364,9 @@ export default function SettingsPage() {
                     </div>
                     <button
                       onClick={() => setProfileCategories(prev => ({ ...prev, allergies: !prev.allergies }))}
-                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${profileCategories.allergies ? 'bg-purple-600' : 'bg-gray-200'}`}
+                      className={`relative inline-flex items-center h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out focus:outline-none ${profileCategories.allergies ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
                     >
-                      <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${profileCategories.allergies ? 'translate-x-4' : 'translate-x-0'}`} />
+                      <span className={`pointer-events-none inline-block h-4 w-4 ml-px transform rounded-full shadow ring-0 transition duration-200 ease-in-out ${profileCategories.allergies ? 'bg-white translate-x-4' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`} />
                     </button>
                   </div>
 
@@ -366,9 +378,9 @@ export default function SettingsPage() {
                     </div>
                     <button
                       onClick={() => setProfileCategories(prev => ({ ...prev, favorite_category: !prev.favorite_category }))}
-                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${profileCategories.favorite_category ? 'bg-purple-600' : 'bg-gray-200'}`}
+                      className={`relative inline-flex items-center h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out focus:outline-none ${profileCategories.favorite_category ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
                     >
-                      <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${profileCategories.favorite_category ? 'translate-x-4' : 'translate-x-0'}`} />
+                      <span className={`pointer-events-none inline-block h-4 w-4 ml-px transform rounded-full shadow ring-0 transition duration-200 ease-in-out ${profileCategories.favorite_category ? 'bg-white translate-x-4' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`} />
                     </button>
                   </div>
 
@@ -380,9 +392,9 @@ export default function SettingsPage() {
                     </div>
                     <button
                       onClick={() => setProfileCategories(prev => ({ ...prev, past_orders: !prev.past_orders }))}
-                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${profileCategories.past_orders ? 'bg-purple-600' : 'bg-gray-200'}`}
+                      className={`relative inline-flex items-center h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out focus:outline-none ${profileCategories.past_orders ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
                     >
-                      <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${profileCategories.past_orders ? 'translate-x-4' : 'translate-x-0'}`} />
+                      <span className={`pointer-events-none inline-block h-4 w-4 ml-px transform rounded-full shadow ring-0 transition duration-200 ease-in-out ${profileCategories.past_orders ? 'bg-white translate-x-4' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`} />
                     </button>
                   </div>
 
@@ -394,9 +406,9 @@ export default function SettingsPage() {
                     </div>
                     <button
                       onClick={() => setProfileCategories(prev => ({ ...prev, issues: !prev.issues }))}
-                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${profileCategories.issues ? 'bg-purple-600' : 'bg-gray-200'}`}
+                      className={`relative inline-flex items-center h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out focus:outline-none ${profileCategories.issues ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
                     >
-                      <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${profileCategories.issues ? 'translate-x-4' : 'translate-x-0'}`} />
+                      <span className={`pointer-events-none inline-block h-4 w-4 ml-px transform rounded-full shadow ring-0 transition duration-200 ease-in-out ${profileCategories.issues ? 'bg-white translate-x-4' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`} />
                     </button>
                   </div>
 
@@ -408,9 +420,9 @@ export default function SettingsPage() {
                     </div>
                     <button
                       onClick={() => setProfileCategories(prev => ({ ...prev, sizes_dimensions: !prev.sizes_dimensions }))}
-                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${profileCategories.sizes_dimensions ? 'bg-purple-600' : 'bg-gray-200'}`}
+                      className={`relative inline-flex items-center h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out focus:outline-none ${profileCategories.sizes_dimensions ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
                     >
-                      <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${profileCategories.sizes_dimensions ? 'translate-x-4' : 'translate-x-0'}`} />
+                      <span className={`pointer-events-none inline-block h-4 w-4 ml-px transform rounded-full shadow ring-0 transition duration-200 ease-in-out ${profileCategories.sizes_dimensions ? 'bg-white translate-x-4' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`} />
                     </button>
                   </div>
 
@@ -422,9 +434,9 @@ export default function SettingsPage() {
                     </div>
                     <button
                       onClick={() => setProfileCategories(prev => ({ ...prev, preferences: !prev.preferences }))}
-                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${profileCategories.preferences ? 'bg-purple-600' : 'bg-gray-200'}`}
+                      className={`relative inline-flex items-center h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out focus:outline-none ${profileCategories.preferences ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
                     >
-                      <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${profileCategories.preferences ? 'translate-x-4' : 'translate-x-0'}`} />
+                      <span className={`pointer-events-none inline-block h-4 w-4 ml-px transform rounded-full shadow ring-0 transition duration-200 ease-in-out ${profileCategories.preferences ? 'bg-white translate-x-4' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`} />
                     </button>
                   </div>
 
@@ -436,9 +448,9 @@ export default function SettingsPage() {
                     </div>
                     <button
                       onClick={() => setProfileCategories(prev => ({ ...prev, best_times: !prev.best_times }))}
-                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${profileCategories.best_times ? 'bg-purple-600' : 'bg-gray-200'}`}
+                      className={`relative inline-flex items-center h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out focus:outline-none ${profileCategories.best_times ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
                     >
-                      <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${profileCategories.best_times ? 'translate-x-4' : 'translate-x-0'}`} />
+                      <span className={`pointer-events-none inline-block h-4 w-4 ml-px transform rounded-full shadow ring-0 transition duration-200 ease-in-out ${profileCategories.best_times ? 'bg-white translate-x-4' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`} />
                     </button>
                   </div>
                 </div>
@@ -446,6 +458,179 @@ export default function SettingsPage() {
             )}
           </div>
         </div>
+
+        {/* AI Auto-Reply */}
+        {(() => {
+          const tier = (business as any)?.subscription_tier || 'free';
+          const isPro = tier === 'pro';
+          const timeOptions = Array.from({ length: 48 }, (_, i) => {
+            const hours = Math.floor(i / 2);
+            const minutes = i % 2 === 0 ? '00' : '30';
+            const value = `${String(hours).padStart(2, '0')}:${minutes}`;
+            const period = hours >= 12 ? 'PM' : 'AM';
+            const displayHour = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+            const label = `${displayHour}:${minutes} ${period}`;
+            return { value, label };
+          });
+
+          const modeOptions: { value: 'after_hours' | 'all_day' | 'custom'; label: string; description: string }[] = [
+            { value: 'after_hours', label: 'After Hours', description: 'AI replies outside your business hours' },
+            { value: 'all_day', label: 'All Day', description: 'AI replies to every message, 24/7' },
+            { value: 'custom', label: 'Custom Hours', description: 'Set specific hours for AI to reply' },
+          ];
+
+          return (
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                  <Moon className="w-5 h-5 text-purple-500" />
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">AI Auto-Reply</h2>
+                </div>
+                <div className="flex items-center space-x-2">
+                  {!isPro && (
+                    <div className="flex items-center space-x-1 text-purple-600 dark:text-purple-400 text-xs">
+                      <Lock className="w-3 h-3" />
+                      <span>Upgrade to Pro</span>
+                    </div>
+                  )}
+                  <span className="border border-purple-300 dark:border-purple-500/50 bg-transparent text-purple-600 dark:text-purple-400 text-xs rounded-full px-2 py-0.5">
+                    Pro
+                  </span>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-slate-300 mb-6">
+                Let AI automatically respond to customer messages on your schedule
+              </p>
+
+              <div className="relative">
+                {!isPro && (
+                  <div
+                    className="absolute inset-0 z-10 pointer-events-auto cursor-not-allowed rounded-lg"
+                    title="Upgrade to Pro to unlock AI Auto-Reply"
+                  />
+                )}
+                <div className={!isPro ? 'opacity-50 pointer-events-none select-none' : ''}>
+                  <div className="p-4 border border-gray-200 dark:border-indigo-700/50 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 dark:from-indigo-900/40 dark:to-purple-900/40">
+                    {/* Header + Toggle */}
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <div className="flex items-center space-x-2 mb-2">
+                          <Moon className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                          <h3 className="font-medium text-gray-900 dark:text-white">AI Auto-Reply</h3>
+                        </div>
+                        <p className="text-sm text-gray-600 dark:text-slate-300">
+                          Automatically respond to customer messages using your knowledge base.
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setAutoReplyEnabled(!autoReplyEnabled)}
+                        disabled={!isPro}
+                        className={`relative inline-flex items-center h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out focus:outline-none ${autoReplyEnabled ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-5 w-5 ml-px transform rounded-full shadow ring-0 transition duration-200 ease-in-out ${autoReplyEnabled ? 'bg-white translate-x-5' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`}
+                        />
+                      </button>
+                    </div>
+
+                    {/* Bullet points */}
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-start space-x-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-purple-500 dark:bg-purple-400 mt-1.5"></div>
+                        <p className="text-sm text-gray-700 dark:text-slate-300">
+                          <strong>Instant replies:</strong> Customers get helpful responses within seconds
+                        </p>
+                      </div>
+                      <div className="flex items-start space-x-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-purple-500 dark:bg-purple-400 mt-1.5"></div>
+                        <p className="text-sm text-gray-700 dark:text-slate-300">
+                          <strong>Knowledge-aware:</strong> Uses your knowledge base to answer accurately
+                        </p>
+                      </div>
+                      <div className="flex items-start space-x-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-purple-500 dark:bg-purple-400 mt-1.5"></div>
+                        <p className="text-sm text-gray-700 dark:text-slate-300">
+                          <strong>Seamless handoff:</strong> Flags complex questions for your team to review
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Mode selector */}
+                    <div className="mt-4">
+                      <p className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Schedule:</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {modeOptions.map((mode) => (
+                          <button
+                            key={mode.value}
+                            onClick={() => setAutoReplyMode(mode.value)}
+                            disabled={!isPro}
+                            className={`p-3 rounded-lg border text-left transition-colors ${
+                              autoReplyMode === mode.value
+                                ? 'border-purple-500 dark:border-purple-400 bg-purple-100 dark:bg-purple-900/50'
+                                : 'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 hover:border-purple-300 dark:hover:border-purple-600'
+                            }`}
+                          >
+                            <p className={`text-sm font-medium ${
+                              autoReplyMode === mode.value
+                                ? 'text-purple-700 dark:text-purple-300'
+                                : 'text-gray-900 dark:text-white'
+                            }`}>{mode.label}</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{mode.description}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Custom hours picker — only visible when mode is 'custom' */}
+                    {autoReplyMode === 'custom' && (
+                      <div className="mt-4">
+                        <p className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Active Hours:</p>
+                        <div className="flex items-center space-x-3">
+                          <select
+                            value={autoReplyStart}
+                            onChange={(e) => setAutoReplyStart(e.target.value)}
+                            disabled={!isPro}
+                            className="bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                          >
+                            {timeOptions.map((t) => (
+                              <option key={t.value} value={t.value}>{t.label}</option>
+                            ))}
+                          </select>
+                          <span className="text-sm text-gray-500 dark:text-slate-400">to</span>
+                          <select
+                            value={autoReplyEnd}
+                            onChange={(e) => setAutoReplyEnd(e.target.value)}
+                            disabled={!isPro}
+                            className="bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                          >
+                            {timeOptions.map((t) => (
+                              <option key={t.value} value={t.value}>{t.label}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-slate-400 mt-2 italic">
+                          AI will automatically reply to messages received between these hours.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Help text for non-custom modes */}
+                    {autoReplyMode === 'after_hours' && (
+                      <p className="text-xs text-gray-500 dark:text-slate-400 mt-3 italic">
+                        AI replies when messages arrive outside your configured business hours (set in Business Information below).
+                      </p>
+                    )}
+                    {autoReplyMode === 'all_day' && (
+                      <p className="text-xs text-gray-500 dark:text-slate-400 mt-3 italic">
+                        AI will reply to every incoming message around the clock. Your team can still jump in at any time.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Business Info */}
         <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">

@@ -1,0 +1,5 @@
+ALTER TABLE businesses
+ADD COLUMN IF NOT EXISTS auto_reply_enabled BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS auto_reply_mode TEXT DEFAULT 'after_hours',
+ADD COLUMN IF NOT EXISTS auto_reply_start TEXT DEFAULT '18:00',
+ADD COLUMN IF NOT EXISTS auto_reply_end TEXT DEFAULT '06:00';
