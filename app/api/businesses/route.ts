@@ -17,18 +17,7 @@ export async function GET(request: NextRequest) {
         role,
         joined_at,
         businesses (
-          id,
-          name,
-          email,
-          business_type,
-          policies,
-          subscription_status,
-          subscription_plan,
-          subscription_tier,
-          stripe_customer_id,
-          created_at,
-          auto_generate_notes,
-          profile_categories
+          *
         )
       `)
       .eq('user_id', userId)

@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useCallback, memo } from 'react';
-import { Menu, X, MessageSquare, BookOpen, Settings, LayoutDashboard, TrendingUp, Users, Archive, Moon, Sun } from 'lucide-react';
+import { useState, useEffect, useCallback, memo } from 'react';
+import { Menu, X, MessageSquare, BookOpen, Settings, LayoutDashboard, TrendingUp, Users, Archive, Moon, Sun, FlaskConical, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from '@/lib/auth';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useTheme } from '@/lib/context/ThemeContext';
+import { shouldAutoReply } from '@/lib/auto-reply';
 import UsageDisplay from '@/components/ui/UsageDisplay';
 import { BusinessSwitcher } from '@/components/ui/BusinessSwitcher';
 
@@ -27,6 +28,17 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, currentBusiness, loading } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const router = useRouter();
+  const [autoReplyActive, setAutoReplyActive] = useState(false);
+
+  // Re-check auto-reply schedule every 60s so the indicator updates live
+  useEffect(() => {
+    function check() {
+      setAutoReplyActive(currentBusiness ? shouldAutoReply(currentBusiness as any) : false);
+    }
+    check();
+    const interval = setInterval(check, 60_000);
+    return () => clearInterval(interval);
+  }, [currentBusiness]);
 
   // Memoized handlers to prevent re-renders
   const handleMouseEnter = useCallback(() => setSidebarExpanded(true), []);
@@ -295,6 +307,16 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
         {/* Desktop top bar - Usage display and dark mode toggle */}
         <div className="hidden lg:flex items-center justify-end gap-4 h-14 px-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
           {currentBusiness?.id && <UsageDisplay businessId={currentBusiness.id} compact />}
+          {autoReplyActive && (
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/30 select-none">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-500 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500" />
+              </span>
+              <Zap className="w-3 h-3 text-purple-600 dark:text-purple-400" aria-hidden="true" />
+              <span className="text-xs font-medium text-purple-700 dark:text-purple-300">Auto-Reply</span>
+            </div>
+          )}
           <button
             onClick={toggleTheme}
             className="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
@@ -326,17 +348,29 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
             </div>
             <span className="text-base font-semibold text-slate-900 dark:text-white transition-colors duration-200 group-hover:text-purple-600 dark:group-hover:text-purple-600">InboxForge</span>
           </Link>
-          <button
-            onClick={toggleTheme}
-            className="p-1.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-            aria-label="Toggle dark mode"
-          >
-            {theme === 'dark' ? (
-              <Sun className="w-5 h-5" aria-hidden="true" />
-            ) : (
-              <Moon className="w-5 h-5" aria-hidden="true" />
+          <div className="flex items-center gap-2">
+            {autoReplyActive && (
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/30 select-none">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-500 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-purple-500" />
+                </span>
+                <Zap className="w-3 h-3 text-purple-600 dark:text-purple-400" aria-hidden="true" />
+                <span className="text-[10px] font-medium text-purple-700 dark:text-purple-300 hidden xs:inline">AI</span>
+              </div>
             )}
-          </button>
+            <button
+              onClick={toggleTheme}
+              className="p-1.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+              aria-label="Toggle dark mode"
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-5 h-5" aria-hidden="true" />
+              ) : (
+                <Moon className="w-5 h-5" aria-hidden="true" />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Page content */}

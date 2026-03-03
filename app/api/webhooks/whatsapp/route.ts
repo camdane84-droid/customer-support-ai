@@ -288,6 +288,14 @@ async function handleWhatsAppMessage(message: any, metadata: any) {
         }).catch(err => {
           logger.debug('Auto-notes failed (non-critical)', { error: err.message });
         });
+
+        // Trigger auto-reply (fire and forget)
+        fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/conversations/${conversationId}/auto-reply`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        }).catch(err => {
+          logger.debug('Auto-reply failed (non-critical)', { error: err.message });
+        });
       }
     }
   } catch (error) {
