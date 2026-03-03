@@ -19,7 +19,6 @@ const navigation = [
   { name: 'Knowledge Base', href: '/dashboard/knowledge', icon: BookOpen },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   { name: 'Team', href: '/dashboard/team', icon: Users },
-  { name: 'Simulator', href: '/test-email', icon: FlaskConical },
 ];
 
 function DashboardLayout({ children }: { children: React.ReactNode }) {
