@@ -10,6 +10,7 @@ import { useTheme } from '@/lib/context/ThemeContext';
 import { shouldAutoReply } from '@/lib/auto-reply';
 import UsageDisplay from '@/components/ui/UsageDisplay';
 import { BusinessSwitcher } from '@/components/ui/BusinessSwitcher';
+import NotificationBell from '@/components/ui/NotificationBell';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -307,6 +308,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
         {/* Desktop top bar - Usage display and dark mode toggle */}
         <div className="hidden lg:flex items-center justify-end gap-4 h-14 px-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
           {currentBusiness?.id && <UsageDisplay businessId={currentBusiness.id} compact />}
+          <NotificationBell />
           {autoReplyActive && (
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/30 select-none">
               <span className="relative flex h-2 w-2">
@@ -349,6 +351,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
             <span className="text-base font-semibold text-slate-900 dark:text-white transition-colors duration-200 group-hover:text-purple-600 dark:group-hover:text-purple-600">InboxForge</span>
           </Link>
           <div className="flex items-center gap-2">
+            <NotificationBell />
             {autoReplyActive && (
               <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/30 select-none">
                 <span className="relative flex h-1.5 w-1.5">

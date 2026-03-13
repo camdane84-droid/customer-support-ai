@@ -42,6 +42,15 @@ export type Business = {
   auto_reply_mode?: 'after_hours' | 'all_day' | 'custom';
   auto_reply_start?: string;   // "18:00"
   auto_reply_end?: string;     // "06:00"
+  ai_parse_enabled?: boolean;
+  ai_parse_urgent?: boolean;
+  ai_parse_important?: boolean;
+  ai_parse_urgent_keywords?: string[];
+  ai_parse_important_keywords?: string[];
+  ai_parse_notify_email?: string | null;
+  ai_parse_notify_phone?: string | null;
+  ai_parse_notify_urgent?: boolean;
+  ai_parse_notify_important?: boolean;
   profile_categories?: {
     allergies: boolean;
     favorite_category: boolean;
@@ -97,6 +106,20 @@ export type Message = {
   sent_at?: string | null;
   failed_at?: string | null;
   error_message?: string | null;
+  priority?: 'normal' | 'important' | 'urgent';
+  priority_reason?: string | null;
+};
+
+export type Notification = {
+  id: string;
+  business_id: string;
+  message_id: string | null;
+  conversation_id: string | null;
+  type: 'urgent' | 'important';
+  title: string;
+  summary: string | null;
+  read: boolean;
+  created_at: string;
 };
 
 export type KnowledgeBase = {

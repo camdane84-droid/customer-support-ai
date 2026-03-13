@@ -151,6 +151,15 @@ export async function POST(request: NextRequest) {
       }).catch(err => {
         logger.debug('Auto-reply failed (non-critical)', { error: err.message });
       });
+
+      // Trigger AI email classification (fire and forget)
+      fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/conversations/${conversationId}/classify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messageContent: content, subject }),
+      }).catch(err => {
+        logger.debug('AI classification failed (non-critical)', { error: err.message });
+      });
     }
 
     return NextResponse.json({ status: 'ok' });

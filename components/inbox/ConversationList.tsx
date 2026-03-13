@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Mail, Instagram, Phone, Search, MoreHorizontal, Archive, Trash2, X, Download, MessageCircle } from 'lucide-react';
+import { Mail, Instagram, Phone, Search, MoreHorizontal, Archive, Trash2, X, Download, MessageCircle, AlertTriangle, Star } from 'lucide-react';
 import TikTokIcon from '@/components/icons/TikTokIcon';
 import type { Conversation } from '@/lib/api/supabase';
 import { formatDistanceToNow } from 'date-fns';
@@ -15,6 +15,8 @@ interface ConversationListProps {
   onBulkArchive?: (conversationIds: string[]) => Promise<void>;
   onBulkDelete?: (conversationIds: string[]) => Promise<void>;
   collapsed?: boolean;
+  /** Map of conversation ID → priority ('urgent' | 'important') for flagged conversations */
+  priorityMap?: Record<string, 'urgent' | 'important'>;
 }
 
 export default function ConversationList({
@@ -24,6 +26,7 @@ export default function ConversationList({
   onBulkArchive,
   onBulkDelete,
   collapsed = false,
+  priorityMap = {},
 }: ConversationListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectionMode, setSelectionMode] = useState(false);
@@ -347,6 +350,7 @@ export default function ConversationList({
             const isChecked = selectedIds.has(conversation.id);
             const displayName = getCustomerDisplayName(conversation);
             const initials = getCustomerInitials(displayName);
+            const priority = priorityMap[conversation.id];
 
             return (
               <button
@@ -362,6 +366,10 @@ export default function ConversationList({
                   w-full p-4 border-b border-gray-200 dark:border-slate-700 text-left transition-all
                   ${isSelected && !selectionMode
                     ? 'bg-indigo-50 dark:bg-indigo-900/30 border-l-4 border-l-indigo-500'
+                    : priority === 'urgent'
+                    ? 'bg-red-50/50 dark:bg-red-900/10 border-l-4 border-l-red-500 hover:bg-red-50 dark:hover:bg-red-900/20'
+                    : priority === 'important'
+                    ? 'bg-indigo-50/50 dark:bg-indigo-900/10 border-l-4 border-l-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20'
                     : 'bg-white dark:bg-slate-800 border-l-4 border-l-transparent hover:bg-gray-50 dark:hover:bg-slate-700'
                   }
                 `}
@@ -425,6 +433,18 @@ export default function ConversationList({
                       </div>
 
                       <div className="flex items-center space-x-2">
+                        {priority === 'urgent' && (
+                          <span className="flex items-center gap-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs font-medium rounded-full px-2 py-0.5">
+                            <AlertTriangle className="w-3 h-3" />
+                            Urgent
+                          </span>
+                        )}
+                        {priority === 'important' && (
+                          <span className="flex items-center gap-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 text-xs font-medium rounded-full px-2 py-0.5">
+                            <Star className="w-3 h-3" />
+                            Important
+                          </span>
+                        )}
                         {conversation.unread_count > 0 && (
                           <span className="bg-indigo-500 text-white text-xs font-medium rounded-full px-2 py-0.5">
                             {conversation.unread_count}

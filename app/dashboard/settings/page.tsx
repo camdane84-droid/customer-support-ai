@@ -31,6 +31,17 @@ export default function SettingsPage() {
   const [autoReplyMode, setAutoReplyMode] = useState<'after_hours' | 'all_day' | 'custom'>('after_hours');
   const [autoReplyStart, setAutoReplyStart] = useState('18:00');
   const [autoReplyEnd, setAutoReplyEnd] = useState('06:00');
+
+  // AI Email Parsing state
+  const [aiParseEnabled, setAiParseEnabled] = useState(false);
+  const [aiParseUrgent, setAiParseUrgent] = useState(true);
+  const [aiParseImportant, setAiParseImportant] = useState(true);
+  const [aiParseUrgentKeywords, setAiParseUrgentKeywords] = useState('');
+  const [aiParseImportantKeywords, setAiParseImportantKeywords] = useState('');
+  const [aiParseNotifyEmail, setAiParseNotifyEmail] = useState('');
+  const [aiParseNotifyPhone, setAiParseNotifyPhone] = useState('');
+  const [aiParseNotifyUrgent, setAiParseNotifyUrgent] = useState(true);
+  const [aiParseNotifyImportant, setAiParseNotifyImportant] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [bottomSaveVisible, setBottomSaveVisible] = useState(false);
@@ -63,6 +74,18 @@ export default function SettingsPage() {
         setAutoReplyMode((business as any).auto_reply_mode || 'after_hours');
         setAutoReplyStart((business as any).auto_reply_start || '18:00');
         setAutoReplyEnd((business as any).auto_reply_end || '06:00');
+      }
+      // AI Email Parsing settings
+      if ('ai_parse_enabled' in (business as any)) {
+        setAiParseEnabled((business as any).ai_parse_enabled || false);
+        setAiParseUrgent((business as any).ai_parse_urgent ?? true);
+        setAiParseImportant((business as any).ai_parse_important ?? true);
+        setAiParseUrgentKeywords(((business as any).ai_parse_urgent_keywords || []).join(', '));
+        setAiParseImportantKeywords(((business as any).ai_parse_important_keywords || []).join(', '));
+        setAiParseNotifyEmail((business as any).ai_parse_notify_email || '');
+        setAiParseNotifyPhone((business as any).ai_parse_notify_phone || '');
+        setAiParseNotifyUrgent((business as any).ai_parse_notify_urgent ?? true);
+        setAiParseNotifyImportant((business as any).ai_parse_notify_important ?? true);
       }
     }
   }, [business]);
@@ -147,6 +170,43 @@ export default function SettingsPage() {
 
       if (autoReplyError) {
         console.warn('⚠️ Auto-reply columns not saved (migration may not be applied yet):', autoReplyError.message);
+      }
+
+      // Step 3: Try saving AI parsing fields separately (may fail if migration not run yet)
+      const parseKeywordsToArray = (str: string) =>
+        str.split(',').map(s => s.trim()).filter(Boolean);
+
+      const aiParseFields: Record<string, any> = {
+        ai_parse_enabled: aiParseEnabled,
+        ai_parse_urgent: aiParseUrgent,
+        ai_parse_important: aiParseImportant,
+        ai_parse_urgent_keywords: parseKeywordsToArray(aiParseUrgentKeywords),
+        ai_parse_important_keywords: parseKeywordsToArray(aiParseImportantKeywords),
+        ai_parse_notify_email: aiParseNotifyEmail || null,
+        ai_parse_notify_phone: aiParseNotifyPhone || null,
+        ai_parse_notify_urgent: aiParseNotifyUrgent,
+        ai_parse_notify_important: aiParseNotifyImportant,
+      };
+
+      let { error: aiParseError } = await supabase
+        .from('businesses')
+        .update(aiParseFields)
+        .eq('id', business.id);
+
+      // If the notify_urgent/notify_important columns don't exist yet, retry without them
+      if (aiParseError && (aiParseError.message.includes('ai_parse_notify_urgent') || aiParseError.message.includes('ai_parse_notify_important'))) {
+        console.warn('⚠️ Notify preference columns not found, saving without them');
+        delete aiParseFields.ai_parse_notify_urgent;
+        delete aiParseFields.ai_parse_notify_important;
+        const retry = await supabase
+          .from('businesses')
+          .update(aiParseFields)
+          .eq('id', business.id);
+        aiParseError = retry.error;
+      }
+
+      if (aiParseError) {
+        console.warn('⚠️ AI parse columns not saved (migration may not be applied yet):', aiParseError.message);
       }
 
       console.log('✅ Settings saved successfully');
@@ -348,11 +408,11 @@ export default function SettingsPage() {
               </div>
               <button
                 onClick={() => setAutoGenerateNotes(!autoGenerateNotes)}
-                className={`relative inline-flex items-center h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out focus:outline-none ${autoGenerateNotes ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'
+                className={`relative inline-flex items-center h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors duration-200 ease-in-out focus:outline-none ${autoGenerateNotes ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'
                   }`}
               >
                 <span
-                  className={`pointer-events-none inline-block h-5 w-5 ml-px transform rounded-full shadow ring-0 transition duration-200 ease-in-out ${autoGenerateNotes ? 'bg-white translate-x-5' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'
+                  className={`pointer-events-none inline-block h-5 w-5 ml-px transform rounded-full shadow-md ring-1 ring-black/10 dark:ring-white/10 transition duration-200 ease-in-out ${autoGenerateNotes ? 'bg-white translate-x-5' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'
                     }`}
                 />
               </button>
@@ -378,7 +438,7 @@ export default function SettingsPage() {
                     </div>
                     <button
                       onClick={() => setProfileCategories(prev => ({ ...prev, allergies: !prev.allergies }))}
-                      className={`relative inline-flex items-center h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out focus:outline-none ${profileCategories.allergies ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
+                      className={`relative inline-flex items-center h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors duration-200 ease-in-out focus:outline-none ${profileCategories.allergies ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
                     >
                       <span className={`pointer-events-none inline-block h-4 w-4 ml-px transform rounded-full shadow ring-0 transition duration-200 ease-in-out ${profileCategories.allergies ? 'bg-white translate-x-4' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`} />
                     </button>
@@ -387,12 +447,12 @@ export default function SettingsPage() {
                   {/* Favorite Category Toggle */}
                   <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
                     <div className="flex items-center space-x-2">
-                      <Star className="w-4 h-4 text-amber-500" />
+                      <Star className="w-4 h-4 text-indigo-500" />
                       <span className="text-sm text-gray-700 dark:text-slate-300">Favorite Category</span>
                     </div>
                     <button
                       onClick={() => setProfileCategories(prev => ({ ...prev, favorite_category: !prev.favorite_category }))}
-                      className={`relative inline-flex items-center h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out focus:outline-none ${profileCategories.favorite_category ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
+                      className={`relative inline-flex items-center h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors duration-200 ease-in-out focus:outline-none ${profileCategories.favorite_category ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
                     >
                       <span className={`pointer-events-none inline-block h-4 w-4 ml-px transform rounded-full shadow ring-0 transition duration-200 ease-in-out ${profileCategories.favorite_category ? 'bg-white translate-x-4' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`} />
                     </button>
@@ -406,7 +466,7 @@ export default function SettingsPage() {
                     </div>
                     <button
                       onClick={() => setProfileCategories(prev => ({ ...prev, past_orders: !prev.past_orders }))}
-                      className={`relative inline-flex items-center h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out focus:outline-none ${profileCategories.past_orders ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
+                      className={`relative inline-flex items-center h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors duration-200 ease-in-out focus:outline-none ${profileCategories.past_orders ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
                     >
                       <span className={`pointer-events-none inline-block h-4 w-4 ml-px transform rounded-full shadow ring-0 transition duration-200 ease-in-out ${profileCategories.past_orders ? 'bg-white translate-x-4' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`} />
                     </button>
@@ -420,7 +480,7 @@ export default function SettingsPage() {
                     </div>
                     <button
                       onClick={() => setProfileCategories(prev => ({ ...prev, issues: !prev.issues }))}
-                      className={`relative inline-flex items-center h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out focus:outline-none ${profileCategories.issues ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
+                      className={`relative inline-flex items-center h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors duration-200 ease-in-out focus:outline-none ${profileCategories.issues ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
                     >
                       <span className={`pointer-events-none inline-block h-4 w-4 ml-px transform rounded-full shadow ring-0 transition duration-200 ease-in-out ${profileCategories.issues ? 'bg-white translate-x-4' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`} />
                     </button>
@@ -434,7 +494,7 @@ export default function SettingsPage() {
                     </div>
                     <button
                       onClick={() => setProfileCategories(prev => ({ ...prev, sizes_dimensions: !prev.sizes_dimensions }))}
-                      className={`relative inline-flex items-center h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out focus:outline-none ${profileCategories.sizes_dimensions ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
+                      className={`relative inline-flex items-center h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors duration-200 ease-in-out focus:outline-none ${profileCategories.sizes_dimensions ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
                     >
                       <span className={`pointer-events-none inline-block h-4 w-4 ml-px transform rounded-full shadow ring-0 transition duration-200 ease-in-out ${profileCategories.sizes_dimensions ? 'bg-white translate-x-4' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`} />
                     </button>
@@ -448,7 +508,7 @@ export default function SettingsPage() {
                     </div>
                     <button
                       onClick={() => setProfileCategories(prev => ({ ...prev, preferences: !prev.preferences }))}
-                      className={`relative inline-flex items-center h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out focus:outline-none ${profileCategories.preferences ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
+                      className={`relative inline-flex items-center h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors duration-200 ease-in-out focus:outline-none ${profileCategories.preferences ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
                     >
                       <span className={`pointer-events-none inline-block h-4 w-4 ml-px transform rounded-full shadow ring-0 transition duration-200 ease-in-out ${profileCategories.preferences ? 'bg-white translate-x-4' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`} />
                     </button>
@@ -462,7 +522,7 @@ export default function SettingsPage() {
                     </div>
                     <button
                       onClick={() => setProfileCategories(prev => ({ ...prev, best_times: !prev.best_times }))}
-                      className={`relative inline-flex items-center h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out focus:outline-none ${profileCategories.best_times ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
+                      className={`relative inline-flex items-center h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors duration-200 ease-in-out focus:outline-none ${profileCategories.best_times ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
                     >
                       <span className={`pointer-events-none inline-block h-4 w-4 ml-px transform rounded-full shadow ring-0 transition duration-200 ease-in-out ${profileCategories.best_times ? 'bg-white translate-x-4' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`} />
                     </button>
@@ -539,10 +599,10 @@ export default function SettingsPage() {
                       <button
                         onClick={() => setAutoReplyEnabled(!autoReplyEnabled)}
                         disabled={!isPro}
-                        className={`relative inline-flex items-center h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border transition-colors duration-200 ease-in-out focus:outline-none ${autoReplyEnabled ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
+                        className={`relative inline-flex items-center h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors duration-200 ease-in-out focus:outline-none ${autoReplyEnabled ? 'bg-purple-600 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
                       >
                         <span
-                          className={`pointer-events-none inline-block h-5 w-5 ml-px transform rounded-full shadow ring-0 transition duration-200 ease-in-out ${autoReplyEnabled ? 'bg-white translate-x-5' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`}
+                          className={`pointer-events-none inline-block h-5 w-5 ml-px transform rounded-full shadow-md ring-1 ring-black/10 dark:ring-white/10 transition duration-200 ease-in-out ${autoReplyEnabled ? 'bg-white translate-x-5' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`}
                         />
                       </button>
                     </div>
@@ -639,6 +699,220 @@ export default function SettingsPage() {
                         AI will reply to every incoming message around the clock. Your team can still jump in at any time.
                       </p>
                     )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* AI Email Parsing */}
+        {(() => {
+          const tier = (business as any)?.subscription_tier || 'free';
+          const isPro = tier === 'pro';
+
+          return (
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                  <Sparkles className="w-5 h-5 text-indigo-500" />
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">AI Email Parsing</h2>
+                </div>
+                <div className="flex items-center space-x-2">
+                  {!isPro && (
+                    <div className="flex items-center space-x-1 text-indigo-600 dark:text-indigo-400 text-xs">
+                      <Lock className="w-3 h-3" />
+                      <span>Upgrade to Pro</span>
+                    </div>
+                  )}
+                  <span className="border border-indigo-300 dark:border-indigo-500/50 bg-transparent text-indigo-600 dark:text-indigo-400 text-xs rounded-full px-2 py-0.5">
+                    Pro
+                  </span>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-slate-300 mb-6">
+                AI reads every incoming email and flags urgent or important messages with in-app notifications and optional alerts to your personal email or phone.
+              </p>
+
+              <div className="relative">
+                {!isPro && (
+                  <div
+                    className="absolute inset-0 z-10 pointer-events-auto cursor-not-allowed rounded-lg"
+                    title="Upgrade to Pro to unlock AI Email Parsing"
+                  />
+                )}
+                <div className={!isPro ? 'opacity-50 pointer-events-none select-none' : ''}>
+                  <div className="p-4 border border-indigo-300 dark:border-indigo-700/50 rounded-lg">
+                    {/* Header + Toggle */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <div className="flex items-center space-x-2 mb-2">
+                          <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                          <h3 className="font-medium text-gray-900 dark:text-white">Enable AI Parsing</h3>
+                        </div>
+                        <p className="text-sm text-gray-600 dark:text-slate-300">
+                          Automatically classify incoming emails by priority.
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setAiParseEnabled(!aiParseEnabled)}
+                        disabled={!isPro}
+                        className={`relative inline-flex items-center h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors duration-200 ease-in-out focus:outline-none ${aiParseEnabled ? 'bg-indigo-500 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-5 w-5 ml-px transform rounded-full shadow-md ring-1 ring-black/10 dark:ring-white/10 transition duration-200 ease-in-out ${aiParseEnabled ? 'bg-white translate-x-5' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`}
+                        />
+                      </button>
+                    </div>
+
+                    {/* Category toggles */}
+                    <div className="space-y-3 mb-5">
+                      <p className="text-sm font-medium text-gray-700 dark:text-slate-300">Flag these categories:</p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <AlertTriangle className="w-4 h-4 text-red-500" />
+                          <span className="text-sm text-gray-900 dark:text-white font-medium">Urgent</span>
+                          <span className="text-xs text-gray-500 dark:text-slate-400">— emergencies, safety, legal, time-critical</span>
+                        </div>
+                        <button
+                          onClick={() => setAiParseUrgent(!aiParseUrgent)}
+                          disabled={!isPro}
+                          className={`relative inline-flex items-center h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors duration-200 ease-in-out focus:outline-none ${aiParseUrgent ? 'bg-red-500 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
+                        >
+                          <span className={`pointer-events-none inline-block h-5 w-5 ml-px transform rounded-full shadow-md ring-1 ring-black/10 dark:ring-white/10 transition duration-200 ease-in-out ${aiParseUrgent ? 'bg-white translate-x-5' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`} />
+                        </button>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <Star className="w-4 h-4 text-indigo-500" />
+                          <span className="text-sm text-gray-900 dark:text-white font-medium">Important</span>
+                          <span className="text-xs text-gray-500 dark:text-slate-400">— business leads, bulk orders, partnerships</span>
+                        </div>
+                        <button
+                          onClick={() => setAiParseImportant(!aiParseImportant)}
+                          disabled={!isPro}
+                          className={`relative inline-flex items-center h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors duration-200 ease-in-out focus:outline-none ${aiParseImportant ? 'bg-indigo-500 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
+                        >
+                          <span className={`pointer-events-none inline-block h-5 w-5 ml-px transform rounded-full shadow-md ring-1 ring-black/10 dark:ring-white/10 transition duration-200 ease-in-out ${aiParseImportant ? 'bg-white translate-x-5' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Keywords */}
+                    <div className="space-y-4 mb-5">
+                      {aiParseUrgent && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">
+                            <span className="flex items-center space-x-1.5">
+                              <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
+                              <span>Urgent keywords</span>
+                            </span>
+                          </label>
+                          <input
+                            type="text"
+                            value={aiParseUrgentKeywords}
+                            onChange={(e) => setAiParseUrgentKeywords(e.target.value)}
+                            disabled={!isPro}
+                            placeholder="e.g. emergency, fire, flood, lawsuit, health inspector"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-slate-500"
+                          />
+                          <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Comma-separated. Leave blank for AI best judgment.</p>
+                        </div>
+                      )}
+
+                      {aiParseImportant && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">
+                            <span className="flex items-center space-x-1.5">
+                              <Star className="w-3.5 h-3.5 text-indigo-500" />
+                              <span>Important keywords</span>
+                            </span>
+                          </label>
+                          <input
+                            type="text"
+                            value={aiParseImportantKeywords}
+                            onChange={(e) => setAiParseImportantKeywords(e.target.value)}
+                            disabled={!isPro}
+                            placeholder="e.g. bulk order, partnership, wholesale, contract"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-slate-500"
+                          />
+                          <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Comma-separated. Leave blank for AI best judgment.</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Personal notification settings */}
+                    <div className="border-t border-gray-200 dark:border-slate-600 pt-4">
+                      <p className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">
+                        Send alerts to your personal channels:
+                      </p>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">
+                            Personal email (for flagged email alerts)
+                          </label>
+                          <input
+                            type="email"
+                            value={aiParseNotifyEmail}
+                            onChange={(e) => setAiParseNotifyEmail(e.target.value)}
+                            disabled={!isPro}
+                            placeholder="you@personal.com"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-slate-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">
+                            Phone number (for SMS alerts)
+                          </label>
+                          <div className="relative">
+                            <input
+                              type="tel"
+                              value={aiParseNotifyPhone}
+                              onChange={(e) => setAiParseNotifyPhone(e.target.value)}
+                              disabled={!isPro}
+                              placeholder="+1 (555) 123-4567"
+                              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-slate-500"
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-indigo-600 dark:text-indigo-400 font-medium">Coming soon</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Which categories trigger external alerts */}
+                      <div className="mt-4 space-y-3">
+                        <p className="text-xs font-medium text-gray-600 dark:text-slate-400">Send external alerts for:</p>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
+                            <span className="text-sm text-gray-900 dark:text-white">Urgent emails</span>
+                          </div>
+                          <button
+                            onClick={() => setAiParseNotifyUrgent(!aiParseNotifyUrgent)}
+                            disabled={!isPro}
+                            className={`relative inline-flex items-center h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors duration-200 ease-in-out focus:outline-none ${aiParseNotifyUrgent ? 'bg-red-500 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
+                          >
+                            <span className={`pointer-events-none inline-block h-5 w-5 ml-px transform rounded-full shadow-md ring-1 ring-black/10 dark:ring-white/10 transition duration-200 ease-in-out ${aiParseNotifyUrgent ? 'bg-white translate-x-5' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`} />
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <Star className="w-3.5 h-3.5 text-indigo-500" />
+                            <span className="text-sm text-gray-900 dark:text-white">Important emails</span>
+                          </div>
+                          <button
+                            onClick={() => setAiParseNotifyImportant(!aiParseNotifyImportant)}
+                            disabled={!isPro}
+                            className={`relative inline-flex items-center h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors duration-200 ease-in-out focus:outline-none ${aiParseNotifyImportant ? 'bg-indigo-500 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
+                          >
+                            <span className={`pointer-events-none inline-block h-5 w-5 ml-px transform rounded-full shadow-md ring-1 ring-black/10 dark:ring-white/10 transition duration-200 ease-in-out ${aiParseNotifyImportant ? 'bg-white translate-x-5' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`} />
+                          </button>
+                        </div>
+                      </div>
+
+                      <p className="text-xs text-gray-500 dark:text-slate-400 mt-3 italic">
+                        Leave contact fields blank to only use in-app notifications.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

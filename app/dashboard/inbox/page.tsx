@@ -27,6 +27,7 @@ function InboxContent() {
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [priorityMap, setPriorityMap] = useState<Record<string, 'urgent' | 'important'>>({});
   const hasLoadedRef = useRef(false);
 
   // Resizable panel state
@@ -120,6 +121,26 @@ function InboxContent() {
       );
 
       setConversations(sortedConvos);
+
+      // Fetch priority flags from unread notifications
+      const { data: notifications } = await supabase
+        .from('notifications')
+        .select('conversation_id, type')
+        .eq('business_id', business.id)
+        .eq('read', false);
+
+      if (notifications) {
+        const pMap: Record<string, 'urgent' | 'important'> = {};
+        for (const n of notifications) {
+          if (n.conversation_id) {
+            // Urgent takes precedence over important
+            if (!pMap[n.conversation_id] || n.type === 'urgent') {
+              pMap[n.conversation_id] = n.type as 'urgent' | 'important';
+            }
+          }
+        }
+        setPriorityMap(pMap);
+      }
 
       // Update selected conversation with fresh data (always, even during polling)
       setSelectedConversation(currentSelected => {
@@ -552,6 +573,7 @@ function InboxContent() {
             onBulkArchive={handleBulkArchive}
             onBulkDelete={handleBulkDelete}
             collapsed={isCollapsed}
+            priorityMap={priorityMap}
           />
         </div>
 
