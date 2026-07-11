@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { after } from 'next/server';
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
 import crypto from 'crypto';
 import { canCreateConversation, incrementConversationUsage } from '@/lib/usage/tracker';
+import { generateAutoNotes } from '@/lib/ai/auto-notes';
+import { sendAutoReply } from '@/lib/ai/send-auto-reply';
 import { logger } from '@/lib/logger';
 
 // GET - Webhook verification
@@ -280,23 +283,13 @@ async function handleWhatsAppMessage(message: any, metadata: any) {
     } else {
       logger.success('WhatsApp message saved to database');
 
-      // Trigger auto-notes (fire and forget)
-      if (process.env.NEXT_PUBLIC_APP_URL) {
-        fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/conversations/${conversationId}/auto-notes`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        }).catch(err => {
-          logger.debug('Auto-notes failed (non-critical)', { error: err.message });
-        });
-
-        // Trigger auto-reply (fire and forget)
-        fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/conversations/${conversationId}/auto-reply`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        }).catch(err => {
-          logger.debug('Auto-reply failed (non-critical)', { error: err.message });
-        });
-      }
+      // Run AI processing after the response is sent
+      after(async () => {
+        await Promise.allSettled([
+          generateAutoNotes(conversationId),
+          sendAutoReply(conversationId),
+        ]);
+      });
     }
   } catch (error) {
     logger.error('Error handling WhatsApp message', error);

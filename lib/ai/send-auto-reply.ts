@@ -1,4 +1,3 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
 import { generateResponseSuggestion } from '@/lib/ai/claude';
 import { shouldAutoReply } from '@/lib/auto-reply';
@@ -12,18 +11,11 @@ import {
 } from '@/lib/channel-senders';
 
 /**
- * POST /api/conversations/[id]/auto-reply
  * Automatically generate and send an AI reply to the latest customer message.
- * Called fire-and-forget from webhooks.
+ * Called directly from webhooks (via after()) — not exposed as an HTTP route.
  */
-export async function POST(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function sendAutoReply(conversationId: string): Promise<void> {
   try {
-    const params = await context.params;
-    const conversationId = params.id;
-
     logger.debug('Auto-reply triggered', { conversationId });
 
     // Fetch conversation
@@ -34,7 +26,8 @@ export async function POST(
       .single();
 
     if (convError || !conversation) {
-      return NextResponse.json({ error: 'Conversation not found' }, { status: 404 });
+      logger.warn('Auto-reply: conversation not found', { conversationId });
+      return;
     }
 
     // Fetch business with all fields (auto-reply settings + business info)
@@ -44,26 +37,19 @@ export async function POST(
       .eq('id', conversation.business_id)
       .single();
 
-    if (bizError || !business) {
-      return NextResponse.json({ error: 'Business not found' }, { status: 404 });
-    }
+    if (bizError || !business) return;
 
     // Check if auto-reply should fire
     if (!shouldAutoReply(business)) {
-      return NextResponse.json({
-        success: false,
-        message: 'Auto-reply not active for this business right now',
-      });
+      logger.debug('Auto-reply not active for this business right now', { conversationId });
+      return;
     }
 
     // Skip for simulated conversations
     const isSimulated = await checkIfSimulated(conversationId, supabaseAdmin);
     if (isSimulated) {
       logger.debug('Skipping auto-reply for simulated conversation', { conversationId });
-      return NextResponse.json({
-        success: false,
-        message: 'Simulated conversation — skipping auto-reply',
-      });
+      return;
     }
 
     // Fetch last 10 messages for context
@@ -74,9 +60,7 @@ export async function POST(
       .order('created_at', { ascending: false })
       .limit(10);
 
-    if (messagesError || !messages || messages.length === 0) {
-      return NextResponse.json({ success: false, message: 'No messages to reply to' });
-    }
+    if (messagesError || !messages || messages.length === 0) return;
 
     // Reverse to chronological order
     messages.reverse();
@@ -86,9 +70,7 @@ export async function POST(
       .reverse()
       .find(m => m.sender_type === 'customer');
 
-    if (!lastCustomerMessage) {
-      return NextResponse.json({ success: false, message: 'No customer message to reply to' });
-    }
+    if (!lastCustomerMessage) return;
 
     // Fetch knowledge base entries
     const { data: knowledgeBase } = await supabaseAdmin
@@ -139,7 +121,7 @@ export async function POST(
 
     if (saveError || !savedMessage) {
       logger.error('Failed to save auto-reply message', saveError);
-      return NextResponse.json({ error: 'Failed to save message' }, { status: 500 });
+      return;
     }
 
     // Send via the appropriate channel
@@ -183,18 +165,7 @@ export async function POST(
       .from('conversations')
       .update({ last_message_at: new Date().toISOString() })
       .eq('id', conversationId);
-
-    return NextResponse.json({
-      success: true,
-      messageId: savedMessage.id,
-      message: 'Auto-reply sent',
-    });
-
   } catch (error: any) {
     logger.error('Error in auto-reply', error);
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    );
   }
 }

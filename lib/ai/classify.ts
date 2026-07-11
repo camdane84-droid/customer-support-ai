@@ -1,30 +1,32 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
 import Anthropic from '@anthropic-ai/sdk';
 import { logger } from '@/lib/logger';
 
-const anthropic = new Anthropic({
+const anthropic = process.env.ANTHROPIC_API_KEY ? new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
-});
+}) : null;
+
+export interface ClassifyInput {
+  messageContent?: string;
+  subject?: string;
+  messageId?: string;
+}
 
 /**
- * POST /api/conversations/[id]/classify
  * AI-classifies an inbound message as normal, important, or urgent.
- * Called fire-and-forget from the email webhook.
+ * Called directly from webhooks (via after()) — not exposed as an HTTP route.
  */
-export async function POST(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function classifyNewMessage(
+  conversationId: string,
+  { messageContent, subject, messageId }: ClassifyInput
+): Promise<void> {
   try {
-    const params = await context.params;
-    const conversationId = params.id;
-    const body = await request.json();
-    const { messageContent, subject, messageId } = body;
-
-    if (!messageContent && !subject) {
-      return NextResponse.json({ error: 'No content to classify' }, { status: 400 });
+    if (!anthropic) {
+      logger.warn('Anthropic API key not configured — skipping classification');
+      return;
     }
+
+    if (!messageContent && !subject) return;
 
     // Fetch conversation to get business_id
     const { data: conversation, error: convError } = await supabaseAdmin
@@ -34,7 +36,8 @@ export async function POST(
       .single();
 
     if (convError || !conversation) {
-      return NextResponse.json({ error: 'Conversation not found' }, { status: 404 });
+      logger.warn('Classification: conversation not found', { conversationId });
+      return;
     }
 
     // Fetch business AI parse settings
@@ -44,19 +47,13 @@ export async function POST(
       .eq('id', conversation.business_id)
       .single();
 
-    if (bizError || !business) {
-      return NextResponse.json({ error: 'Business not found' }, { status: 404 });
-    }
+    if (bizError || !business) return;
 
     // Check if AI parsing is enabled
-    if (!business.ai_parse_enabled) {
-      return NextResponse.json({ success: false, message: 'AI parsing not enabled' });
-    }
+    if (!business.ai_parse_enabled) return;
 
     // Check if at least one category is enabled
-    if (!business.ai_parse_urgent && !business.ai_parse_important) {
-      return NextResponse.json({ success: false, message: 'No categories enabled' });
-    }
+    if (!business.ai_parse_urgent && !business.ai_parse_important) return;
 
     // Build the classification prompt
     const urgentKeywords = (business.ai_parse_urgent_keywords || []).join(', ');
@@ -199,19 +196,8 @@ Be conservative — most emails are "normal". Only flag as urgent or important w
         }
       }
     }
-
-    return NextResponse.json({
-      success: true,
-      priority: classification.priority,
-      reason: classification.reason,
-    });
-
   } catch (error: any) {
     logger.error('Error in email classification', error);
-    return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
-    );
   }
 }
 

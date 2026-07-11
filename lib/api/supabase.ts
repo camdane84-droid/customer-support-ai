@@ -87,6 +87,8 @@ export type Conversation = {
   unread_count: number;
   last_message_at: string;
   notes: string | null;
+  social_connection_id?: string | null;
+  channel_address?: string | null;
   created_at: string;
   updated_at: string;
 };

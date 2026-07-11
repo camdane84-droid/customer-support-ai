@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { after } from 'next/server';
 import { supabaseServer } from '@/lib/supabase-server';
 import { logError } from '@/lib/services/errorLogger';
 import { authenticateRequest } from '@/lib/api/auth-middleware';
+import { generateAutoNotes } from '@/lib/ai/auto-notes';
 import { logger } from '@/lib/logger';
 import {
   handleEmailSend,
@@ -58,15 +60,9 @@ export async function POST(request: NextRequest) {
       .update({ last_message_at: new Date().toISOString() })
       .eq('id', message.conversation_id);
 
-    // If this is a customer message, trigger auto-notes (fire and forget)
-    if (message.sender_type === 'customer' && process.env.NEXT_PUBLIC_APP_URL) {
-      // Don't await - let it run in background
-      fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/conversations/${message.conversation_id}/auto-notes`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      }).catch(() => {
-        // Auto-notes failure is non-critical
-      });
+    // If this is a customer message, generate auto-notes after the response is sent
+    if (message.sender_type === 'customer') {
+      after(() => generateAutoNotes(message.conversation_id));
     }
 
     // If this is a business reply, try to send it
