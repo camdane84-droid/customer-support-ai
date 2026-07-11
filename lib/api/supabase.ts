@@ -5,20 +5,9 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim();
 const supabaseAnonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
 
-// Always log what we're using
-console.log('🔧 [SUPABASE] Initializing with URL:', supabaseUrl);
-console.log('🔧 [SUPABASE] URL length:', supabaseUrl?.length);
-console.log('🔧 [SUPABASE] URL type:', typeof supabaseUrl);
-console.log('🔧 [SUPABASE] URL first/last chars:', supabaseUrl.charCodeAt(0), supabaseUrl.charCodeAt(supabaseUrl.length - 1));
-console.log('🔧 [SUPABASE] Anon key present:', !!supabaseAnonKey);
-console.log('🔧 [SUPABASE] Anon key length:', supabaseAnonKey?.length);
-console.log('🔧 [SUPABASE] Anon key first/last chars:', supabaseAnonKey.charCodeAt(0), supabaseAnonKey.charCodeAt(supabaseAnonKey.length - 1));
-console.log('🔧 [SUPABASE] Full URL:', JSON.stringify(supabaseUrl));
-console.log('🔧 [SUPABASE] First 50 chars of anon key:', supabaseAnonKey.substring(0, 50));
-
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error('❌ Missing Supabase environment variables!');
-  console.error('NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl);
+  console.error('NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ? 'SET' : 'MISSING');
   console.error('NEXT_PUBLIC_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'SET' : 'MISSING');
 }
 
@@ -42,6 +31,15 @@ export type Business = {
   auto_reply_mode?: 'after_hours' | 'all_day' | 'custom';
   auto_reply_start?: string;   // "18:00"
   auto_reply_end?: string;     // "06:00"
+  ai_parse_enabled?: boolean;
+  ai_parse_urgent?: boolean;
+  ai_parse_important?: boolean;
+  ai_parse_urgent_keywords?: string[];
+  ai_parse_important_keywords?: string[];
+  ai_parse_notify_email?: string | null;
+  ai_parse_notify_phone?: string | null;
+  ai_parse_notify_urgent?: boolean;
+  ai_parse_notify_important?: boolean;
   profile_categories?: {
     allergies: boolean;
     favorite_category: boolean;
@@ -73,11 +71,13 @@ export type Conversation = {
   customer_phone: string | null;
   customer_instagram_id: string | null;
   customer_tiktok_id: string | null;
-  channel: 'email' | 'instagram' | 'sms' | 'whatsapp' | 'tiktok';
+  channel: 'email' | 'instagram' | 'sms' | 'whatsapp' | 'tiktok' | 'chat';
   status: 'open' | 'closed' | 'pending' | 'archived';
   unread_count: number;
   last_message_at: string;
   notes: string | null;
+  social_connection_id?: string | null;
+  channel_address?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -97,6 +97,20 @@ export type Message = {
   sent_at?: string | null;
   failed_at?: string | null;
   error_message?: string | null;
+  priority?: 'normal' | 'important' | 'urgent';
+  priority_reason?: string | null;
+};
+
+export type Notification = {
+  id: string;
+  business_id: string;
+  message_id: string | null;
+  conversation_id: string | null;
+  type: 'urgent' | 'important';
+  title: string;
+  summary: string | null;
+  read: boolean;
+  created_at: string;
 };
 
 export type KnowledgeBase = {

@@ -1,4 +1,3 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
 import Anthropic from '@anthropic-ai/sdk';
 import { logger } from '@/lib/logger';
@@ -8,26 +7,17 @@ const anthropic = process.env.ANTHROPIC_API_KEY ? new Anthropic({
 }) : null;
 
 /**
- * POST /api/conversations/[id]/auto-notes
- * Automatically generate notes from conversation messages
+ * Automatically generate notes from conversation messages.
+ * Called directly from webhooks and the messages route (via after()) —
+ * not exposed as an HTTP route.
  */
-export async function POST(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function generateAutoNotes(conversationId: string): Promise<void> {
   try {
-    const params = await context.params;
-    const conversationId = params.id;
-
     logger.debug('Auto-generating notes for conversation', { conversationId });
 
-    // Check if Anthropic API key is configured
     if (!anthropic) {
-      logger.warn('Anthropic API key not configured');
-      return NextResponse.json({
-        success: false,
-        message: 'AI not available - API key not configured'
-      }, { status: 503 });
+      logger.warn('Anthropic API key not configured — skipping auto-notes');
+      return;
     }
 
     // Fetch conversation
@@ -38,10 +28,8 @@ export async function POST(
       .single();
 
     if (convError || !conversation) {
-      return NextResponse.json(
-        { error: 'Conversation not found' },
-        { status: 404 }
-      );
+      logger.warn('Auto-notes: conversation not found', { conversationId });
+      return;
     }
 
     // Check if auto-notes is enabled for this business
@@ -51,12 +39,7 @@ export async function POST(
       .eq('id', conversation.business_id)
       .single();
 
-    if (!business?.auto_generate_notes) {
-      return NextResponse.json({
-        success: false,
-        message: 'Auto-notes not enabled for this business'
-      });
-    }
+    if (!business?.auto_generate_notes) return;
 
     // Fetch recent messages (last 10 to keep it relevant)
     const { data: messages, error: messagesError } = await supabaseAdmin
@@ -66,12 +49,7 @@ export async function POST(
       .order('created_at', { ascending: false })
       .limit(10);
 
-    if (messagesError || !messages || messages.length === 0) {
-      return NextResponse.json({
-        success: false,
-        message: 'No messages to analyze'
-      });
-    }
+    if (messagesError || !messages || messages.length === 0) return;
 
     // Reverse to chronological order
     messages.reverse();
@@ -84,7 +62,7 @@ export async function POST(
     // Use Claude to extract key points
     logger.debug('Calling Claude API to generate notes');
     const response = await anthropic.messages.create({
-      model: 'claude-3-haiku-20240307',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 500,
       messages: [{
         role: 'user',
@@ -121,11 +99,7 @@ If there's nothing notable to add, return "SKIP"`
     // Skip if AI says there's nothing to add
     if (aiResponse === 'SKIP' || aiResponse.length === 0) {
       logger.debug('No notable information to add to notes');
-      return NextResponse.json({
-        success: true,
-        notesAdded: false,
-        message: 'No notable information to add'
-      });
+      return;
     }
 
     // Get existing notes
@@ -147,26 +121,11 @@ If there's nothing notable to add, return "SKIP"`
 
     if (updateError) {
       logger.error('Failed to update notes', updateError);
-      throw new Error('Failed to update notes');
+      return;
     }
 
     logger.success('Auto-notes generated and saved');
-
-    return NextResponse.json({
-      success: true,
-      notesAdded: true,
-      newNotes: aiResponse,
-      message: 'Notes generated successfully'
-    });
-
   } catch (error: any) {
     logger.error('Error generating auto-notes', error);
-    return NextResponse.json(
-      {
-        error: error.message || 'Internal server error',
-        details: error.error?.message || error.status || 'Unknown error'
-      },
-      { status: 500 }
-    );
   }
 }

@@ -14,6 +14,12 @@ import { useAuth } from '@/lib/context/AuthContext';
 import type { Conversation } from '@/lib/api/supabase';
 import { MessageSquare, Clock, Mail } from 'lucide-react';
 
+interface EmailConnection {
+  id: string;
+  platform_user_id: string;
+  metadata: { label?: string } | null;
+}
+
 const PANEL_MIN_WIDTH = 68;
 const PANEL_MAX_WIDTH = 480;
 const PANEL_DEFAULT_WIDTH = 320;
@@ -27,7 +33,11 @@ function InboxContent() {
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [priorityMap, setPriorityMap] = useState<Record<string, 'urgent' | 'important'>>({});
+  const [emailConnections, setEmailConnections] = useState<EmailConnection[]>([]);
+  const [selectedEmailAddresses, setSelectedEmailAddresses] = useState<Set<string>>(new Set());
   const hasLoadedRef = useRef(false);
+  const emailConnectionsLoadedRef = useRef(false);
 
   // Resizable panel state
   const [panelWidth, setPanelWidth] = useState(() => {
@@ -120,6 +130,26 @@ function InboxContent() {
       );
 
       setConversations(sortedConvos);
+
+      // Fetch priority flags from unread notifications
+      const { data: notifications } = await supabase
+        .from('notifications')
+        .select('conversation_id, type')
+        .eq('business_id', business.id)
+        .eq('read', false);
+
+      if (notifications) {
+        const pMap: Record<string, 'urgent' | 'important'> = {};
+        for (const n of notifications) {
+          if (n.conversation_id) {
+            // Urgent takes precedence over important
+            if (!pMap[n.conversation_id] || n.type === 'urgent') {
+              pMap[n.conversation_id] = n.type as 'urgent' | 'important';
+            }
+          }
+        }
+        setPriorityMap(pMap);
+      }
 
       // Update selected conversation with fresh data (always, even during polling)
       setSelectedConversation(currentSelected => {
@@ -223,6 +253,43 @@ function InboxContent() {
 
     return () => clearInterval(pollInterval);
   }, [loadConversations, authLoading]);
+
+  // Fetch email connections once
+  useEffect(() => {
+    if (!business || emailConnectionsLoadedRef.current) return;
+    emailConnectionsLoadedRef.current = true;
+
+    fetch(`/api/email-connections?businessId=${business.id}`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data?.connections) {
+          setEmailConnections(data.connections);
+          setSelectedEmailAddresses(new Set(data.connections.map((c: EmailConnection) => c.platform_user_id)));
+        }
+      })
+      .catch(() => {});
+  }, [business]);
+
+  function handleToggleEmailFilter(email: string) {
+    setSelectedEmailAddresses(prev => {
+      const next = new Set(prev);
+      if (next.has(email)) {
+        next.delete(email);
+      } else {
+        next.add(email);
+      }
+      return next;
+    });
+  }
+
+  function handleToggleAllEmailFilters() {
+    setSelectedEmailAddresses(prev => {
+      if (prev.size === emailConnections.length) {
+        return new Set();
+      }
+      return new Set(emailConnections.map(c => c.platform_user_id));
+    });
+  }
 
   function setupRealtimeSubscription() {
     if (!business) return;
@@ -512,10 +579,19 @@ function InboxContent() {
     }
   }
 
+  // Filter conversations by selected email addresses (non-email channels always show)
+  const filteredByEmail = emailConnections.length > 0
+    ? conversations.filter(c => {
+        if (c.channel !== 'email') return true;
+        if (!c.channel_address) return true;
+        return selectedEmailAddresses.has(c.channel_address);
+      })
+    : conversations;
+
   // Calculate stats
-  const totalConversations = conversations.length;
-  const openConversations = conversations.filter(c => c.status === 'open').length;
-  const unreadConversations = conversations.filter(c => c.unread_count > 0).length;
+  const totalConversations = filteredByEmail.length;
+  const openConversations = filteredByEmail.filter(c => c.status === 'open').length;
+  const unreadConversations = filteredByEmail.filter(c => c.unread_count > 0).length;
 
   return (
     <DashboardLayout>
@@ -546,12 +622,17 @@ function InboxContent() {
           style={{ width: panelWidth }}
         >
           <ConversationList
-            conversations={conversations}
+            conversations={filteredByEmail}
             selectedConversation={selectedConversation}
             onSelectConversation={handleSelectConversation}
             onBulkArchive={handleBulkArchive}
             onBulkDelete={handleBulkDelete}
             collapsed={isCollapsed}
+            priorityMap={priorityMap}
+            emailConnections={emailConnections}
+            selectedEmailAddresses={selectedEmailAddresses}
+            onToggleEmailFilter={handleToggleEmailFilter}
+            onToggleAllEmailFilters={handleToggleAllEmailFilters}
           />
         </div>
 

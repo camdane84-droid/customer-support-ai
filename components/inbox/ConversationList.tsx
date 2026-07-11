@@ -1,12 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { Mail, Instagram, Phone, Search, MoreHorizontal, Archive, Trash2, X, Download, MessageCircle } from 'lucide-react';
+import { Mail, Instagram, Phone, Search, MoreHorizontal, Archive, Trash2, X, Download, MessageCircle, MessageSquare, AlertTriangle, Star, ChevronDown, Check } from 'lucide-react';
 import TikTokIcon from '@/components/icons/TikTokIcon';
 import type { Conversation } from '@/lib/api/supabase';
 import { formatDistanceToNow } from 'date-fns';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { getCustomerDisplayName, getCustomerInitials } from '@/lib/utils/customerDisplay';
+
+interface EmailConnection {
+  id: string;
+  platform_user_id: string;
+  metadata: { label?: string } | null;
+}
 
 interface ConversationListProps {
   conversations: Conversation[];
@@ -15,6 +21,16 @@ interface ConversationListProps {
   onBulkArchive?: (conversationIds: string[]) => Promise<void>;
   onBulkDelete?: (conversationIds: string[]) => Promise<void>;
   collapsed?: boolean;
+  /** Map of conversation ID → priority ('urgent' | 'important') for flagged conversations */
+  priorityMap?: Record<string, 'urgent' | 'important'>;
+  /** Available email connections for filtering */
+  emailConnections?: EmailConnection[];
+  /** Currently selected email addresses for filtering */
+  selectedEmailAddresses?: Set<string>;
+  /** Callback to toggle an email address filter */
+  onToggleEmailFilter?: (email: string) => void;
+  /** Callback to select/deselect all email filters */
+  onToggleAllEmailFilters?: () => void;
 }
 
 export default function ConversationList({
@@ -24,12 +40,18 @@ export default function ConversationList({
   onBulkArchive,
   onBulkDelete,
   collapsed = false,
+  priorityMap = {},
+  emailConnections = [],
+  selectedEmailAddresses,
+  onToggleEmailFilter,
+  onToggleAllEmailFilters,
 }: ConversationListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showEmailFilter, setShowEmailFilter] = useState(false);
 
   // Filter conversations based on search
   const filteredConversations = conversations.filter((convo) => {
@@ -56,6 +78,8 @@ export default function ConversationList({
         return <MessageCircle className="w-4 h-4" />;
       case 'tiktok':
         return <TikTokIcon className="w-4 h-4" />;
+      case 'chat':
+        return <MessageSquare className="w-4 h-4" />;
       default:
         return <Mail className="w-4 h-4" />;
     }
@@ -73,6 +97,8 @@ export default function ConversationList({
         return 'text-green-500';
       case 'tiktok':
         return 'text-slate-800 dark:text-slate-200';
+      case 'chat':
+        return 'text-violet-500';
       default:
         return 'text-gray-500';
     }
@@ -320,6 +346,74 @@ export default function ConversationList({
         )}
       </div>
 
+      {/* Email Filter — collapsible arrow row */}
+      {emailConnections.length > 0 && selectedEmailAddresses && onToggleEmailFilter && (
+        <div className="border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+          {/* Arrow toggle row */}
+          <button
+            onClick={() => setShowEmailFilter(!showEmailFilter)}
+            className="w-full flex items-center justify-between px-4 py-2 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
+          >
+            <div className="flex items-center space-x-2">
+              <Mail className="w-4 h-4 text-indigo-500" />
+              <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
+                Emails
+              </span>
+              <span className="text-xs text-gray-400 dark:text-slate-500">
+                {selectedEmailAddresses.size === emailConnections.length
+                  ? 'All active'
+                  : `${selectedEmailAddresses.size} of ${emailConnections.length} active`
+                }
+              </span>
+            </div>
+            <ChevronDown className={`w-4 h-4 text-gray-400 dark:text-slate-500 transition-transform duration-200 ${showEmailFilter ? 'rotate-180' : ''}`} />
+          </button>
+
+          {/* Expanded email list */}
+          {showEmailFilter && (
+            <div className="px-3 pb-3 space-y-1.5">
+              {emailConnections.map(conn => {
+                const isActive = selectedEmailAddresses.has(conn.platform_user_id);
+                return (
+                  <button
+                    key={conn.id}
+                    onClick={() => onToggleEmailFilter(conn.platform_user_id)}
+                    className={`
+                      w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-all
+                      ${isActive
+                        ? 'bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700/50'
+                        : 'bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 opacity-60'
+                      }
+                    `}
+                  >
+                    <div className="flex items-center space-x-2 min-w-0">
+                      <Mail className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? 'text-indigo-500' : 'text-gray-400 dark:text-slate-500'}`} />
+                      <span className={`truncate ${isActive ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-500 dark:text-slate-400'}`}>
+                        {conn.metadata?.label ? `${conn.metadata.label}` : conn.platform_user_id}
+                      </span>
+                      {conn.metadata?.label && (
+                        <span className="text-xs text-gray-400 dark:text-slate-500 truncate hidden sm:inline">
+                          {conn.platform_user_id}
+                        </span>
+                      )}
+                    </div>
+                    <span className={`
+                      text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0
+                      ${isActive
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                        : 'bg-gray-200 dark:bg-slate-600 text-gray-500 dark:text-slate-400'
+                      }
+                    `}>
+                      {isActive ? 'Active' : 'Hidden'}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Conversation List */}
       <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-slate-900">
         {filteredConversations.length === 0 ? (
@@ -347,6 +441,7 @@ export default function ConversationList({
             const isChecked = selectedIds.has(conversation.id);
             const displayName = getCustomerDisplayName(conversation);
             const initials = getCustomerInitials(displayName);
+            const priority = priorityMap[conversation.id];
 
             return (
               <button
@@ -362,6 +457,10 @@ export default function ConversationList({
                   w-full p-4 border-b border-gray-200 dark:border-slate-700 text-left transition-all
                   ${isSelected && !selectionMode
                     ? 'bg-indigo-50 dark:bg-indigo-900/30 border-l-4 border-l-indigo-500'
+                    : priority === 'urgent'
+                    ? 'bg-red-50/50 dark:bg-red-900/10 border-l-4 border-l-red-500 hover:bg-red-50 dark:hover:bg-red-900/20'
+                    : priority === 'important'
+                    ? 'bg-indigo-50/50 dark:bg-indigo-900/10 border-l-4 border-l-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20'
                     : 'bg-white dark:bg-slate-800 border-l-4 border-l-transparent hover:bg-gray-50 dark:hover:bg-slate-700'
                   }
                 `}
@@ -415,16 +514,33 @@ export default function ConversationList({
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2 min-w-0">
                         <span className={getChannelColor(conversation.channel)}>
                           {getChannelIcon(conversation.channel)}
                         </span>
                         <span className="text-xs text-gray-600 dark:text-slate-300 capitalize font-medium">
                           {conversation.channel}
                         </span>
+                        {conversation.channel === 'email' && conversation.channel_address && (
+                          <span className="text-xs text-gray-400 dark:text-slate-500 truncate">
+                            via {conversation.channel_address}
+                          </span>
+                        )}
                       </div>
 
                       <div className="flex items-center space-x-2">
+                        {priority === 'urgent' && (
+                          <span className="flex items-center gap-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs font-medium rounded-full px-2 py-0.5">
+                            <AlertTriangle className="w-3 h-3" />
+                            Urgent
+                          </span>
+                        )}
+                        {priority === 'important' && (
+                          <span className="flex items-center gap-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 text-xs font-medium rounded-full px-2 py-0.5">
+                            <Star className="w-3 h-3" />
+                            Important
+                          </span>
+                        )}
                         {conversation.unread_count > 0 && (
                           <span className="bg-indigo-500 text-white text-xs font-medium rounded-full px-2 py-0.5">
                             {conversation.unread_count}

@@ -23,7 +23,7 @@ export async function handleEmailSend(
 
   const { data: conversation, error: convError } = await supabase
     .from('conversations')
-    .select('customer_email, customer_name')
+    .select('customer_email, customer_name, channel_address')
     .eq('id', message.conversation_id)
     .single();
 
@@ -45,16 +45,23 @@ export async function handleEmailSend(
     throw new Error('Customer email not found in conversation');
   }
 
-  if (!business?.email) {
-    throw new Error('Business email not found');
+  // Always send from the verified domain address — Resend rejects (or worse,
+  // spoofs) arbitrary from-addresses. The business's own address goes in
+  // Reply-To so customer replies still route back to their inbox.
+  const fromEmail = process.env.RESEND_FROM_EMAIL;
+  if (!fromEmail) {
+    throw new Error('Email service not configured. Please add RESEND_FROM_EMAIL to your environment variables.');
   }
+
+  const replyToEmail = conversation.channel_address || business?.email;
 
   try {
     await sendEmail({
       to: conversation.customer_email,
-      from: `${business.name} <${business.email}>`,
+      from: `${business.name} <${fromEmail}>`,
       subject: `Re: Message from ${business.name}`,
       text: message.content,
+      ...(replyToEmail && { replyTo: replyToEmail }),
     });
   } catch (emailError: any) {
     throw new Error(`Email delivery failed: ${emailError.message}`);

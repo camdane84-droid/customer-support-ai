@@ -17,24 +17,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "InboxForge - All Your Customer Conversations. One Intelligent Inbox.",
-  description: "Unify email, Instagram DMs, WhatsApp, and more into one powerful inbox. Respond 10x faster with AI-powered suggestions from Claude. Start your 14-day free trial today.",
-  keywords: ["customer support", "AI support", "inbox management", "customer service", "Instagram DMs", "email support", "unified inbox", "Claude AI"],
+  title: "InboxForge - The AI Front Desk for Your Business Email",
+  description: "Forward your business email to InboxForge. AI triages every message, alerts you to urgent issues, drafts on-brand replies, and answers customers after hours. Start your 14-day free trial today.",
+  keywords: ["customer support", "AI support", "email triage", "customer service", "auto-reply", "email support", "unified inbox", "Claude AI"],
   authors: [{ name: "InboxForge" }],
   icons: {
     icon: '/favicon.svg',
     apple: '/logo.svg',
   },
   openGraph: {
-    title: "InboxForge - AI-Powered Customer Support",
-    description: "Unify all your customer conversations in one intelligent inbox with AI assistance",
+    title: "InboxForge - The AI Front Desk for Your Business Email",
+    description: "AI that triages every customer email, flags what's urgent, and answers after hours",
     type: "website",
     siteName: "InboxForge",
   },
   twitter: {
     card: "summary_large_image",
-    title: "InboxForge - AI-Powered Customer Support",
-    description: "Unify all your customer conversations in one intelligent inbox with AI assistance",
+    title: "InboxForge - The AI Front Desk for Your Business Email",
+    description: "AI that triages every customer email, flags what's urgent, and answers after hours",
   },
 };
 

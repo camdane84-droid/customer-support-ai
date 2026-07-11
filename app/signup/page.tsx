@@ -191,8 +191,12 @@ function SignupForm() {
                 }`}
                 placeholder={inviteToken ? (loadingInvite ? 'Loading...' : 'Business name') : 'Acme Coffee Shop'}
               />
-              {!inviteToken && checkingName && (
-                <p className="text-xs text-gray-500 mt-1">Checking availability...</p>
+              {/* Fixed-height status slot so the form doesn't jump while the
+                  debounced availability check toggles on and off */}
+              {!inviteToken && (
+                <p className="text-xs text-gray-500 mt-1 h-4" aria-live="polite">
+                  {checkingName ? 'Checking availability...' : ''}
+                </p>
               )}
               {!inviteToken && businessNameError && (
                 <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg flex gap-2">
