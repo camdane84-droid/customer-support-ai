@@ -4,6 +4,7 @@ import { supabaseServer } from '@/lib/supabase-server';
 import { logError } from '@/lib/services/errorLogger';
 import { authenticateRequest } from '@/lib/api/auth-middleware';
 import { generateAutoNotes } from '@/lib/ai/auto-notes';
+import { broadcastChatMessage } from '@/lib/chat-broadcast';
 import { logger } from '@/lib/logger';
 import {
   handleEmailSend,
@@ -95,6 +96,19 @@ export async function POST(request: NextRequest) {
             sent_at: new Date().toISOString(),
           })
           .eq('id', data.id);
+
+        // Chat delivery is the widget reading the DB — push it instantly
+        if (message.channel === 'chat') {
+          after(() =>
+            broadcastChatMessage(supabaseServer, message.conversation_id, {
+              id: data.id,
+              content: data.content,
+              sender_type: data.sender_type,
+              sender_name: data.sender_name,
+              created_at: data.created_at,
+            })
+          );
+        }
       } catch (sendError: any) {
         // Update status to failed
         await supabaseServer

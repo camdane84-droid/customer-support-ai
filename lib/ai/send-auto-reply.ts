@@ -1,6 +1,7 @@
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
 import { generateResponseSuggestion } from '@/lib/ai/claude';
 import { shouldAutoReply, shouldAutoReplyChat } from '@/lib/auto-reply';
+import { broadcastChatMessage } from '@/lib/chat-broadcast';
 import { logger } from '@/lib/logger';
 import {
   handleEmailSend,
@@ -148,6 +149,17 @@ export async function sendAutoReply(conversationId: string): Promise<void> {
           sent_at: new Date().toISOString(),
         })
         .eq('id', savedMessage.id);
+
+      // Push chat replies to the widget instantly (delivery = DB + broadcast)
+      if (conversation.channel === 'chat') {
+        await broadcastChatMessage(supabaseAdmin, conversationId, {
+          id: savedMessage.id,
+          content: savedMessage.content,
+          sender_type: savedMessage.sender_type,
+          sender_name: savedMessage.sender_name,
+          created_at: savedMessage.created_at,
+        });
+      }
 
       logger.success('Auto-reply sent', { conversationId, channel: conversation.channel });
     } catch (sendError: any) {
