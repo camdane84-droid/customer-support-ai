@@ -19,6 +19,10 @@ const OPTIONAL_ENV_VARS = [
   'STRIPE_SECRET_KEY',
   'STRIPE_STARTER_PRICE_ID',
   'STRIPE_PRO_PRICE_ID',
+  // Without this, the inbound email webhook accepts unauthenticated requests
+  'EMAIL_WEBHOOK_TOKEN',
+  // Without this, forwarding-based email onboarding is unavailable
+  'INBOUND_PARSE_DOMAIN',
 ] as const;
 
 export function validateEnv() {

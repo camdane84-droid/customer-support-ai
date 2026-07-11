@@ -13,11 +13,24 @@ export async function GET(request: NextRequest) {
   const { businessId } = auth.data;
 
   try {
-    const { data, error } = await supabaseAdmin
+    // Optional email channel filter
+    const channelAddresses = request.nextUrl.searchParams.get('channelAddresses');
+
+    let query = supabaseAdmin
       .from('conversations')
       .select('*')
       .eq('business_id', businessId)
-      .neq('status', 'archived')
+      .neq('status', 'archived');
+
+    if (channelAddresses) {
+      const addresses = channelAddresses.split(',').map(a => a.trim()).filter(Boolean);
+      if (addresses.length > 0) {
+        // Show non-email conversations always, plus email conversations matching the filter
+        query = query.or(`channel.neq.email,channel_address.in.(${addresses.join(',')})`);
+      }
+    }
+
+    const { data, error } = await query
       .order('last_message_at', { ascending: false });
 
     if (error) {
