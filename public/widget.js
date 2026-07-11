@@ -8,7 +8,13 @@
  *   data-color="#7c3aed"  — launcher button color (chat window color is set in InboxForge settings)
  */
 (function () {
+  // currentScript is null for dynamically injected scripts (tag managers,
+  // SPA embeds) — fall back to finding our own tag by src + data-key.
   var script = document.currentScript;
+  if (!script) {
+    var candidates = document.querySelectorAll('script[src*="widget.js"][data-key]');
+    script = candidates[candidates.length - 1];
+  }
   if (!script) return;
 
   var key = script.getAttribute('data-key');

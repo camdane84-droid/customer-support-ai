@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chat Widget Test Page</title>
+  <style>
+    body { font-family: -apple-system, 'Segoe UI', sans-serif; max-width: 640px; margin: 60px auto; padding: 0 20px; line-height: 1.6; color: #1e293b; }
+    h1 { font-size: 1.6rem; }
+    .note { background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 8px; padding: 12px 16px; font-size: 0.9rem; }
+    code { background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-size: 0.85em; }
+  </style>
+</head>
+<body>
+  <h1>☕ Demo Coffee Shop</h1>
+  <p>This page stands in for a customer's website. Pass a widget key in the URL
+     and the InboxForge chat bubble appears in the bottom-right corner, exactly
+     as it would on a real site.</p>
+  <div class="note" id="status">Loading widget&hellip;</div>
+
+  <script>
+    // Load the widget with the key from ?key=..., against this page's own
+    // origin — so the same page works locally and on the deployed app.
+    (function () {
+      var key = new URLSearchParams(location.search).get('key');
+      var status = document.getElementById('status');
+      if (!key) {
+        status.innerHTML = 'No widget key. Open this page as ' +
+          '<code>/widget-test.html?key=YOUR_WIDGET_KEY</code> &mdash; the key is in ' +
+          'the embed snippet under <strong>Settings &rarr; Website Chat Widget</strong>.';
+        return;
+      }
+      var safeKey = key.replace(/[^\w-]/g, '');
+      status.innerHTML = 'Widget loaded for key <code>' + safeKey + '</code>. ' +
+        'The chat bubble should appear in the bottom-right corner.';
+      // document.write is intentional: it makes the tag parser-inserted, and the
+      // loader also has a fallback for fully dynamic injection (tag managers).
+      document.write('<script src="/widget.js" data-key="' + safeKey + '" async><\/script>');
+    })();
+  </script>
+</body>
+</html>
