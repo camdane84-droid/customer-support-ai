@@ -7,6 +7,7 @@ import { useTheme } from '@/lib/context/ThemeContext';
 import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
+import Script from 'next/script';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import DemoInbox from '@/components/landing/DemoInbox';
 import AutoReplyDemo from '@/components/landing/AutoReplyDemo';
@@ -641,6 +642,16 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Our own chat widget, eating our own dog food. The loader finds its
+          tag via the data-key fallback since next/script injects dynamically. */}
+      {process.env.NEXT_PUBLIC_WIDGET_KEY && (
+        <Script
+          src="/widget.js"
+          data-key={process.env.NEXT_PUBLIC_WIDGET_KEY}
+          strategy="afterInteractive"
+        />
+      )}
     </div>
   );
 }
