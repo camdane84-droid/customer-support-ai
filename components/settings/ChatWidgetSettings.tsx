@@ -6,6 +6,7 @@ import { MessageSquare, Copy, Check, Loader2, Save, Lock, ExternalLink } from 'l
 import { supabase } from '@/lib/api/supabase';
 
 type EmbedPlatform = 'webflow' | 'wordpress' | 'shopify' | 'wix' | 'squarespace' | 'other';
+type ChatAutoReplyMode = 'always' | 'same_as_email' | 'off';
 
 interface ChatWidgetSettingsProps {
   businessId: string;
@@ -17,6 +18,7 @@ interface WidgetSettings {
   widget_enabled: boolean;
   widget_color: string;
   widget_greeting: string;
+  chat_auto_reply_mode: ChatAutoReplyMode;
 }
 
 export default function ChatWidgetSettings({ businessId, subscriptionTier }: ChatWidgetSettingsProps) {
@@ -29,12 +31,13 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
   const [platform, setPlatform] = useState<EmbedPlatform>('webflow');
+  const [savingMode, setSavingMode] = useState(false);
 
   useEffect(() => {
     async function load() {
       const { data } = await supabase
         .from('businesses')
-        .select('widget_key, widget_enabled, widget_color, widget_greeting')
+        .select('widget_key, widget_enabled, widget_color, widget_greeting, chat_auto_reply_mode')
         .eq('id', businessId)
         .single();
 
@@ -44,6 +47,7 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
           widget_enabled: !!data.widget_enabled,
           widget_color: data.widget_color || '#7c3aed',
           widget_greeting: data.widget_greeting || '',
+          chat_auto_reply_mode: (data.chat_auto_reply_mode as ChatAutoReplyMode) || 'always',
         });
       }
       setLoading(false);
@@ -68,6 +72,24 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
       setSettings({ ...settings, widget_enabled: enabled });
     }
     setToggling(false);
+  }
+
+  async function handleAutoReplyMode(mode: ChatAutoReplyMode) {
+    if (!settings || savingMode || settings.chat_auto_reply_mode === mode) return;
+    setSavingMode(true);
+    setError('');
+
+    const { error: updateError } = await supabase
+      .from('businesses')
+      .update({ chat_auto_reply_mode: mode })
+      .eq('id', businessId);
+
+    if (updateError) {
+      setError('Failed to update AI auto-reply mode');
+    } else {
+      setSettings({ ...settings, chat_auto_reply_mode: mode });
+    }
+    setSavingMode(false);
   }
 
   async function handleSave() {
@@ -239,6 +261,42 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
                 </button>
               </div>
             </div>
+          </div>
+
+          {/* AI auto-reply mode — chat is separate from the email schedule */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+              AI auto-reply in chat
+            </label>
+            <div className="flex items-center flex-wrap gap-1 mb-1.5">
+              {([
+                ['always', 'Always on'],
+                ['same_as_email', 'Follow email schedule'],
+                ['off', 'Off'],
+              ] as [ChatAutoReplyMode, string][]).map(([mode, label]) => (
+                <button
+                  key={mode}
+                  onClick={() => handleAutoReplyMode(mode)}
+                  disabled={savingMode}
+                  className={`px-3 py-1 text-xs font-medium rounded-full transition-colors disabled:opacity-60 ${
+                    settings.chat_auto_reply_mode === mode
+                      ? 'bg-violet-600 text-white'
+                      : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600'
+                  }`}
+                >
+                  {label}
+                  {mode === 'always' && ' (recommended)'}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 dark:text-slate-400">
+              {settings.chat_auto_reply_mode === 'always' &&
+                'The AI answers every chat message instantly. Your team can jump in from the inbox anytime.'}
+              {settings.chat_auto_reply_mode === 'same_as_email' &&
+                'The AI answers chats only when your email auto-reply schedule is active.'}
+              {settings.chat_auto_reply_mode === 'off' &&
+                'Chats wait for a human reply from the inbox — visitors expect answers within seconds, so keep an eye on it.'}
+            </p>
           </div>
 
           <div>

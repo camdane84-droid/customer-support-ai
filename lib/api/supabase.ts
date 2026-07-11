@@ -31,6 +31,7 @@ export type Business = {
   auto_reply_mode?: 'after_hours' | 'all_day' | 'custom';
   auto_reply_start?: string;   // "18:00"
   auto_reply_end?: string;     // "06:00"
+  chat_auto_reply_mode?: 'always' | 'same_as_email' | 'off';
   ai_parse_enabled?: boolean;
   ai_parse_urgent?: boolean;
   ai_parse_important?: boolean;
