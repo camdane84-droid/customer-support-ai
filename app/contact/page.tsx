@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
     title: 'Contact & Support | InboxForge',
-    description: 'Get help from the InboxForge support team. Find answers to common questions about account & billing, Instagram integration, AI features, and technical issues.',
+    description: 'Get help from the InboxForge support team. Find answers to common questions about account & billing, email channels, live chat, AI features, and technical issues.',
 };
 
 const faqTopics = [
@@ -20,15 +20,15 @@ const faqTopics = [
         ],
     },
     {
-        title: 'Instagram Integration',
-        gradient: 'from-pink-500 to-purple-500',
-        border: 'border-pink-200 dark:border-pink-800',
-        bg: 'bg-pink-50 dark:bg-pink-900/20',
-        dot: 'text-pink-600 dark:text-pink-400',
+        title: 'Email & Live Chat',
+        gradient: 'from-indigo-500 to-violet-500',
+        border: 'border-indigo-200 dark:border-indigo-800',
+        bg: 'bg-indigo-50 dark:bg-indigo-900/20',
+        dot: 'text-indigo-600 dark:text-indigo-400',
         items: [
-            { q: 'How do I connect my Instagram account?', a: 'Go to Dashboard → Settings → Integrations and click "Connect Instagram." You\'ll be redirected to Meta to authorize access to your Instagram Professional account.' },
-            { q: 'Why are my Instagram messages not appearing?', a: 'Ensure your Instagram account is a Professional (Business or Creator) account and that you\'ve granted all required permissions during the OAuth flow. Try disconnecting and reconnecting.' },
-            { q: 'Does InboxForge support Instagram Story replies?', a: 'Yes, story replies and reactions appear in your inbox as regular conversations. You can respond to them directly from the dashboard.' },
+            { q: 'How do I connect my business email?', a: 'Go to Dashboard → Settings → Connected Accounts, add your address, and verify ownership with the code we email you. Then set up forwarding to your unique InboxForge address — step-by-step instructions are provided for Gmail, Outlook, and other hosts. No DNS changes needed.' },
+            { q: 'Can I connect more than one email address?', a: 'Yes — connect support@, orders@, info@ and any others. Each address gets its own forwarding setup, and you can filter your inbox by address.' },
+            { q: 'How do I add live chat to my website?', a: 'On the Pro plan, enable the Website Chat Widget under Settings and paste the embed snippet into your site. The settings page includes instructions for Webflow, WordPress, Shopify, Wix, Squarespace, and plain HTML, plus a live preview.' },
         ],
     },
     {

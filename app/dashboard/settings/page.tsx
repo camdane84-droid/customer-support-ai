@@ -334,7 +334,7 @@ export default function SettingsPage() {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Connected Accounts</h2>
           </div>
           <p className="text-sm text-gray-600 dark:text-slate-300 mb-6">
-            Connect your social media accounts to receive messages in your InboxForge inbox
+            Connect your business email addresses and website chat to receive messages in your InboxForge inbox
           </p>
 
           <div className="space-y-4">
@@ -347,17 +347,13 @@ export default function SettingsPage() {
               subscriptionTier={business.subscription_tier || 'free'}
             />
 
-            {/* Instagram Connection */}
-            <InstagramConnection businessId={business.id} />
-
-            {/* Facebook Connection - COMING SOON */}
+            {/* Social channels shelved during the email-first pivot (Meta/TikTok
+                API access requires business verification). Components are kept
+                below — uncomment to bring a channel back. */}
+            {/* <InstagramConnection businessId={business.id} /> */}
             {/* <FacebookConnection businessId={business.id} /> */}
-
-            {/* WhatsApp Connection */}
-            <WhatsAppConnection businessId={business.id} />
-
-            {/* TikTok Connection */}
-            <TikTokConnection businessId={business.id} />
+            {/* <WhatsAppConnection businessId={business.id} /> */}
+            {/* <TikTokConnection businessId={business.id} /> */}
           </div>
         </div>
         )}

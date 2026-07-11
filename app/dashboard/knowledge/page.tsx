@@ -384,33 +384,31 @@ export default function KnowledgeBasePage() {
           </p>
 
           <div className="space-y-4">
-            {/* Guide 1: Connecting Instagram */}
-            <details className="group bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/10 dark:to-purple-900/10 border border-pink-200 dark:border-pink-800 rounded-lg overflow-hidden">
-              <summary className="cursor-pointer p-4 font-semibold text-gray-900 dark:text-white hover:bg-pink-100 dark:hover:bg-pink-900/20 transition-colors flex items-center justify-between">
+            {/* Guide: Connecting email */}
+            <details className="group bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-900/10 dark:to-violet-900/10 border border-indigo-200 dark:border-indigo-800 rounded-lg overflow-hidden">
+              <summary className="cursor-pointer p-4 font-semibold text-gray-900 dark:text-white hover:bg-indigo-100 dark:hover:bg-indigo-900/20 transition-colors flex items-center justify-between">
                 <span className="flex items-center">
-                  <svg className="w-5 h-5 mr-2 text-pink-600 dark:text-pink-400" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                  <svg className="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
-                  How to Connect Instagram
+                  How to Connect Your Business Email
                 </span>
                 <svg className="w-5 h-5 text-gray-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
               <div className="p-4 pt-0 space-y-3 text-gray-700 dark:text-slate-300">
-                <p className="font-medium text-gray-900 dark:text-white">Connect your Instagram Business account to receive DMs in InboxForge:</p>
+                <p className="font-medium text-gray-900 dark:text-white">Route your customer email into InboxForge with simple forwarding — no DNS changes needed:</p>
                 <ol className="list-decimal list-inside space-y-2 ml-2">
                   <li><strong>Go to Settings</strong> - Navigate to the Settings page from the sidebar</li>
-                  <li><strong>Find Instagram Connection</strong> - Scroll to the "Connected Accounts" section</li>
-                  <li><strong>Click "Connect"</strong> - Click the Connect button next to Instagram</li>
-                  <li><strong>Authorize with Facebook</strong> - You'll be redirected to Facebook to authorize the connection</li>
-                  <li><strong>Select Your Page</strong> - Choose the Facebook Page connected to your Instagram Business account</li>
-                  <li><strong>Grant Permissions</strong> - Allow InboxForge to access Instagram messages</li>
-                  <li><strong>Done!</strong> - You'll be redirected back and your Instagram will be connected</li>
+                  <li><strong>Add your address</strong> - In "Connected Accounts", add the email address customers write to (support@, orders@, ...)</li>
+                  <li><strong>Verify ownership</strong> - Enter the 6-digit code we email to that address</li>
+                  <li><strong>Set up forwarding</strong> - Follow the step-by-step instructions for Gmail, Outlook, or your email host to forward mail to your unique InboxForge address</li>
+                  <li><strong>Done!</strong> - New customer emails appear in your inbox, triaged by AI</li>
                 </ol>
-                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded p-3 mt-3">
-                  <p className="text-sm text-amber-800 dark:text-amber-200">
-                    <strong>Note:</strong> You need an Instagram Business account (not personal) and it must be connected to a Facebook Page.
+                <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded p-3 mt-3">
+                  <p className="text-sm text-indigo-800 dark:text-indigo-200">
+                    <strong>Tip:</strong> Connect as many addresses as you need — the inbox can filter conversations by address.
                   </p>
                 </div>
               </div>
