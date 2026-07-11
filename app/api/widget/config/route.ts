@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase-server';
 import { isValidWidgetKey } from '@/lib/chat-widget';
-import { shouldAutoReply } from '@/lib/auto-reply';
+import { shouldAutoReplyChat } from '@/lib/auto-reply';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
 /**
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
 
   const { data: business } = await supabaseServer
     .from('businesses')
-    .select('name, widget_enabled, widget_color, widget_greeting, auto_reply_enabled, subscription_tier, auto_reply_mode, auto_reply_start, auto_reply_end')
+    .select('name, widget_enabled, widget_color, widget_greeting, auto_reply_enabled, subscription_tier, auto_reply_mode, auto_reply_start, auto_reply_end, chat_auto_reply_mode')
     .eq('widget_key', key)
     .single();
 
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     businessName: business.name,
     greeting: business.widget_greeting || null,
     color: business.widget_color || '#7c3aed',
-    // Whether the AI front desk would answer right now (after-hours schedule etc.)
-    aiActive: shouldAutoReply(business),
+    // Whether the AI front desk would answer a chat right now
+    aiActive: shouldAutoReplyChat(business),
   });
 }

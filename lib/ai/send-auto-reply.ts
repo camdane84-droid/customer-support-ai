@@ -1,6 +1,6 @@
 import { supabaseAdmin } from '@/lib/api/supabase-admin';
 import { generateResponseSuggestion } from '@/lib/ai/claude';
-import { shouldAutoReply } from '@/lib/auto-reply';
+import { shouldAutoReply, shouldAutoReplyChat } from '@/lib/auto-reply';
 import { logger } from '@/lib/logger';
 import {
   handleEmailSend,
@@ -39,9 +39,13 @@ export async function sendAutoReply(conversationId: string): Promise<void> {
 
     if (bizError || !business) return;
 
-    // Check if auto-reply should fire
-    if (!shouldAutoReply(business)) {
-      logger.debug('Auto-reply not active for this business right now', { conversationId });
+    // Check if auto-reply should fire — chat has its own always/off switch,
+    // email follows the configured schedule
+    const autoReplyActive = conversation.channel === 'chat'
+      ? shouldAutoReplyChat(business)
+      : shouldAutoReply(business);
+    if (!autoReplyActive) {
+      logger.debug('Auto-reply not active for this business right now', { conversationId, channel: conversation.channel });
       return;
     }
 

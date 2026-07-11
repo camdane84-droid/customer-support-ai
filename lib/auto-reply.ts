@@ -10,6 +10,7 @@ interface Business {
   auto_reply_mode?: 'after_hours' | 'all_day' | 'custom';
   auto_reply_start?: string; // HH:MM format
   auto_reply_end?: string;   // HH:MM format
+  chat_auto_reply_mode?: 'always' | 'same_as_email' | 'off';
 }
 
 /**
@@ -29,6 +30,20 @@ export function shouldAutoReply(business: Business): boolean {
   const end = business.auto_reply_end || '06:00';
 
   return isWithinSchedule(start, end);
+}
+
+/**
+ * Chat has its own auto-reply switch: visitors expect instant answers, so
+ * the default is 'always' regardless of the email schedule. Pro-only, like
+ * the widget itself.
+ */
+export function shouldAutoReplyChat(business: Business): boolean {
+  if (business.subscription_tier !== 'pro') return false;
+
+  const mode = business.chat_auto_reply_mode || 'always';
+  if (mode === 'off') return false;
+  if (mode === 'same_as_email') return shouldAutoReply(business);
+  return true;
 }
 
 /**
