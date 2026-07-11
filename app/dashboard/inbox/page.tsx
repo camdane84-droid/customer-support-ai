@@ -12,6 +12,7 @@ import { getConversations } from '@/lib/api/conversations';
 import { supabase } from '@/lib/api/supabase';
 import { useAuth } from '@/lib/context/AuthContext';
 import type { Conversation } from '@/lib/api/supabase';
+import { playNotificationSound } from '@/lib/notification-sound';
 import { MessageSquare, Clock, Mail } from 'lucide-react';
 
 interface EmailConnection {
@@ -375,6 +376,11 @@ function InboxContent() {
     const conversationId = message.conversation_id;
 
     console.log('💬 Handling new message for conversation:', conversationId);
+
+    // Chime for incoming customer messages (not our own or AI replies)
+    if (message.sender_type === 'customer') {
+      playNotificationSound();
+    }
 
     // Reload the specific conversation to get updated last_message_at and unread_count
     supabase

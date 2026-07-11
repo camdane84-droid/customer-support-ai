@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Send, X, Sparkles, MessageSquare, Loader2 } from 'lucide-react';
+import { playNotificationSound } from '@/lib/notification-sound';
 
 /**
  * Chat UI rendered inside the widget iframe on customer websites.
@@ -45,6 +46,8 @@ export default function ChatWidget({ widgetKey }: { widgetKey: string }) {
   const tokenRef = useRef<string | null>(null);
   tokenRef.current = token;
   const lastCreatedAtRef = useRef<string | null>(null);
+  const knownIdsRef = useRef<Set<string>>(new Set());
+  const historyLoadedRef = useRef(false);
 
   // Load config + any stored session
   useEffect(() => {
@@ -66,6 +69,15 @@ export default function ChatWidget({ widgetKey }: { widgetKey: string }) {
 
   const mergeMessages = useCallback((incoming: ChatMessage[]) => {
     if (incoming.length === 0) return;
+
+    // Chime for replies that arrive after the initial history load —
+    // never for the visitor's own messages or the backlog
+    const unseen = incoming.filter(m => !knownIdsRef.current.has(m.id));
+    for (const msg of unseen) knownIdsRef.current.add(msg.id);
+    if (historyLoadedRef.current && unseen.some(m => m.sender_type !== 'customer')) {
+      playNotificationSound();
+    }
+
     setMessages(prev => {
       const byId = new Map(prev.map(m => [m.id, m]));
       for (const msg of incoming) byId.set(msg.id, msg);
@@ -89,6 +101,8 @@ export default function ChatWidget({ widgetKey }: { widgetKey: string }) {
         try { localStorage.removeItem(storageKey(widgetKey)); } catch {}
         setToken(null);
         setMessages([]);
+        knownIdsRef.current.clear();
+        historyLoadedRef.current = false;
         return;
       }
       if (!res.ok) return;
@@ -102,7 +116,9 @@ export default function ChatWidget({ widgetKey }: { widgetKey: string }) {
   // Full history on session (re)load, then incremental polling
   useEffect(() => {
     if (!token) return;
-    fetchMessages(null);
+    fetchMessages(null).then(() => {
+      historyLoadedRef.current = true;
+    });
 
     const interval = setInterval(() => {
       fetchMessages(lastCreatedAtRef.current);
