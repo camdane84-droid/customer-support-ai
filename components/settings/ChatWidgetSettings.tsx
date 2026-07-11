@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { MessageSquare, Copy, Check, Loader2, Save, Lock } from 'lucide-react';
+import { MessageSquare, Copy, Check, Loader2, Save, Lock, ExternalLink } from 'lucide-react';
 import { supabase } from '@/lib/api/supabase';
+
+type EmbedPlatform = 'wordpress' | 'shopify' | 'wix' | 'squarespace' | 'other';
 
 interface ChatWidgetSettingsProps {
   businessId: string;
@@ -26,6 +28,7 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
+  const [platform, setPlatform] = useState<EmbedPlatform>('wordpress');
 
   useEffect(() => {
     async function load() {
@@ -239,11 +242,22 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-              Embed code
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">
+                Embed code
+              </label>
+              <a
+                href={`/widget-test.html?key=${settings.widget_key}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-1 text-xs font-medium text-violet-600 dark:text-violet-400 hover:underline"
+              >
+                <span>Preview your widget</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
             <p className="text-xs text-gray-500 dark:text-slate-400 mb-2">
-              Paste this snippet before the closing <code className="font-mono">&lt;/body&gt;</code> tag on your website.
+              Copy this snippet, then follow the steps below for your website platform.
             </p>
             <div className="flex items-stretch gap-2">
               <code className="flex-1 px-3 py-2.5 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-lg text-xs font-mono text-gray-800 dark:text-slate-200 overflow-x-auto whitespace-nowrap">
@@ -257,6 +271,75 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
                 <span>{copied ? 'Copied' : 'Copy'}</span>
               </button>
             </div>
+          </div>
+
+          {/* Where to paste it, per platform */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+              Where do I paste it?
+            </label>
+            <div className="flex items-center flex-wrap gap-1 mb-2">
+              {([
+                ['wordpress', 'WordPress'],
+                ['shopify', 'Shopify'],
+                ['wix', 'Wix'],
+                ['squarespace', 'Squarespace'],
+                ['other', 'Other / HTML'],
+              ] as [EmbedPlatform, string][]).map(([p, label]) => (
+                <button
+                  key={p}
+                  onClick={() => setPlatform(p)}
+                  className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
+                    platform === p
+                      ? 'bg-violet-600 text-white'
+                      : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            <ol className="list-decimal list-inside space-y-1.5 text-sm text-gray-600 dark:text-slate-300">
+              {platform === 'wordpress' && (
+                <>
+                  <li>In your WordPress admin, go to <span className="font-medium">Plugins &rarr; Add New</span> and install the free <span className="font-medium">WPCode</span> plugin</li>
+                  <li>Open <span className="font-medium">Code Snippets &rarr; Header &amp; Footer</span></li>
+                  <li>Paste the snippet into the <span className="font-medium">Footer</span> box and click Save</li>
+                  <li>Visit your site &mdash; the chat bubble appears in the bottom-right corner</li>
+                </>
+              )}
+              {platform === 'shopify' && (
+                <>
+                  <li>In your Shopify admin, go to <span className="font-medium">Online Store &rarr; Themes</span></li>
+                  <li>Click <span className="font-medium">&hellip; &rarr; Edit code</span> on your current theme</li>
+                  <li>Open <span className="font-medium">layout/theme.liquid</span> and paste the snippet just above the <code className="font-mono text-xs">&lt;/body&gt;</code> line near the bottom</li>
+                  <li>Click Save &mdash; the bubble appears on every page of your store</li>
+                </>
+              )}
+              {platform === 'wix' && (
+                <>
+                  <li>In your Wix dashboard, go to <span className="font-medium">Settings &rarr; Custom Code</span></li>
+                  <li>Click <span className="font-medium">+ Add Custom Code</span> and paste the snippet</li>
+                  <li>Set <span className="font-medium">Place Code in: Body &ndash; End</span> and apply to <span className="font-medium">All pages</span></li>
+                  <li>Click Apply (custom code requires a paid Wix plan with a connected domain)</li>
+                </>
+              )}
+              {platform === 'squarespace' && (
+                <>
+                  <li>In Squarespace, go to <span className="font-medium">Settings &rarr; Advanced &rarr; Code Injection</span></li>
+                  <li>Paste the snippet into the <span className="font-medium">Footer</span> box</li>
+                  <li>Click Save (Code Injection requires the Business plan or higher)</li>
+                </>
+              )}
+              {platform === 'other' && (
+                <>
+                  <li>Open the HTML of your website &mdash; if your site has a shared layout or footer file, use that so the widget loads on every page</li>
+                  <li>Paste the snippet just before the closing <code className="font-mono text-xs">&lt;/body&gt;</code> tag</li>
+                  <li>Save and reload your site &mdash; the chat bubble appears in the bottom-right corner</li>
+                </>
+              )}
+            </ol>
           </div>
         </div>
       )}
