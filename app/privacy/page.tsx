@@ -6,11 +6,13 @@ export default function PrivacyPolicy() {
 
         <div className="space-y-6 text-gray-200">
           <section>
-            <p className="text-sm text-gray-400 mb-4">Last Updated: {new Date().toLocaleDateString()}</p>
+            <p className="text-sm text-gray-400 mb-4">Last Updated: July 11, 2026</p>
 
             <p>
-              This privacy policy describes how our customer support platform ("we", "our", or "the Service")
-              collects, uses, and shares information when you use our service.
+              This privacy policy describes how InboxForge (&quot;we&quot;, &quot;our&quot;, or &quot;the Service&quot;)
+              collects, uses, and shares information when you use our service. InboxForge is an AI-assisted
+              customer support platform: businesses connect their email addresses and website chat, and we help
+              them triage and answer customer messages.
             </p>
           </section>
 
@@ -19,16 +21,23 @@ export default function PrivacyPolicy() {
             <p className="mb-3">We collect the following types of information:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li>
-                <strong className="text-white">Messages and Communications:</strong> When you send messages through Instagram, TikTok,
-                WhatsApp, or email, we store the content of those messages to provide customer support services.
+                <strong className="text-white">Messages and Communications:</strong> When you email a business
+                that uses InboxForge, or message them through their website chat, we store the content of those
+                messages to provide customer support services.
               </li>
               <li>
-                <strong className="text-white">Account Information:</strong> We collect your social media username/ID (Instagram, TikTok,
-                WhatsApp), email address, and other identifiers necessary to route messages to the correct business.
+                <strong className="text-white">Contact Information:</strong> We collect your email address and
+                name (when provided) so the business can identify you and route replies to you. Website chat
+                visitors may chat anonymously.
               </li>
               <li>
-                <strong className="text-white">Usage Data:</strong> We collect information about how you interact with our service,
-                including timestamps and conversation metadata.
+                <strong className="text-white">Business Account Information:</strong> For businesses using
+                InboxForge, we collect account details (name, email, connected addresses), team member accounts,
+                and billing information processed by Stripe.
+              </li>
+              <li>
+                <strong className="text-white">Usage Data:</strong> We collect information about how you interact
+                with our service, including timestamps and conversation metadata.
               </li>
             </ul>
           </section>
@@ -38,53 +47,55 @@ export default function PrivacyPolicy() {
             <p className="mb-3">We use the information we collect to:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li>Provide customer support services and facilitate communication between customers and businesses</li>
+              <li>Route emails and chat messages to the correct business inbox</li>
+              <li>Generate AI-powered features on behalf of the business: message classification (e.g. flagging urgent
+                messages), reply suggestions, automatic replies, and customer profile notes</li>
+              <li>Send responses to your messages via email or website chat</li>
               <li>Improve our service and develop new features</li>
-              <li>Send responses to your messages via Instagram Direct Messages, TikTok Direct Messages, WhatsApp, or email</li>
-              <li>Generate AI-powered message suggestions to help businesses respond faster</li>
-              <li>Maintain security and prevent abuse of our service</li>
+              <li>Maintain security, enforce usage limits, and prevent abuse of our service</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-3 text-white">Instagram Integration</h2>
+            <h2 className="text-2xl font-semibold mb-3 text-white">Email Processing</h2>
             <p className="mb-3">
-              Our service integrates with Instagram to enable businesses to receive and respond to customer messages.
-              When you message a business on Instagram:
+              Businesses connect their email addresses to InboxForge by forwarding mail to a unique address we
+              provide. When you email a connected business:
             </p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Your Instagram username and message content are stored in our database</li>
-              <li>The business can see your messages and send responses through our platform</li>
-              <li>We use the Instagram Messaging API to send and receive messages on behalf of businesses</li>
-              <li>We do not post to Instagram on your behalf or access your Instagram content beyond the messages you send to businesses</li>
+              <li>Your email address, name, and message content are stored in our database</li>
+              <li>The business sees your message in their InboxForge inbox and can reply from there</li>
+              <li>Replies are delivered by our email providers with the business&apos;s address as the reply-to</li>
+              <li>Message content may be processed by our AI provider to classify the message and draft or send
+                replies on the business&apos;s behalf</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-3 text-white">TikTok Integration</h2>
+            <h2 className="text-2xl font-semibold mb-3 text-white">Website Chat Widget</h2>
             <p className="mb-3">
-              Our service integrates with TikTok to enable businesses to receive and respond to customer messages.
-              When you message a business on TikTok:
+              Businesses can embed our chat widget on their own websites. When you use a business&apos;s chat widget:
             </p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Your TikTok username and message content are stored in our database</li>
-              <li>The business can see your messages and send responses through our platform</li>
-              <li>We use the TikTok Content Posting API to send and receive messages on behalf of businesses</li>
-              <li>We do not post to TikTok on your behalf or access your TikTok content beyond the messages you send to businesses</li>
+              <li>Your messages, and the name/email you optionally provide, are stored in our database</li>
+              <li>A session token is stored in your browser&apos;s local storage so your conversation persists between visits</li>
+              <li>Replies may come from the business&apos;s team or from an AI assistant acting on their behalf
+                (AI replies are labeled as such in the chat)</li>
+              <li>We do not track your browsing on the business&apos;s website beyond the chat itself</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-3 text-white">WhatsApp Integration</h2>
-            <p className="mb-3">
-              Our service integrates with WhatsApp to enable businesses to receive and respond to customer messages.
-              When you message a business on WhatsApp:
+            <h2 className="text-2xl font-semibold mb-3 text-white">Social Media Integrations</h2>
+            <p>
+              InboxForge may offer integrations with social messaging platforms such as Instagram, WhatsApp, or
+              TikTok. Where a business has such an integration connected, your platform username or phone number
+              and the messages you send to that business are stored and handled the same way as email messages,
+              using each platform&apos;s official messaging APIs. We only access the messages you send to businesses —
+              never your other content — and we never use social platform data for advertising. We comply with
+              Meta&apos;s Platform Policy and TikTok&apos;s Developer Terms of Service, including deletion of platform
+              data upon request or when no longer needed.
             </p>
-            <ul className="list-disc pl-6 space-y-2">
-              <li>Your WhatsApp phone number and message content are stored in our database</li>
-              <li>The business can see your messages and send responses through our platform</li>
-              <li>We use the WhatsApp Business API to send and receive messages on behalf of businesses</li>
-              <li>We do not access your WhatsApp content beyond the messages you send to businesses</li>
-            </ul>
           </section>
 
           <section>
@@ -92,18 +103,20 @@ export default function PrivacyPolicy() {
             <p className="mb-3">We share your information in the following circumstances:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li>
-                <strong className="text-white">With Businesses:</strong> Messages you send are shared with the business you're
-                contacting so they can provide customer support
+                <strong className="text-white">With Businesses:</strong> Messages you send are shared with the
+                business you&apos;re contacting so they can provide customer support
               </li>
               <li>
-                <strong className="text-white">Service Providers:</strong> We use third-party services including Supabase (database),
-                SendGrid (email), Anthropic (AI), Meta/Facebook (Instagram and WhatsApp messaging), and TikTok (TikTok messaging)
+                <strong className="text-white">Service Providers:</strong> We use third-party processors including
+                Supabase (database and authentication), Vercel (hosting), Anthropic (AI processing), Resend and
+                SendGrid (email delivery and receiving), and Stripe (payments for business subscriptions)
               </li>
               <li>
-                <strong className="text-white">Legal Requirements:</strong> We may disclose information if required by law or to
-                protect our rights
+                <strong className="text-white">Legal Requirements:</strong> We may disclose information if required
+                by law or to protect our rights
               </li>
             </ul>
+            <p className="mt-3">We do not sell your personal data.</p>
           </section>
 
           <section>
@@ -120,9 +133,9 @@ export default function PrivacyPolicy() {
             <p className="mb-3">You have the right to:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li>Request access to the personal data we hold about you</li>
-              <li>Request correction or deletion of your personal data</li>
+              <li>Request correction or deletion of your personal data (see our <a href="/data-deletion" className="text-blue-400 hover:text-blue-300 underline">data deletion page</a>)</li>
               <li>Object to our processing of your personal data</li>
-              <li>Stop receiving messages by blocking the business on the respective platform (Instagram, TikTok, or WhatsApp)</li>
+              <li>Stop receiving messages from a business by emailing them directly or closing the chat</li>
             </ul>
           </section>
 
@@ -130,13 +143,14 @@ export default function PrivacyPolicy() {
             <h2 className="text-2xl font-semibold mb-3 text-white">Security</h2>
             <p>
               We implement appropriate technical and organizational measures to protect your personal data
-              against unauthorized access, alteration, disclosure, or destruction. However, no method of
-              transmission over the internet is 100% secure.
+              against unauthorized access, alteration, disclosure, or destruction — including verified ownership
+              of connected email addresses, authenticated webhooks, and hashed chat session tokens. However, no
+              method of transmission over the internet is 100% secure.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-3 text-white">Children's Privacy</h2>
+            <h2 className="text-2xl font-semibold mb-3 text-white">Children&apos;s Privacy</h2>
             <p>
               Our service is not directed to individuals under the age of 13. We do not knowingly collect
               personal information from children under 13.
@@ -147,7 +161,7 @@ export default function PrivacyPolicy() {
             <h2 className="text-2xl font-semibold mb-3 text-white">Changes to This Policy</h2>
             <p>
               We may update this privacy policy from time to time. We will notify you of any changes by
-              posting the new privacy policy on this page and updating the "Last Updated" date.
+              posting the new privacy policy on this page and updating the &quot;Last Updated&quot; date.
             </p>
           </section>
 
@@ -159,34 +173,6 @@ export default function PrivacyPolicy() {
                 inboxforgeapp@outlook.com
               </a>.
             </p>
-          </section>
-
-          <section className="mt-8 pt-8 border-t border-slate-700">
-            <h2 className="text-2xl font-semibold mb-3 text-white">Meta Platform Policy Compliance</h2>
-            <p className="mb-3">
-              This service complies with Meta's Platform Policy. We:
-            </p>
-            <ul className="list-disc pl-6 space-y-2">
-              <li>Only use Instagram and WhatsApp data for the purpose of providing customer support messaging services</li>
-              <li>Do not use Instagram or WhatsApp data for advertising or marketing purposes</li>
-              <li>Protect user data with industry-standard security measures</li>
-              <li>Delete user data upon request or when no longer needed for our service</li>
-              <li>Comply with all Meta Platform Terms and Developer Policies</li>
-            </ul>
-          </section>
-
-          <section className="mt-8 pt-8 border-t border-slate-700">
-            <h2 className="text-2xl font-semibold mb-3 text-white">TikTok Platform Policy Compliance</h2>
-            <p className="mb-3">
-              This service complies with TikTok's Developer Terms of Service. We:
-            </p>
-            <ul className="list-disc pl-6 space-y-2">
-              <li>Only use TikTok data for the purpose of providing customer support messaging services</li>
-              <li>Do not use TikTok data for advertising or marketing purposes</li>
-              <li>Protect user data with industry-standard security measures</li>
-              <li>Delete user data upon request or when no longer needed for our service</li>
-              <li>Comply with all TikTok Platform Terms and Developer Policies</li>
-            </ul>
           </section>
         </div>
       </div>
