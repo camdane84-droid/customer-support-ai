@@ -56,6 +56,7 @@ const plans = [
       'Unlimited AI suggestions',
       'Unlimited conversations',
       'Unlimited email addresses',
+      'Website live chat widget',
       'After-hours auto-reply',
       'Urgent email alerts',
       '10 team members',

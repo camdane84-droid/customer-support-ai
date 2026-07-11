@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MessageSquare, Copy, Check, Loader2, Save } from 'lucide-react';
+import Link from 'next/link';
+import { MessageSquare, Copy, Check, Loader2, Save, Lock } from 'lucide-react';
 import { supabase } from '@/lib/api/supabase';
 
 interface ChatWidgetSettingsProps {
   businessId: string;
+  subscriptionTier: string;
 }
 
 interface WidgetSettings {
@@ -15,7 +17,8 @@ interface WidgetSettings {
   widget_greeting: string;
 }
 
-export default function ChatWidgetSettings({ businessId }: ChatWidgetSettingsProps) {
+export default function ChatWidgetSettings({ businessId, subscriptionTier }: ChatWidgetSettingsProps) {
+  const isPro = subscriptionTier === 'pro';
   const [settings, setSettings] = useState<WidgetSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -113,6 +116,40 @@ export default function ChatWidgetSettings({ businessId }: ChatWidgetSettingsPro
   }
 
   if (!settings) return null;
+
+  // Live chat is a Pro feature — the widget API refuses non-pro businesses,
+  // so show the upgrade path instead of controls that silently do nothing.
+  if (!isPro) {
+    return (
+      <div className="border border-gray-200 dark:border-slate-700 rounded-lg p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
+              <MessageSquare className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h3 className="font-medium text-gray-900 dark:text-white">Website Chat Widget</h3>
+                <span className="flex items-center gap-1 px-2 py-0.5 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-xs font-medium rounded-full">
+                  <Lock className="w-3 h-3" />
+                  Pro
+                </span>
+              </div>
+              <p className="text-sm text-gray-500 dark:text-slate-400">
+                Live chat bubble for your website, answered from this inbox
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/pricing"
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-violet-600 text-white hover:bg-violet-700 transition-colors"
+          >
+            Upgrade to Pro
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden">

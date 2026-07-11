@@ -341,8 +341,11 @@ export default function SettingsPage() {
             {/* Email Connections (primary + additional, with forwarding setup) */}
             <EmailConnections businessId={business.id} primaryEmail={business.email} />
 
-            {/* Website Chat Widget */}
-            <ChatWidgetSettings businessId={business.id} />
+            {/* Website Chat Widget (Pro feature) */}
+            <ChatWidgetSettings
+              businessId={business.id}
+              subscriptionTier={business.subscription_tier || 'free'}
+            />
 
             {/* Instagram Connection */}
             <InstagramConnection businessId={business.id} />

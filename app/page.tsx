@@ -346,8 +346,8 @@ export default function LandingPage() {
               </div>
               <h3 className="font-semibold text-lg mb-2">Live Chat Widget</h3>
               <p className="text-sm text-slate-600 dark:text-muted-foreground">AI-powered chat on your website, answered from the same inbox</p>
-              <div className="mt-4 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium inline-block">
-                Coming Soon
+              <div className="mt-4 px-3 py-1 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 text-xs font-medium inline-block">
+                Active
               </div>
             </div>
 
@@ -526,7 +526,7 @@ export default function LandingPage() {
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                  <span className="text-sm">Live chat widget (Coming Soon)</span>
+                  <span className="text-sm">Website live chat widget</span>
                 </li>
               </ul>
 

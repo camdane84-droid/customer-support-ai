@@ -5,6 +5,7 @@ import { generateAutoNotes } from '@/lib/ai/auto-notes';
 import { sendAutoReply } from '@/lib/ai/send-auto-reply';
 import { classifyNewMessage } from '@/lib/ai/classify';
 import { getSessionByToken, validateMessageContent } from '@/lib/chat-widget';
+import { rateLimit, getClientIp } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 
 /**
@@ -13,6 +14,12 @@ import { logger } from '@/lib/logger';
  */
 export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get('token');
+
+  // Widget polls every 3s (~20/min); allow a few tabs' worth of headroom
+  if (!rateLimit(`widget-poll:${token || getClientIp(request)}`, 60, 60_000)) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
   const session = await getSessionByToken(supabaseServer, token);
   if (!session) {
     return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
@@ -53,9 +60,19 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Every message triggers AI processing — cap per session and per client
+    const ip = getClientIp(request);
+    if (!rateLimit(`widget-send-ip:${ip}`, 30, 60_000)) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const body = await request.json().catch(() => null);
     if (!body) {
       return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    }
+
+    if (typeof body.token === 'string' && !rateLimit(`widget-send:${body.token}`, 15, 60_000)) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     const session = await getSessionByToken(supabaseServer, body.token);

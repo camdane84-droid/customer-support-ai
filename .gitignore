@@ -49,3 +49,6 @@ tmpclaude-*
 # Local screenshots and diagnostic scripts
 *.png
 scripts/
+
+# local widget test page
+widget-test.html

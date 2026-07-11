@@ -14,6 +14,7 @@ import {
   CHAT_NAME_MAX_LENGTH,
   CHAT_EMAIL_MAX_LENGTH,
 } from '@/lib/chat-widget';
+import { rateLimit, getClientIp } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 
 /**
@@ -23,6 +24,12 @@ import { logger } from '@/lib/logger';
  */
 export async function POST(request: NextRequest) {
   try {
+    // Each session creates a conversation (usage-counted, AI-processed) —
+    // keep this strict per client
+    if (!rateLimit(`widget-session:${getClientIp(request)}`, 5, 60_000)) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const body = await request.json().catch(() => null);
     if (!body) {
       return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
@@ -46,11 +53,12 @@ export async function POST(request: NextRequest) {
 
     const { data: business } = await supabaseServer
       .from('businesses')
-      .select('id, name, widget_enabled')
+      .select('id, name, widget_enabled, subscription_tier')
       .eq('widget_key', key)
       .single();
 
-    if (!business || !business.widget_enabled) {
+    // Live chat is a Pro feature; same 404 as unknown key to avoid leaking tier
+    if (!business || !business.widget_enabled || business.subscription_tier !== 'pro') {
       return NextResponse.json({ error: 'Widget not found' }, { status: 404 });
     }
 
