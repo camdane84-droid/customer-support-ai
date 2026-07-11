@@ -1,7 +1,9 @@
 /**
  * Centralized logging utility
- * Provides structured logging that can be easily integrated with services like Sentry
+ * error() forwards to Sentry when a DSN is configured (no-op otherwise)
  */
+
+import * as Sentry from '@sentry/nextjs';
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
@@ -49,10 +51,15 @@ class Logger {
       ...context,
     });
 
-    // TODO: Send to error tracking service (Sentry, LogRocket, etc.)
-    // if (this.isProduction) {
-    //   Sentry.captureException(error, { extra: context });
-    // }
+    // No-op unless Sentry.init ran with a DSN (see instrumentation*.ts)
+    if (error instanceof Error) {
+      Sentry.captureException(error, { extra: { message, ...context } });
+    } else {
+      Sentry.captureMessage(message, {
+        level: 'error',
+        extra: { error, ...context },
+      });
+    }
   }
 
   /**
