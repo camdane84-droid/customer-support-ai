@@ -5,20 +5,9 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim();
 const supabaseAnonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
 
-// Always log what we're using
-console.log('🔧 [SUPABASE] Initializing with URL:', supabaseUrl);
-console.log('🔧 [SUPABASE] URL length:', supabaseUrl?.length);
-console.log('🔧 [SUPABASE] URL type:', typeof supabaseUrl);
-console.log('🔧 [SUPABASE] URL first/last chars:', supabaseUrl.charCodeAt(0), supabaseUrl.charCodeAt(supabaseUrl.length - 1));
-console.log('🔧 [SUPABASE] Anon key present:', !!supabaseAnonKey);
-console.log('🔧 [SUPABASE] Anon key length:', supabaseAnonKey?.length);
-console.log('🔧 [SUPABASE] Anon key first/last chars:', supabaseAnonKey.charCodeAt(0), supabaseAnonKey.charCodeAt(supabaseAnonKey.length - 1));
-console.log('🔧 [SUPABASE] Full URL:', JSON.stringify(supabaseUrl));
-console.log('🔧 [SUPABASE] First 50 chars of anon key:', supabaseAnonKey.substring(0, 50));
-
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error('❌ Missing Supabase environment variables!');
-  console.error('NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl);
+  console.error('NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ? 'SET' : 'MISSING');
   console.error('NEXT_PUBLIC_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'SET' : 'MISSING');
 }
 
