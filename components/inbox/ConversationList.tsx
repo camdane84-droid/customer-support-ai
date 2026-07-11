@@ -1,12 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { Mail, Instagram, Phone, Search, MoreHorizontal, Archive, Trash2, X, Download, MessageCircle, AlertTriangle, Star } from 'lucide-react';
+import { Mail, Instagram, Phone, Search, MoreHorizontal, Archive, Trash2, X, Download, MessageCircle, AlertTriangle, Star, ChevronDown, Check } from 'lucide-react';
 import TikTokIcon from '@/components/icons/TikTokIcon';
 import type { Conversation } from '@/lib/api/supabase';
 import { formatDistanceToNow } from 'date-fns';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { getCustomerDisplayName, getCustomerInitials } from '@/lib/utils/customerDisplay';
+
+interface EmailConnection {
+  id: string;
+  platform_user_id: string;
+  metadata: { label?: string } | null;
+}
 
 interface ConversationListProps {
   conversations: Conversation[];
@@ -17,6 +23,14 @@ interface ConversationListProps {
   collapsed?: boolean;
   /** Map of conversation ID → priority ('urgent' | 'important') for flagged conversations */
   priorityMap?: Record<string, 'urgent' | 'important'>;
+  /** Available email connections for filtering */
+  emailConnections?: EmailConnection[];
+  /** Currently selected email addresses for filtering */
+  selectedEmailAddresses?: Set<string>;
+  /** Callback to toggle an email address filter */
+  onToggleEmailFilter?: (email: string) => void;
+  /** Callback to select/deselect all email filters */
+  onToggleAllEmailFilters?: () => void;
 }
 
 export default function ConversationList({
@@ -27,12 +41,17 @@ export default function ConversationList({
   onBulkDelete,
   collapsed = false,
   priorityMap = {},
+  emailConnections = [],
+  selectedEmailAddresses,
+  onToggleEmailFilter,
+  onToggleAllEmailFilters,
 }: ConversationListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showEmailFilter, setShowEmailFilter] = useState(false);
 
   // Filter conversations based on search
   const filteredConversations = conversations.filter((convo) => {
@@ -323,6 +342,74 @@ export default function ConversationList({
         )}
       </div>
 
+      {/* Email Filter — collapsible arrow row */}
+      {emailConnections.length > 0 && selectedEmailAddresses && onToggleEmailFilter && (
+        <div className="border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+          {/* Arrow toggle row */}
+          <button
+            onClick={() => setShowEmailFilter(!showEmailFilter)}
+            className="w-full flex items-center justify-between px-4 py-2 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
+          >
+            <div className="flex items-center space-x-2">
+              <Mail className="w-4 h-4 text-indigo-500" />
+              <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
+                Emails
+              </span>
+              <span className="text-xs text-gray-400 dark:text-slate-500">
+                {selectedEmailAddresses.size === emailConnections.length
+                  ? 'All active'
+                  : `${selectedEmailAddresses.size} of ${emailConnections.length} active`
+                }
+              </span>
+            </div>
+            <ChevronDown className={`w-4 h-4 text-gray-400 dark:text-slate-500 transition-transform duration-200 ${showEmailFilter ? 'rotate-180' : ''}`} />
+          </button>
+
+          {/* Expanded email list */}
+          {showEmailFilter && (
+            <div className="px-3 pb-3 space-y-1.5">
+              {emailConnections.map(conn => {
+                const isActive = selectedEmailAddresses.has(conn.platform_user_id);
+                return (
+                  <button
+                    key={conn.id}
+                    onClick={() => onToggleEmailFilter(conn.platform_user_id)}
+                    className={`
+                      w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-all
+                      ${isActive
+                        ? 'bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700/50'
+                        : 'bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 opacity-60'
+                      }
+                    `}
+                  >
+                    <div className="flex items-center space-x-2 min-w-0">
+                      <Mail className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? 'text-indigo-500' : 'text-gray-400 dark:text-slate-500'}`} />
+                      <span className={`truncate ${isActive ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-500 dark:text-slate-400'}`}>
+                        {conn.metadata?.label ? `${conn.metadata.label}` : conn.platform_user_id}
+                      </span>
+                      {conn.metadata?.label && (
+                        <span className="text-xs text-gray-400 dark:text-slate-500 truncate hidden sm:inline">
+                          {conn.platform_user_id}
+                        </span>
+                      )}
+                    </div>
+                    <span className={`
+                      text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0
+                      ${isActive
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                        : 'bg-gray-200 dark:bg-slate-600 text-gray-500 dark:text-slate-400'
+                      }
+                    `}>
+                      {isActive ? 'Active' : 'Hidden'}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Conversation List */}
       <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-slate-900">
         {filteredConversations.length === 0 ? (
@@ -423,13 +510,18 @@ export default function ConversationList({
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2 min-w-0">
                         <span className={getChannelColor(conversation.channel)}>
                           {getChannelIcon(conversation.channel)}
                         </span>
                         <span className="text-xs text-gray-600 dark:text-slate-300 capitalize font-medium">
                           {conversation.channel}
                         </span>
+                        {conversation.channel === 'email' && conversation.channel_address && (
+                          <span className="text-xs text-gray-400 dark:text-slate-500 truncate">
+                            via {conversation.channel_address}
+                          </span>
+                        )}
                       </div>
 
                       <div className="flex items-center space-x-2">

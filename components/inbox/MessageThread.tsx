@@ -565,6 +565,11 @@ export default function MessageThread({ conversation, businessId, onConversation
               </div>
               <p className="text-sm text-gray-500">
                 {conversation.customer_email || conversation.customer_instagram_id || 'No contact info'}
+                {conversation.channel === 'email' && conversation.channel_address && (
+                  <span className="ml-2 text-indigo-500 dark:text-indigo-400">
+                    via {conversation.channel_address}
+                  </span>
+                )}
               </p>
             </div>
           </div>

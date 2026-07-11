@@ -4,9 +4,10 @@ import { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/lib/context/AuthContext';
 import { supabase } from '@/lib/api/supabase';
-import { Save, Building, Clock, Share2, Mail, MessageCircle, Instagram, Facebook, CheckCircle, FileText, Sparkles, Trash2, AlertTriangle, Star, ShoppingBag, AlertCircle, Ruler, Heart, ChevronDown, Moon, Lock } from 'lucide-react';
+import { Save, Building, Clock, Share2, MessageCircle, Instagram, Facebook, CheckCircle, FileText, Sparkles, Trash2, AlertTriangle, Star, ShoppingBag, AlertCircle, Ruler, Heart, ChevronDown, Moon, Lock } from 'lucide-react';
 import TikTokIcon from '@/components/icons/TikTokIcon';
 import BillingSection from '@/components/ui/BillingSection';
+import EmailConnections from '@/components/settings/EmailConnections';
 import { useRouter } from 'next/navigation';
 import { hasPermission } from '@/lib/permissions';
 import SettingsSkeleton from '@/components/skeletons/SettingsSkeleton';
@@ -336,16 +337,8 @@ export default function SettingsPage() {
           </p>
 
           <div className="space-y-4">
-            {/* Email Connection (Always Active) */}
-            <ConnectionCard
-              platform="email"
-              icon={Mail}
-              name="Email"
-              description={business.email}
-              isConnected={true}
-              canDisconnect={false}
-              color="blue"
-            />
+            {/* Email Connections (primary + additional, with forwarding setup) */}
+            <EmailConnections businessId={business.id} primaryEmail={business.email} />
 
             {/* Instagram Connection */}
             <InstagramConnection businessId={business.id} />
