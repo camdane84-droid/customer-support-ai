@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { MessageSquare, Copy, Check, Loader2, Save, Lock, ExternalLink } from 'lucide-react';
 import { supabase } from '@/lib/api/supabase';
 
-type EmbedPlatform = 'wordpress' | 'shopify' | 'wix' | 'squarespace' | 'other';
+type EmbedPlatform = 'webflow' | 'wordpress' | 'shopify' | 'wix' | 'squarespace' | 'other';
 
 interface ChatWidgetSettingsProps {
   businessId: string;
@@ -28,7 +28,7 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
-  const [platform, setPlatform] = useState<EmbedPlatform>('wordpress');
+  const [platform, setPlatform] = useState<EmbedPlatform>('webflow');
 
   useEffect(() => {
     async function load() {
@@ -280,6 +280,7 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
             </label>
             <div className="flex items-center flex-wrap gap-1 mb-2">
               {([
+                ['webflow', 'Webflow'],
                 ['wordpress', 'WordPress'],
                 ['shopify', 'Shopify'],
                 ['wix', 'Wix'],
@@ -301,6 +302,14 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
             </div>
 
             <ol className="list-decimal list-inside space-y-1.5 text-sm text-gray-600 dark:text-slate-300">
+              {platform === 'webflow' && (
+                <>
+                  <li>In Webflow, open <span className="font-medium">Site settings &rarr; Custom code</span> (requires a paid site plan)</li>
+                  <li>Paste the snippet into the <span className="font-medium">Footer code</span> box</li>
+                  <li>Click <span className="font-medium">Save changes</span>, then <span className="font-medium">Publish</span> your site</li>
+                  <li>Visit your published site &mdash; the chat bubble appears in the bottom-right corner</li>
+                </>
+              )}
               {platform === 'wordpress' && (
                 <>
                   <li>In your WordPress admin, go to <span className="font-medium">Plugins &rarr; Add New</span> and install the free <span className="font-medium">WPCode</span> plugin</li>
