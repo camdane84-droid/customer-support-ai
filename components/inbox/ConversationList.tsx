@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Mail, Instagram, Phone, Search, MoreHorizontal, Archive, Trash2, X, Download, MessageCircle, AlertTriangle, Star, ChevronDown, Check } from 'lucide-react';
+import { Mail, Instagram, Phone, Search, MoreHorizontal, Archive, Trash2, X, Download, MessageCircle, MessageSquare, AlertTriangle, Star, ChevronDown, Check } from 'lucide-react';
 import TikTokIcon from '@/components/icons/TikTokIcon';
 import type { Conversation } from '@/lib/api/supabase';
 import { formatDistanceToNow } from 'date-fns';
@@ -78,6 +78,8 @@ export default function ConversationList({
         return <MessageCircle className="w-4 h-4" />;
       case 'tiktok':
         return <TikTokIcon className="w-4 h-4" />;
+      case 'chat':
+        return <MessageSquare className="w-4 h-4" />;
       default:
         return <Mail className="w-4 h-4" />;
     }
@@ -95,6 +97,8 @@ export default function ConversationList({
         return 'text-green-500';
       case 'tiktok':
         return 'text-slate-800 dark:text-slate-200';
+      case 'chat':
+        return 'text-violet-500';
       default:
         return 'text-gray-500';
     }

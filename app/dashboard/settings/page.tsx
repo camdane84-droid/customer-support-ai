@@ -8,6 +8,7 @@ import { Save, Building, Clock, Share2, MessageCircle, Instagram, Facebook, Chec
 import TikTokIcon from '@/components/icons/TikTokIcon';
 import BillingSection from '@/components/ui/BillingSection';
 import EmailConnections from '@/components/settings/EmailConnections';
+import ChatWidgetSettings from '@/components/settings/ChatWidgetSettings';
 import { useRouter } from 'next/navigation';
 import { hasPermission } from '@/lib/permissions';
 import SettingsSkeleton from '@/components/skeletons/SettingsSkeleton';
@@ -339,6 +340,9 @@ export default function SettingsPage() {
           <div className="space-y-4">
             {/* Email Connections (primary + additional, with forwarding setup) */}
             <EmailConnections businessId={business.id} primaryEmail={business.email} />
+
+            {/* Website Chat Widget */}
+            <ChatWidgetSettings businessId={business.id} />
 
             {/* Instagram Connection */}
             <InstagramConnection businessId={business.id} />

@@ -82,7 +82,7 @@ export type Conversation = {
   customer_phone: string | null;
   customer_instagram_id: string | null;
   customer_tiktok_id: string | null;
-  channel: 'email' | 'instagram' | 'sms' | 'whatsapp' | 'tiktok';
+  channel: 'email' | 'instagram' | 'sms' | 'whatsapp' | 'tiktok' | 'chat';
   status: 'open' | 'closed' | 'pending' | 'archived';
   unread_count: number;
   last_message_at: string;
