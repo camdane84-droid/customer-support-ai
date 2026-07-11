@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Send, X, Sparkles, MessageSquare, Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/api/supabase';
 import { playNotificationSound } from '@/lib/notification-sound';
 
 /**
@@ -26,10 +27,22 @@ interface ChatMessage {
   created_at: string;
 }
 
+// Fast polling until the realtime channel confirms, then it's just a safety net
 const POLL_INTERVAL_MS = 3000;
+const POLL_INTERVAL_REALTIME_MS = 15000;
 
 function storageKey(widgetKey: string) {
   return `inboxforge_chat_session:${widgetKey}`;
+}
+
+/** SHA-256 hex — matches the server-side token hash, which names our channel. */
+async function sha256Hex(value: string): Promise<string | null> {
+  try {
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+    return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch {
+    return null; // non-secure context — polling covers us
+  }
 }
 
 export default function ChatWidget({ widgetKey }: { widgetKey: string }) {
@@ -48,6 +61,7 @@ export default function ChatWidget({ widgetKey }: { widgetKey: string }) {
   const lastCreatedAtRef = useRef<string | null>(null);
   const knownIdsRef = useRef<Set<string>>(new Set());
   const historyLoadedRef = useRef(false);
+  const realtimeUpRef = useRef(false);
 
   // Load config + any stored session
   useEffect(() => {
@@ -113,19 +127,60 @@ export default function ChatWidget({ widgetKey }: { widgetKey: string }) {
     }
   }, [widgetKey, mergeMessages]);
 
-  // Full history on session (re)load, then incremental polling
+  // Full history on session (re)load, then incremental polling. Polling is
+  // the reliability floor; realtime below makes replies instant.
   useEffect(() => {
     if (!token) return;
     fetchMessages(null).then(() => {
       historyLoadedRef.current = true;
     });
 
-    const interval = setInterval(() => {
-      fetchMessages(lastCreatedAtRef.current);
-    }, POLL_INTERVAL_MS);
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const schedule = () => {
+      timer = setTimeout(async () => {
+        if (cancelled) return;
+        await fetchMessages(lastCreatedAtRef.current);
+        if (!cancelled) schedule();
+      }, realtimeUpRef.current ? POLL_INTERVAL_REALTIME_MS : POLL_INTERVAL_MS);
+    };
+    schedule();
 
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [token, fetchMessages]);
+
+  // Realtime: replies are broadcast on a channel named by our token's hash
+  useEffect(() => {
+    if (!token) return;
+    let removed = false;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    sha256Hex(token).then(hash => {
+      if (!hash || removed) return;
+      channel = supabase
+        .channel(`chat:${hash}`)
+        .on('broadcast', { event: 'new-message' }, payload => {
+          const msg = payload?.payload?.message;
+          if (msg && typeof msg.id === 'string' && typeof msg.content === 'string') {
+            mergeMessages([msg as ChatMessage]);
+          } else {
+            fetchMessages(lastCreatedAtRef.current);
+          }
+        })
+        .subscribe(status => {
+          realtimeUpRef.current = status === 'SUBSCRIBED';
+        });
+    });
+
+    return () => {
+      removed = true;
+      realtimeUpRef.current = false;
+      if (channel) supabase.removeChannel(channel);
+    };
+  }, [token, mergeMessages, fetchMessages]);
 
   // Keep the newest message in view
   useEffect(() => {
