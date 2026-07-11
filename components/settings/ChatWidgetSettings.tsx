@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { MessageSquare, Copy, Check, Loader2, Save, Lock, ExternalLink } from 'lucide-react';
+import { MessageSquare, Copy, Check, Loader2, Save, Lock, ExternalLink, RefreshCw } from 'lucide-react';
 import { supabase } from '@/lib/api/supabase';
 
 type EmbedPlatform = 'webflow' | 'wordpress' | 'shopify' | 'wix' | 'squarespace' | 'other';
@@ -32,6 +32,8 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
   const [error, setError] = useState('');
   const [platform, setPlatform] = useState<EmbedPlatform>('webflow');
   const [savingMode, setSavingMode] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
+  const [confirmRegen, setConfirmRegen] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -72,6 +74,32 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
       setSettings({ ...settings, widget_enabled: enabled });
     }
     setToggling(false);
+  }
+
+  async function handleRegenerateKey() {
+    if (!settings || regenerating) return;
+    // Two-step confirm: regenerating kills every existing embed
+    if (!confirmRegen) {
+      setConfirmRegen(true);
+      setTimeout(() => setConfirmRegen(false), 5000);
+      return;
+    }
+    setConfirmRegen(false);
+    setRegenerating(true);
+    setError('');
+
+    const newKey = crypto.randomUUID();
+    const { error: updateError } = await supabase
+      .from('businesses')
+      .update({ widget_key: newKey })
+      .eq('id', businessId);
+
+    if (updateError) {
+      setError('Failed to regenerate the widget key');
+    } else {
+      setSettings({ ...settings, widget_key: newKey });
+    }
+    setRegenerating(false);
   }
 
   async function handleAutoReplyMode(mode: ChatAutoReplyMode) {
@@ -304,15 +332,27 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
               <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">
                 Embed code
               </label>
-              <a
-                href={`/widget-test.html?key=${settings.widget_key}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center space-x-1 text-xs font-medium text-violet-600 dark:text-violet-400 hover:underline"
-              >
-                <span>Preview your widget</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={handleRegenerateKey}
+                  disabled={regenerating}
+                  className={`flex items-center space-x-1 text-xs font-medium hover:underline disabled:opacity-50 ${
+                    confirmRegen ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-slate-400'
+                  }`}
+                >
+                  <RefreshCw className={`w-3 h-3 ${regenerating ? 'animate-spin' : ''}`} />
+                  <span>{confirmRegen ? 'Existing embeds will break — confirm?' : 'Regenerate key'}</span>
+                </button>
+                <a
+                  href={`/widget-test.html?key=${settings.widget_key}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-1 text-xs font-medium text-violet-600 dark:text-violet-400 hover:underline"
+                >
+                  <span>Preview your widget</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
             </div>
             <p className="text-xs text-gray-500 dark:text-slate-400 mb-2">
               Copy this snippet, then follow the steps below for your website platform.
