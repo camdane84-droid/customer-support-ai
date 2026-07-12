@@ -1,0 +1,64 @@
+# Nightly logical backup of the Supabase database.
+#
+# The free tier has no point-in-time recovery and the project already died
+# once (90-day pause) — this is the disaster-recovery safety net. Dumps the
+# app-relevant schemas via the session pooler (GitHub runners are IPv4-only;
+# the direct db host is IPv6-only) and stores them as workflow artifacts.
+#
+# Requires repo secret SUPABASE_DB_URL:
+#   postgresql://postgres.<project-ref>:<db-password>@aws-0-ca-central-1.pooler.supabase.com:5432/postgres
+#
+# NOTE: scheduled runs only fire from the default branch.
+
+name: Nightly database backup
+
+on:
+  schedule:
+    - cron: '17 8 * * *' # 08:17 UTC daily (~3am ET); odd minute avoids the on-the-hour cron rush
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Install PostgreSQL 17 client
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+            -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-17
+
+      - name: Dump database
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          STAMP=$(date -u +%Y-%m-%d)
+          # public = app data, auth = users, storage = file metadata.
+          # Internal Supabase schemas are skipped — they're owned by
+          # supabase_admin and would fail with permission errors.
+          pg_dump "$SUPABASE_DB_URL" \
+            --format=custom \
+            --schema=public \
+            --schema=auth \
+            --schema=storage \
+            --no-owner \
+            --no-privileges \
+            --file="inboxforge-$STAMP.dump"
+          # A valid archive lists its contents; a truncated one errors here
+          pg_restore --list "inboxforge-$STAMP.dump" > /dev/null
+          ls -lh "inboxforge-$STAMP.dump"
+          echo "STAMP=$STAMP" >> "$GITHUB_ENV"
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ env.STAMP }}
+          path: inboxforge-${{ env.STAMP }}.dump
+          retention-days: 90
+          compression-level: 9
+          if-no-files-found: error

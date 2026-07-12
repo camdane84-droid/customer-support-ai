@@ -62,6 +62,14 @@ export async function handleEmailSend(
       subject: `Re: Message from ${business.name}`,
       text: message.content,
       ...(replyToEmail && { replyTo: replyToEmail }),
+      // RFC 3834: mark AI auto-replies as machine-generated so autoresponders
+      // and other tools like ours don't reply back and start a mail loop
+      ...(message.sender_type === 'ai' && {
+        headers: {
+          'Auto-Submitted': 'auto-replied',
+          'X-Auto-Response-Suppress': 'All',
+        },
+      }),
     });
   } catch (emailError: any) {
     throw new Error(`Email delivery failed: ${emailError.message}`);

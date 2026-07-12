@@ -11,6 +11,7 @@ import {
   isGmailForwardingConfirmation,
   parseGmailForwardingConfirmation,
 } from '@/lib/forwarding';
+import { getAutoReplySuppressionReason } from '@/lib/email-loop-guard';
 import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
@@ -273,6 +274,12 @@ export async function POST(request: NextRequest) {
       throw new Error('Failed to create/find conversation');
     }
 
+    // Machine-generated mail (newsletters, out-of-office, notifications,
+    // no-reply senders) still gets ingested and classified, but must never
+    // receive an AI reply — that's how mail loops start.
+    const rawHeaders = formData.get('headers') as string | null;
+    const suppressReason = getAutoReplySuppressionReason(rawHeaders, senderEmail);
+
     // Create message - strip quoted thread from replies so only the new content is saved
     const rawContent = text || html || subject;
     const content = extractLatestReply(rawContent);
@@ -287,6 +294,7 @@ export async function POST(request: NextRequest) {
         subject: subject,
         from_email: senderEmail,
         to_email: channelAddress || businessEmail,
+        ...(suppressReason && { automated_sender: suppressReason }),
       },
     }).select('id').single();
 
@@ -295,10 +303,13 @@ export async function POST(request: NextRequest) {
     // Run AI processing after the response is sent. after() keeps the serverless
     // function alive, unlike fire-and-forget fetch which can be killed mid-flight.
     const savedConversationId = conversationId;
+    if (suppressReason) {
+      logger.info('Auto-reply suppressed for automated sender', { senderEmail, reason: suppressReason });
+    }
     after(async () => {
       await Promise.allSettled([
         generateAutoNotes(savedConversationId),
-        sendAutoReply(savedConversationId),
+        ...(suppressReason ? [] : [sendAutoReply(savedConversationId)]),
         classifyNewMessage(savedConversationId, {
           messageContent: content,
           subject,

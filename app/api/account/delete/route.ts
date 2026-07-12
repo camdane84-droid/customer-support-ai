@@ -63,10 +63,17 @@ export async function POST(request: NextRequest) {
       await supabaseAdmin.from('social_connections').delete().eq('business_id', business.id);
       await supabaseAdmin.from('canned_responses').delete().eq('business_id', business.id);
       await supabaseAdmin.from('customers').delete().eq('business_id', business.id);
-      await supabaseAdmin.from('business_members').delete().eq('business_id', business.id);
 
-      // Delete business
-      await supabaseAdmin.from('businesses').delete().eq('id', business.id);
+      // Delete the business FIRST — business_members rows follow via ON
+      // DELETE CASCADE. Deleting member rows while the business still exists
+      // trips the last-owner guard and used to abort the whole flow.
+      const { error: bizDeleteError } = await supabaseAdmin
+        .from('businesses')
+        .delete()
+        .eq('id', business.id);
+      if (bizDeleteError) {
+        throw new Error(`Failed to delete business: ${bizDeleteError.message}`);
+      }
     } else {
       // Business doesn't exist (might have been merged/deleted)
       // Just clean up user's memberships

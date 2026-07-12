@@ -12,6 +12,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
     "@sendgrid/mail": "^8.1.6",
+    "@sentry/nextjs": "^10.65.0",
     "@stripe/stripe-js": "^8.6.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.86.2",
