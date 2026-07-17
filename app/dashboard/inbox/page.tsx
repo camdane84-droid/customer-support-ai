@@ -39,6 +39,9 @@ function InboxContent() {
   const [selectedEmailAddresses, setSelectedEmailAddresses] = useState<Set<string>>(new Set());
   const hasLoadedRef = useRef(false);
   const emailConnectionsLoadedRef = useRef(false);
+  // Snapshot of unread_count per conversation from the previous poll, used to
+  // detect newly-arrived incoming customer messages and chime for them.
+  const prevUnreadRef = useRef<Map<string, number> | null>(null);
 
   // Resizable panel state
   const [panelWidth, setPanelWidth] = useState(() => {
@@ -131,6 +134,22 @@ function InboxContent() {
       );
 
       setConversations(sortedConvos);
+
+      // Chime when a new incoming customer message arrives. Inbound customer
+      // messages raise a conversation's unread_count; our own and AI replies
+      // don't — so an increase (or a brand-new unread conversation) means a
+      // customer just wrote in. Skipped on the first load (baseline only) so
+      // we never chime on page open.
+      const prevUnread = prevUnreadRef.current;
+      if (prevUnread) {
+        const hasNewIncoming = sortedConvos.some(
+          c => c.unread_count > (prevUnread.get(c.id) ?? 0)
+        );
+        if (hasNewIncoming) {
+          playNotificationSound();
+        }
+      }
+      prevUnreadRef.current = new Map(sortedConvos.map(c => [c.id, c.unread_count] as [string, number]));
 
       // Fetch priority flags from unread notifications
       const { data: notifications } = await supabase
@@ -290,132 +309,6 @@ function InboxContent() {
       }
       return new Set(emailConnections.map(c => c.platform_user_id));
     });
-  }
-
-  function setupRealtimeSubscription() {
-    if (!business) return;
-
-    console.log('🔌 Setting up realtime subscription for business:', business.id);
-
-    const conversationChannel = supabase
-      .channel(`business-conversations-${business.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'conversations',
-          filter: `business_id=eq.${business.id}`,
-        },
-        (payload) => {
-          console.log('🔄 Conversation changed via realtime:', payload.eventType, payload);
-          handleConversationUpdate(payload);
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `business_id=eq.${business.id}`,
-        },
-        (payload) => {
-          console.log('💬 New message received via realtime:', payload);
-          handleNewMessage(payload);
-        }
-      )
-      .subscribe((status, err) => {
-        console.log('📡 Subscription status:', status);
-        if (err) {
-          console.error('❌ Subscription error:', err);
-        }
-        if (status === 'SUBSCRIBED') {
-          console.log('✅ Successfully subscribed to realtime updates');
-        } else if (status === 'CHANNEL_ERROR') {
-          console.error('❌ Channel error - realtime may not be enabled');
-        } else if (status === 'TIMED_OUT') {
-          console.error('❌ Subscription timed out');
-        }
-      });
-
-    return () => {
-      console.log('🔌 Cleaning up subscription');
-      supabase.removeChannel(conversationChannel);
-    };
-  }
-
-  function handleConversationUpdate(payload: any) {
-    const { eventType, new: newRecord, old: oldRecord } = payload;
-
-    setConversations(prev => {
-      let updated = [...prev];
-
-      if (eventType === 'INSERT') {
-        updated = [newRecord as Conversation, ...prev];
-      } else if (eventType === 'UPDATE') {
-        updated = prev.map(c => c.id === newRecord.id ? newRecord as Conversation : c);
-      } else if (eventType === 'DELETE') {
-        updated = prev.filter(c => c.id !== oldRecord.id);
-      }
-
-      return updated.sort((a, b) =>
-        new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
-      );
-    });
-
-    // Update selected conversation if it's the one that changed
-    if (selectedConversation?.id === newRecord?.id) {
-      console.log('📍 Updating selected conversation:', newRecord);
-      setSelectedConversation(newRecord as Conversation);
-    }
-  }
-
-  function handleNewMessage(payload: any) {
-    const message = payload.new;
-    const conversationId = message.conversation_id;
-
-    console.log('💬 Handling new message for conversation:', conversationId);
-
-    // Chime for incoming customer messages (not our own or AI replies)
-    if (message.sender_type === 'customer') {
-      playNotificationSound();
-    }
-
-    // Reload the specific conversation to get updated last_message_at and unread_count
-    supabase
-      .from('conversations')
-      .select('*')
-      .eq('id', conversationId)
-      .single()
-      .then(({ data: updatedConversation }) => {
-        if (updatedConversation) {
-          setConversations(prev => {
-            // Check if conversation exists
-            const exists = prev.some(c => c.id === conversationId);
-
-            if (exists) {
-              // Update existing conversation and move to top
-              const updated = prev
-                .map(c => c.id === conversationId ? updatedConversation as Conversation : c)
-                .sort((a, b) =>
-                  new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
-                );
-              return updated;
-            } else {
-              // Add new conversation at the top
-              return [updatedConversation as Conversation, ...prev].sort((a, b) =>
-                new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
-              );
-            }
-          });
-
-          // Update selected conversation if it's the one that received the message
-          if (selectedConversation?.id === conversationId) {
-            setSelectedConversation(updatedConversation as Conversation);
-          }
-        }
-      });
   }
 
   function handleConversationDeleted() {
