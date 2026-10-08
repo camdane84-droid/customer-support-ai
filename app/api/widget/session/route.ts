@@ -5,6 +5,7 @@ import { canCreateConversation, incrementConversationUsage } from '@/lib/usage/t
 import { generateAutoNotes } from '@/lib/ai/auto-notes';
 import { sendAutoReply } from '@/lib/ai/send-auto-reply';
 import { classifyNewMessage } from '@/lib/ai/classify';
+import { checkInboundAiBudget } from '@/lib/ai/inbound-budget';
 import {
   generateSessionToken,
   hashSessionToken,
@@ -130,7 +131,10 @@ export async function POST(request: NextRequest) {
     });
 
     const conversationId = conversation.id;
+    const businessId = business.id;
     after(async () => {
+      const budget = await checkInboundAiBudget(businessId, conversationId);
+      if (!budget.allowed) return;
       await Promise.allSettled([
         generateAutoNotes(conversationId),
         sendAutoReply(conversationId),
