@@ -284,7 +284,7 @@ export default function SettingsPage() {
           <div className="text-gray-500 dark:text-slate-400 text-lg">Unable to load business data</div>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
           >
             Retry
           </button>
@@ -370,7 +370,7 @@ export default function SettingsPage() {
 
           <div className="space-y-4">
             {/* AI Insights Toggle */}
-            <div className="flex items-start justify-between p-4 border border-gray-200 dark:border-indigo-700/50 rounded-lg hover:border-purple-300 dark:hover:border-indigo-600 transition-colors bg-gradient-to-r from-purple-50 to-blue-50 dark:from-indigo-900/40 dark:to-purple-900/40">
+            <div className="flex items-start justify-between p-4 border border-gray-200 dark:border-purple-700/50 rounded-lg hover:border-purple-300 dark:hover:border-purple-600 transition-colors bg-gradient-to-r from-purple-50 to-purple-50 dark:from-purple-900/40 dark:to-purple-900/40">
               <div className="flex-1 pr-4">
                 <div className="flex items-center space-x-2 mb-2">
                   <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
@@ -443,7 +443,7 @@ export default function SettingsPage() {
                   {/* Favorite Category Toggle */}
                   <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
                     <div className="flex items-center space-x-2">
-                      <Star className="w-4 h-4 text-indigo-500" />
+                      <Star className="w-4 h-4 text-purple-500" />
                       <span className="text-sm text-gray-700 dark:text-slate-300">Favorite Category</span>
                     </div>
                     <button
@@ -471,7 +471,7 @@ export default function SettingsPage() {
                   {/* Issues Toggle */}
                   <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
                     <div className="flex items-center space-x-2">
-                      <AlertCircle className="w-4 h-4 text-orange-500" />
+                      <AlertCircle className="w-4 h-4 text-purple-500" />
                       <span className="text-sm text-gray-700 dark:text-slate-300">Issues</span>
                     </div>
                     <button
@@ -485,7 +485,7 @@ export default function SettingsPage() {
                   {/* Sizes/Dimensions Toggle */}
                   <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
                     <div className="flex items-center space-x-2">
-                      <Ruler className="w-4 h-4 text-indigo-500" />
+                      <Ruler className="w-4 h-4 text-purple-500" />
                       <span className="text-sm text-gray-700 dark:text-slate-300">Sizes / Dimensions</span>
                     </div>
                     <button
@@ -499,7 +499,7 @@ export default function SettingsPage() {
                   {/* Preferences Toggle */}
                   <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
                     <div className="flex items-center space-x-2">
-                      <Heart className="w-4 h-4 text-pink-500" />
+                      <Heart className="w-4 h-4 text-purple-500" />
                       <span className="text-sm text-gray-700 dark:text-slate-300">Preferences</span>
                     </div>
                     <button
@@ -513,7 +513,7 @@ export default function SettingsPage() {
                   {/* Best Times Toggle */}
                   <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
                     <div className="flex items-center space-x-2">
-                      <Clock className="w-4 h-4 text-teal-500" />
+                      <Clock className="w-4 h-4 text-purple-500" />
                       <span className="text-sm text-gray-700 dark:text-slate-300">Best Times</span>
                     </div>
                     <button
@@ -580,7 +580,7 @@ export default function SettingsPage() {
                   />
                 )}
                 <div className={!isPro ? 'opacity-50 pointer-events-none select-none' : ''}>
-                  <div className="p-4 border border-gray-200 dark:border-indigo-700/50 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 dark:from-indigo-900/40 dark:to-purple-900/40">
+                  <div className="p-4 border border-gray-200 dark:border-purple-700/50 rounded-lg bg-gradient-to-r from-purple-50 to-purple-50 dark:from-purple-900/40 dark:to-purple-900/40">
                     {/* Header + Toggle */}
                     <div className="flex items-start justify-between mb-3">
                       <div>
@@ -711,17 +711,17 @@ export default function SettingsPage() {
             <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-2">
-                  <Sparkles className="w-5 h-5 text-indigo-500" />
+                  <Sparkles className="w-5 h-5 text-purple-500" />
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">AI Email Parsing</h2>
                 </div>
                 <div className="flex items-center space-x-2">
                   {!isPro && (
-                    <div className="flex items-center space-x-1 text-indigo-600 dark:text-indigo-400 text-xs">
+                    <div className="flex items-center space-x-1 text-purple-600 dark:text-purple-400 text-xs">
                       <Lock className="w-3 h-3" />
                       <span>Upgrade to Pro</span>
                     </div>
                   )}
-                  <span className="border border-indigo-300 dark:border-indigo-500/50 bg-transparent text-indigo-600 dark:text-indigo-400 text-xs rounded-full px-2 py-0.5">
+                  <span className="border border-purple-300 dark:border-purple-500/50 bg-transparent text-purple-600 dark:text-purple-400 text-xs rounded-full px-2 py-0.5">
                     Pro
                   </span>
                 </div>
@@ -738,12 +738,12 @@ export default function SettingsPage() {
                   />
                 )}
                 <div className={!isPro ? 'opacity-50 pointer-events-none select-none' : ''}>
-                  <div className="p-4 border border-indigo-300 dark:border-indigo-700/50 rounded-lg">
+                  <div className="p-4 border border-purple-300 dark:border-purple-700/50 rounded-lg">
                     {/* Header + Toggle */}
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <div className="flex items-center space-x-2 mb-2">
-                          <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                          <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                           <h3 className="font-medium text-gray-900 dark:text-white">Enable AI Parsing</h3>
                         </div>
                         <p className="text-sm text-gray-600 dark:text-slate-300">
@@ -753,7 +753,7 @@ export default function SettingsPage() {
                       <button
                         onClick={() => setAiParseEnabled(!aiParseEnabled)}
                         disabled={!isPro}
-                        className={`relative inline-flex items-center h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors duration-200 ease-in-out focus:outline-none ${aiParseEnabled ? 'bg-indigo-500 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
+                        className={`relative inline-flex items-center h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors duration-200 ease-in-out focus:outline-none ${aiParseEnabled ? 'bg-purple-500 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
                       >
                         <span
                           className={`pointer-events-none inline-block h-5 w-5 ml-px transform rounded-full shadow-md ring-1 ring-black/10 dark:ring-white/10 transition duration-200 ease-in-out ${aiParseEnabled ? 'bg-white translate-x-5' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`}
@@ -780,14 +780,14 @@ export default function SettingsPage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <Star className="w-4 h-4 text-indigo-500" />
+                          <Star className="w-4 h-4 text-purple-500" />
                           <span className="text-sm text-gray-900 dark:text-white font-medium">Important</span>
                           <span className="text-xs text-gray-500 dark:text-slate-400">— business leads, bulk orders, partnerships</span>
                         </div>
                         <button
                           onClick={() => setAiParseImportant(!aiParseImportant)}
                           disabled={!isPro}
-                          className={`relative inline-flex items-center h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors duration-200 ease-in-out focus:outline-none ${aiParseImportant ? 'bg-indigo-500 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
+                          className={`relative inline-flex items-center h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors duration-200 ease-in-out focus:outline-none ${aiParseImportant ? 'bg-purple-500 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
                         >
                           <span className={`pointer-events-none inline-block h-5 w-5 ml-px transform rounded-full shadow-md ring-1 ring-black/10 dark:ring-white/10 transition duration-200 ease-in-out ${aiParseImportant ? 'bg-white translate-x-5' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`} />
                         </button>
@@ -820,7 +820,7 @@ export default function SettingsPage() {
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">
                             <span className="flex items-center space-x-1.5">
-                              <Star className="w-3.5 h-3.5 text-indigo-500" />
+                              <Star className="w-3.5 h-3.5 text-purple-500" />
                               <span>Important keywords</span>
                             </span>
                           </label>
@@ -830,7 +830,7 @@ export default function SettingsPage() {
                             onChange={(e) => setAiParseImportantKeywords(e.target.value)}
                             disabled={!isPro}
                             placeholder="e.g. bulk order, partnership, wholesale, contract"
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-slate-500"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-slate-500"
                           />
                           <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Comma-separated. Leave blank for AI best judgment.</p>
                         </div>
@@ -853,7 +853,7 @@ export default function SettingsPage() {
                             onChange={(e) => setAiParseNotifyEmail(e.target.value)}
                             disabled={!isPro}
                             placeholder="you@personal.com"
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-slate-500"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-slate-500"
                           />
                         </div>
                         <div>
@@ -867,9 +867,9 @@ export default function SettingsPage() {
                               onChange={(e) => setAiParseNotifyPhone(e.target.value)}
                               disabled={!isPro}
                               placeholder="+1 (555) 123-4567"
-                              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-slate-500"
+                              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-slate-500"
                             />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-indigo-600 dark:text-indigo-400 font-medium">Coming soon</span>
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-purple-600 dark:text-purple-400 font-medium">Coming soon</span>
                           </div>
                         </div>
                       </div>
@@ -892,13 +892,13 @@ export default function SettingsPage() {
                         </div>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-2">
-                            <Star className="w-3.5 h-3.5 text-indigo-500" />
+                            <Star className="w-3.5 h-3.5 text-purple-500" />
                             <span className="text-sm text-gray-900 dark:text-white">Important emails</span>
                           </div>
                           <button
                             onClick={() => setAiParseNotifyImportant(!aiParseNotifyImportant)}
                             disabled={!isPro}
-                            className={`relative inline-flex items-center h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors duration-200 ease-in-out focus:outline-none ${aiParseNotifyImportant ? 'bg-indigo-500 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
+                            className={`relative inline-flex items-center h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors duration-200 ease-in-out focus:outline-none ${aiParseNotifyImportant ? 'bg-purple-500 border-transparent' : 'bg-transparent border-gray-300 dark:border-slate-500'}`}
                           >
                             <span className={`pointer-events-none inline-block h-5 w-5 ml-px transform rounded-full shadow-md ring-1 ring-black/10 dark:ring-white/10 transition duration-200 ease-in-out ${aiParseNotifyImportant ? 'bg-white translate-x-5' : 'bg-gray-300 dark:bg-slate-400 translate-x-0'}`} />
                           </button>
@@ -932,7 +932,7 @@ export default function SettingsPage() {
                 type="text"
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
               />
             </div>
 
@@ -944,7 +944,7 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => setBusinessTypeOpen(!businessTypeOpen)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white flex items-center justify-between"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white flex items-center justify-between"
                 >
                   <span className={businessType ? '' : 'text-gray-400 dark:text-slate-500'}>
                     {businessType
@@ -970,7 +970,7 @@ export default function SettingsPage() {
                       onClick={() => { setBusinessType(option.value); setBusinessTypeOpen(false); }}
                       className={`w-full px-4 py-2 text-left text-sm transition-colors ${
                         businessType === option.value
-                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                          ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
                           : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-slate-600'
                       }`}
                     >
@@ -990,7 +990,7 @@ export default function SettingsPage() {
                 onChange={(e) => setPolicies(e.target.value)}
                 rows={6}
                 placeholder="Enter your business policies, return policy, shipping info, etc. This helps the AI provide better responses."
-                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
               />
               <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
                 This information will be used by AI to generate better response suggestions
@@ -1021,9 +1021,9 @@ export default function SettingsPage() {
         </div>
 
         {/* Help & Support */}
-        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800 p-6">
+        <div className="bg-gradient-to-r from-purple-50 to-purple-50 dark:from-purple-900/20 dark:to-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800 p-6">
           <div className="flex items-center space-x-2 mb-4">
-            <svg className="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Help & Support</h2>
@@ -1177,7 +1177,7 @@ function ConnectionCard({
   disabled?: boolean;
 }) {
   const colors = {
-    blue: 'text-indigo-500 bg-blue-50 dark:bg-transparent dark:border dark:border-slate-700',
+    blue: 'text-purple-500 bg-purple-50 dark:bg-transparent dark:border dark:border-slate-700',
     pink: 'text-pink-500 bg-pink-50 dark:bg-transparent dark:border dark:border-slate-700',
     green: 'text-green-500 bg-green-50 dark:bg-transparent dark:border dark:border-slate-700',
     slate: 'text-slate-700 dark:text-slate-400 bg-slate-50 dark:bg-transparent dark:border dark:border-slate-700',
@@ -1217,7 +1217,7 @@ function ConnectionCard({
       ) : (
         <button
           onClick={onConnect}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
+          className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
         >
           Connect
         </button>

@@ -151,7 +151,7 @@ export default function CannedResponsesPage() {
           </div>
           <button
             onClick={startCreate}
-            className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
           >
             <Plus className="w-5 h-5" />
             <span>New Response</span>
@@ -175,7 +175,7 @@ export default function CannedResponsesPage() {
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   placeholder="e.g., Order Confirmation"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
 
@@ -188,7 +188,7 @@ export default function CannedResponsesPage() {
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                   placeholder="Type your response template here..."
                   rows={6}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
                 />
               </div>
 
@@ -202,7 +202,7 @@ export default function CannedResponsesPage() {
                     value={formData.shortcut}
                     onChange={(e) => setFormData({ ...formData, shortcut: e.target.value })}
                     placeholder="e.g., /order"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 </div>
 
@@ -215,7 +215,7 @@ export default function CannedResponsesPage() {
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     placeholder="e.g., Orders"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 </div>
               </div>
@@ -230,7 +230,7 @@ export default function CannedResponsesPage() {
                 </button>
                 <button
                   onClick={handleSave}
-                  className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
                 >
                   <Save className="w-4 h-4" />
                   <span>Save</span>
@@ -258,7 +258,7 @@ export default function CannedResponsesPage() {
                     <div className="flex items-center space-x-3 mb-2">
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{response.title}</h3>
                       {response.shortcut && (
-                        <span className="px-2 py-0.5 bg-blue-100 text-indigo-700 text-xs font-mono rounded">
+                        <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-mono rounded">
                           {response.shortcut}
                         </span>
                       )}
@@ -275,7 +275,7 @@ export default function CannedResponsesPage() {
                   <div className="flex items-center space-x-2 ml-4">
                     <button
                       onClick={() => startEdit(response)}
-                      className="p-2 text-gray-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                      className="p-2 text-gray-600 dark:text-slate-300 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
                       title="Edit"
                     >
                       <Edit2 className="w-4 h-4" />

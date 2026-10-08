@@ -147,24 +147,24 @@ export default function CustomerProfileModal({
     const needsData = profile?.needs_more_data.includes(title.toLowerCase().replace(/[\/\s]/g, '_'));
 
     const colorClasses = inverse ? {
-      blue: { bg: 'bg-indigo-600', border: 'border-blue-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-indigo-700' },
+      blue: { bg: 'bg-purple-600', border: 'border-purple-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-purple-700' },
       green: { bg: 'bg-green-600', border: 'border-green-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-green-700' },
-      orange: { bg: 'bg-orange-600', border: 'border-orange-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-orange-700' },
+      orange: { bg: 'bg-purple-600', border: 'border-purple-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-purple-700' },
       red: { bg: 'bg-red-600', border: 'border-red-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-red-700' },
       purple: { bg: 'bg-purple-600', border: 'border-purple-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-purple-700' },
-      pink: { bg: 'bg-pink-600', border: 'border-pink-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-pink-700' },
-      indigo: { bg: 'bg-indigo-600', border: 'border-indigo-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-indigo-700' },
-      teal: { bg: 'bg-teal-600', border: 'border-teal-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-teal-700' },
-    }[color] || { bg: 'bg-indigo-600', border: 'border-blue-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-indigo-700' } : {
-      blue: { bg: 'bg-blue-50', border: 'border-blue-200', icon: 'text-indigo-600', text: 'text-blue-900', iconBg: 'bg-white' },
+      pink: { bg: 'bg-purple-600', border: 'border-purple-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-purple-700' },
+      indigo: { bg: 'bg-purple-600', border: 'border-purple-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-purple-700' },
+      teal: { bg: 'bg-purple-600', border: 'border-purple-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-purple-700' },
+    }[color] || { bg: 'bg-purple-600', border: 'border-purple-700', icon: 'text-white', text: 'text-white', iconBg: 'bg-purple-700' } : {
+      blue: { bg: 'bg-purple-50', border: 'border-purple-200', icon: 'text-purple-600', text: 'text-purple-900', iconBg: 'bg-white' },
       green: { bg: 'bg-green-50', border: 'border-green-200', icon: 'text-green-600', text: 'text-green-900', iconBg: 'bg-white' },
-      orange: { bg: 'bg-orange-50', border: 'border-orange-200', icon: 'text-orange-600', text: 'text-orange-900', iconBg: 'bg-white' },
+      orange: { bg: 'bg-purple-50', border: 'border-purple-200', icon: 'text-purple-600', text: 'text-purple-900', iconBg: 'bg-white' },
       red: { bg: 'bg-red-50', border: 'border-red-200', icon: 'text-red-600', text: 'text-red-900', iconBg: 'bg-white' },
       purple: { bg: 'bg-purple-50', border: 'border-purple-200', icon: 'text-purple-600', text: 'text-purple-900', iconBg: 'bg-white' },
-      pink: { bg: 'bg-pink-50', border: 'border-pink-200', icon: 'text-pink-600', text: 'text-pink-900', iconBg: 'bg-white' },
-      indigo: { bg: 'bg-indigo-50', border: 'border-indigo-200', icon: 'text-indigo-600', text: 'text-indigo-900', iconBg: 'bg-white' },
-      teal: { bg: 'bg-teal-50', border: 'border-teal-200', icon: 'text-teal-600', text: 'text-teal-900', iconBg: 'bg-white' },
-    }[color] || { bg: 'bg-blue-50', border: 'border-blue-200', icon: 'text-indigo-600', text: 'text-blue-900', iconBg: 'bg-white' };
+      pink: { bg: 'bg-purple-50', border: 'border-purple-200', icon: 'text-purple-600', text: 'text-purple-900', iconBg: 'bg-white' },
+      indigo: { bg: 'bg-purple-50', border: 'border-purple-200', icon: 'text-purple-600', text: 'text-purple-900', iconBg: 'bg-white' },
+      teal: { bg: 'bg-purple-50', border: 'border-purple-200', icon: 'text-purple-600', text: 'text-purple-900', iconBg: 'bg-white' },
+    }[color] || { bg: 'bg-purple-50', border: 'border-purple-200', icon: 'text-purple-600', text: 'text-purple-900', iconBg: 'bg-white' };
 
     return (
       <div className={`${colorClasses.bg} border ${colorClasses.border} rounded-lg p-4 mb-3 ${inverse ? 'shadow-lg' : ''}`}>
@@ -217,7 +217,7 @@ export default function CustomerProfileModal({
 
           {/* Avatar */}
           <div className="flex flex-col items-center">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center mb-3">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-400 to-purple-500 flex items-center justify-center mb-3">
               <span className="text-3xl font-bold text-white">{getInitials()}</span>
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-1">{customerName}</h2>
@@ -249,7 +249,7 @@ export default function CustomerProfileModal({
               <button
                 onClick={analyzeProfile}
                 disabled={analyzing}
-                className="mt-4 flex items-center space-x-2 px-4 py-2 bg-blue-50 text-indigo-600 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50 text-sm"
+                className="mt-4 flex items-center space-x-2 px-4 py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors disabled:opacity-50 text-sm"
               >
                 {analyzing ? (
                   <>
@@ -278,7 +278,7 @@ export default function CustomerProfileModal({
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+              <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
             </div>
           ) : profile ? (
             <>
@@ -296,14 +296,14 @@ export default function CustomerProfileModal({
 
               {/* Favorite Category */}
               {profileCategories.favorite_category && profile.favorite_category && (
-                <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-lg p-4 mb-4 shadow-md">
+                <div className="bg-gradient-to-r from-purple-50 to-white border-2 border-purple-300 rounded-lg p-4 mb-4 shadow-md">
                   <div className="flex items-center space-x-2 mb-2">
-                    <div className="p-2 rounded-lg bg-white border-2 border-amber-300 shadow-sm">
-                      <Star className="w-6 h-6 text-amber-500 fill-amber-400" />
+                    <div className="p-2 rounded-lg bg-white border-2 border-purple-300 shadow-sm">
+                      <Star className="w-6 h-6 text-purple-500 fill-purple-400" />
                     </div>
-                    <h3 className="text-base font-bold text-amber-900">Favorite Category</h3>
+                    <h3 className="text-base font-bold text-purple-900">Favorite Category</h3>
                   </div>
-                  <p className="text-lg font-bold text-amber-800 pl-2">{profile.favorite_category}</p>
+                  <p className="text-lg font-bold text-purple-800 pl-2">{profile.favorite_category}</p>
                 </div>
               )}
 

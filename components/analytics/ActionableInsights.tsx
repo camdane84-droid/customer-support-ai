@@ -135,7 +135,7 @@ export default function ActionableInsights({ analytics }: ActionableInsightsProp
       case 'success': return <CheckCircle className="w-5 h-5 text-green-600" />;
       case 'warning': return <AlertCircle className="w-5 h-5 text-yellow-600" />;
       case 'urgent': return <AlertCircle className="w-5 h-5 text-red-600" />;
-      default: return <TrendingUp className="w-5 h-5 text-indigo-600" />;
+      default: return <TrendingUp className="w-5 h-5 text-purple-600" />;
     }
   };
 
@@ -144,7 +144,7 @@ export default function ActionableInsights({ analytics }: ActionableInsightsProp
       case 'success': return 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700/50';
       case 'warning': return 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-700/50';
       case 'urgent': return 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700/50';
-      default: return 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700/50';
+      default: return 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700/50';
     }
   };
 
@@ -152,7 +152,7 @@ export default function ActionableInsights({ analytics }: ActionableInsightsProp
     return (
       <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/75 dark:border-slate-700/50 p-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-          <TrendingUp className="w-5 h-5 mr-2 text-indigo-600" />
+          <TrendingUp className="w-5 h-5 mr-2 text-purple-600" />
           Actionable Insights
         </h2>
         <p className="text-gray-500 dark:text-slate-400 text-sm">
@@ -165,7 +165,7 @@ export default function ActionableInsights({ analytics }: ActionableInsightsProp
   return (
     <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/75 dark:border-slate-700/50 p-6">
       <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-        <TrendingUp className="w-5 h-5 mr-2 text-indigo-600" />
+        <TrendingUp className="w-5 h-5 mr-2 text-purple-600" />
         Actionable Insights
         <span className="ml-auto text-sm font-normal text-gray-500 dark:text-slate-400">{insights.length} insights</span>
       </h2>

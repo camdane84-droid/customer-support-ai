@@ -201,7 +201,7 @@ export default function EmailConnections({ businessId, primaryEmail }: EmailConn
         <div key={conn.id} className="p-4 border border-gray-200 dark:border-slate-700 rounded-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="p-3 rounded-lg text-indigo-500 bg-blue-50 dark:bg-transparent dark:border dark:border-slate-700">
+              <div className="p-3 rounded-lg text-purple-500 bg-purple-50 dark:bg-transparent dark:border dark:border-slate-700">
                 <Mail className="w-6 h-6" />
               </div>
               <div>
@@ -210,7 +210,7 @@ export default function EmailConnections({ businessId, primaryEmail }: EmailConn
                     {conn.metadata?.label || 'Email'}
                   </p>
                   {isPrimary(conn) && (
-                    <span className="px-2 py-0.5 text-xs font-medium bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded-full">
+                    <span className="px-2 py-0.5 text-xs font-medium bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 rounded-full">
                       Primary
                     </span>
                   )}
@@ -262,12 +262,12 @@ export default function EmailConnections({ businessId, primaryEmail }: EmailConn
                   value={codeInputs[conn.id] || ''}
                   onChange={e => setCodeInputs(prev => ({ ...prev, [conn.id]: e.target.value.replace(/\D/g, '') }))}
                   placeholder="123456"
-                  className="w-32 px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg text-sm tracking-widest focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-32 px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg text-sm tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
                 <button
                   onClick={() => handleVerify(conn.id)}
                   disabled={verifyingId === conn.id || (codeInputs[conn.id] || '').length !== 6}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium disabled:opacity-50 flex items-center space-x-2"
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium disabled:opacity-50 flex items-center space-x-2"
                 >
                   {verifyingId === conn.id && <Loader2 className="w-4 h-4 animate-spin" />}
                   <span>Verify</span>
@@ -275,7 +275,7 @@ export default function EmailConnections({ businessId, primaryEmail }: EmailConn
                 <button
                   onClick={() => handleResend(conn.id)}
                   disabled={resendingId === conn.id}
-                  className="px-3 py-2 text-sm text-indigo-600 dark:text-indigo-400 hover:underline disabled:opacity-50"
+                  className="px-3 py-2 text-sm text-purple-600 dark:text-purple-400 hover:underline disabled:opacity-50"
                 >
                   {resendingId === conn.id ? 'Sending…' : resentId === conn.id ? 'Code sent!' : 'Resend code'}
                 </button>
@@ -303,7 +303,7 @@ export default function EmailConnections({ businessId, primaryEmail }: EmailConn
 
       {/* Add Email Form */}
       {showAddForm ? (
-        <div className="p-4 border border-indigo-200 dark:border-indigo-700/50 rounded-lg bg-indigo-50/50 dark:bg-indigo-900/20">
+        <div className="p-4 border border-purple-200 dark:border-purple-700/50 rounded-lg bg-purple-50/50 dark:bg-purple-900/20">
           <div className="flex items-center justify-between mb-3">
             <h4 className="text-sm font-medium text-gray-900 dark:text-white">Add Email Address</h4>
             <button
@@ -320,14 +320,14 @@ export default function EmailConnections({ businessId, primaryEmail }: EmailConn
               value={newEmail}
               onChange={e => setNewEmail(e.target.value)}
               placeholder="sales@yourbusiness.com"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
             <input
               type="text"
               value={newLabel}
               onChange={e => setNewLabel(e.target.value)}
               placeholder="Label (e.g. Sales, Support, Returns)"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
 
             <p className="text-xs text-gray-500 dark:text-slate-400">
@@ -342,7 +342,7 @@ export default function EmailConnections({ businessId, primaryEmail }: EmailConn
               <button
                 onClick={handleAdd}
                 disabled={adding || !newEmail.trim()}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium disabled:opacity-50 flex items-center space-x-2"
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium disabled:opacity-50 flex items-center space-x-2"
               >
                 {adding && <Loader2 className="w-4 h-4 animate-spin" />}
                 <span>Add Email</span>
@@ -359,7 +359,7 @@ export default function EmailConnections({ businessId, primaryEmail }: EmailConn
       ) : (
         <button
           onClick={() => setShowAddForm(true)}
-          className="w-full flex items-center justify-center space-x-2 p-4 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg text-gray-500 dark:text-slate-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+          className="w-full flex items-center justify-center space-x-2 p-4 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg text-gray-500 dark:text-slate-400 hover:border-purple-400 dark:hover:border-purple-500 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
         >
           <Plus className="w-5 h-5" />
           <span className="text-sm font-medium">Add Email Address</span>

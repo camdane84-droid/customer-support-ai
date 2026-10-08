@@ -332,7 +332,7 @@ function InboxContent() {
       <DashboardLayout>
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
             <div className="text-gray-500 dark:text-slate-400">Loading authentication...</div>
           </div>
         </div>
@@ -346,7 +346,7 @@ function InboxContent() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-full">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
         </div>
       </DashboardLayout>
     );
@@ -366,7 +366,7 @@ function InboxContent() {
             </div>
             <button
               onClick={() => window.location.reload()}
-              className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+              className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
             >
               Reload Page
             </button>
@@ -383,7 +383,7 @@ function InboxContent() {
       <DashboardLayout>
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
             <div className="text-gray-500 dark:text-slate-400">Loading inbox...</div>
           </div>
         </div>
@@ -498,7 +498,7 @@ function InboxContent() {
         {/* Compact Stats Bar */}
         <div className="flex items-center justify-start gap-6 px-4 py-2 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
           <div className="flex items-center gap-2 text-sm">
-            <MessageSquare className="w-4 h-4 text-indigo-500" />
+            <MessageSquare className="w-4 h-4 text-purple-500" />
             <span className="text-gray-500 dark:text-slate-400">Total:</span>
             <span className="font-semibold text-gray-900 dark:text-white">{totalConversations}</span>
           </div>
@@ -508,7 +508,7 @@ function InboxContent() {
             <span className="font-semibold text-gray-900 dark:text-white">{openConversations}</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
-            <Mail className="w-4 h-4 text-orange-500" />
+            <Mail className="w-4 h-4 text-purple-500" />
             <span className="text-gray-500 dark:text-slate-400">Unread:</span>
             <span className="font-semibold text-gray-900 dark:text-white">{unreadConversations}</span>
           </div>
@@ -537,7 +537,7 @@ function InboxContent() {
 
         {/* Drag Handle */}
         <div
-          className="hidden md:flex w-1 cursor-col-resize items-center justify-center hover:bg-indigo-300 dark:hover:bg-indigo-600 bg-gray-200 dark:bg-slate-700 transition-colors flex-shrink-0"
+          className="hidden md:flex w-1 cursor-col-resize items-center justify-center hover:bg-purple-300 dark:hover:bg-purple-600 bg-gray-200 dark:bg-slate-700 transition-colors flex-shrink-0"
           onMouseDown={handleMouseDown}
           role="separator"
           aria-orientation="vertical"

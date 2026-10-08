@@ -40,11 +40,11 @@ export default function KnowledgeBaseSkeleton() {
       </div>
 
       {/* Pro Tips Box */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 p-4">
-        <div className="h-5 bg-blue-200 dark:bg-blue-800 rounded w-24 mb-3" />
+      <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800 p-4">
+        <div className="h-5 bg-purple-200 dark:bg-purple-800 rounded w-24 mb-3" />
         <div className="space-y-2">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-3.5 bg-blue-200 dark:bg-blue-800 rounded w-72 max-w-full" />
+            <div key={i} className="h-3.5 bg-purple-200 dark:bg-purple-800 rounded w-72 max-w-full" />
           ))}
         </div>
       </div>

@@ -29,10 +29,6 @@ export default function KnowledgeBasePage() {
   });
 
   useEffect(() => {
-    console.log('📝 showAddForm changed to:', showAddForm);
-  }, [showAddForm]);
-
-  useEffect(() => {
     if (business) {
       loadKnowledgeBase();
     }
@@ -145,13 +141,8 @@ export default function KnowledgeBasePage() {
             </p>
           </div>
           <button
-            onClick={() => {
-              console.log('🔘 Add button clicked!');
-              console.log('Current showAddForm:', showAddForm);
-              setShowAddForm(true);
-              console.log('After setting showAddForm to true');
-            }}
-            className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            onClick={() => setShowAddForm(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
           >
             <Plus className="w-5 h-5" />
             <span>Add Item</span>
@@ -184,7 +175,7 @@ export default function KnowledgeBasePage() {
                   value={formData.question}
                   onChange={(e) => setFormData({ ...formData, question: e.target.value })}
                   placeholder="What are your business hours?"
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
 
@@ -197,7 +188,7 @@ export default function KnowledgeBasePage() {
                   onChange={(e) => setFormData({ ...formData, answer: e.target.value })}
                   rows={4}
                   placeholder="We're open Monday-Friday 9am-5pm, Saturday 10am-4pm. Closed Sundays."
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
 
@@ -210,7 +201,7 @@ export default function KnowledgeBasePage() {
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                   placeholder="hours, pricing, policies, etc."
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
 
@@ -218,7 +209,7 @@ export default function KnowledgeBasePage() {
                 <button
                   onClick={handleAdd}
                   disabled={!formData.question || !formData.answer}
-                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                  className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                 >
                   Add Item
                 </button>
@@ -248,7 +239,7 @@ export default function KnowledgeBasePage() {
             </p>
             <button
               onClick={() => setShowAddForm(true)}
-              className="inline-flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              className="inline-flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
             >
               <Plus className="w-5 h-5" />
               <span>Add Your First Item</span>
@@ -272,7 +263,7 @@ export default function KnowledgeBasePage() {
                         type="text"
                         value={item.question}
                         onChange={(e) => updateItem(item.id, 'question', e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                       />
                     </div>
                     <div>
@@ -283,7 +274,7 @@ export default function KnowledgeBasePage() {
                         value={item.answer}
                         onChange={(e) => updateItem(item.id, 'answer', e.target.value)}
                         rows={4}
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                       />
                     </div>
                     <div>
@@ -294,13 +285,13 @@ export default function KnowledgeBasePage() {
                         type="text"
                         value={item.category || ''}
                         onChange={(e) => updateItem(item.id, 'category', e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                       />
                     </div>
                     <div className="flex space-x-3">
                       <button
                         onClick={() => handleUpdate(item.id)}
-                        className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                        className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
                       >
                         <Save className="w-4 h-4" />
                         <span>Save Changes</span>
@@ -326,7 +317,7 @@ export default function KnowledgeBasePage() {
                             {item.question}
                           </h3>
                           {item.category && (
-                            <span className="px-2 py-1 bg-blue-100 text-indigo-700 text-xs rounded-full">
+                            <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
                               {item.category}
                             </span>
                           )}
@@ -341,7 +332,7 @@ export default function KnowledgeBasePage() {
                       <div className="flex space-x-2 ml-4">
                         <button
                           onClick={() => setEditingId(item.id)}
-                          className="p-2 text-gray-500 dark:text-slate-400 hover:text-indigo-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                          className="p-2 text-gray-500 dark:text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
                           title="Edit"
                         >
                           <Edit2 className="w-4 h-4" />
@@ -363,9 +354,9 @@ export default function KnowledgeBasePage() {
         )}
 
         {/* Info Box */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-          <h3 className="font-medium text-blue-900 dark:text-blue-300 mb-2">💡 Pro Tips</h3>
-          <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1 list-disc list-inside">
+        <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+          <h3 className="font-medium text-purple-900 dark:text-purple-300 mb-2">💡 Pro Tips</h3>
+          <ul className="text-sm text-purple-800 dark:text-purple-200 space-y-1 list-disc list-inside">
             <li>Add your most frequently asked questions first</li>
             <li>AI will automatically use this information when generating responses</li>
             <li>Keep answers concise but informative</li>
@@ -376,7 +367,7 @@ export default function KnowledgeBasePage() {
         {/* User Guides Section */}
         <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
           <div className="flex items-center space-x-2 mb-6">
-            <BookOpen className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+            <BookOpen className="w-6 h-6 text-purple-600 dark:text-purple-400" />
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">User Guides</h2>
           </div>
           <p className="text-gray-600 dark:text-slate-300 mb-6">
@@ -385,10 +376,10 @@ export default function KnowledgeBasePage() {
 
           <div className="space-y-4">
             {/* Guide: Connecting email */}
-            <details className="group bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-900/10 dark:to-violet-900/10 border border-indigo-200 dark:border-indigo-800 rounded-lg overflow-hidden">
-              <summary className="cursor-pointer p-4 font-semibold text-gray-900 dark:text-white hover:bg-indigo-100 dark:hover:bg-indigo-900/20 transition-colors flex items-center justify-between">
+            <details className="group bg-gradient-to-r from-purple-50 to-white dark:from-purple-900/10 dark:to-transparent border border-purple-200 dark:border-purple-800 rounded-lg overflow-hidden">
+              <summary className="cursor-pointer p-4 font-semibold text-gray-900 dark:text-white hover:bg-purple-100 dark:hover:bg-purple-900/20 transition-colors flex items-center justify-between">
                 <span className="flex items-center">
-                  <svg className="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 mr-2 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                   How to Connect Your Business Email
@@ -406,8 +397,8 @@ export default function KnowledgeBasePage() {
                   <li><strong>Set up forwarding</strong> - Follow the step-by-step instructions for Gmail, Outlook, or your email host to forward mail to your unique InboxForge address</li>
                   <li><strong>Done!</strong> - New customer emails appear in your inbox, triaged by AI</li>
                 </ol>
-                <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded p-3 mt-3">
-                  <p className="text-sm text-indigo-800 dark:text-indigo-200">
+                <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded p-3 mt-3">
+                  <p className="text-sm text-purple-800 dark:text-purple-200">
                     <strong>Tip:</strong> Connect as many addresses as you need — the inbox can filter conversations by address.
                   </p>
                 </div>
@@ -415,7 +406,7 @@ export default function KnowledgeBasePage() {
             </details>
 
             {/* Guide 2: Using AI Features */}
-            <details className="group bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/10 dark:to-blue-900/10 border border-purple-200 dark:border-purple-800 rounded-lg overflow-hidden">
+            <details className="group bg-gradient-to-r from-purple-50 to-white dark:from-purple-900/10 dark:to-transparent border border-purple-200 dark:border-purple-800 rounded-lg overflow-hidden">
               <summary className="cursor-pointer p-4 font-semibold text-gray-900 dark:text-white hover:bg-purple-100 dark:hover:bg-purple-900/20 transition-colors flex items-center justify-between">
                 <span className="flex items-center">
                   <svg className="w-5 h-5 mr-2 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -436,11 +427,11 @@ export default function KnowledgeBasePage() {
                   <li><strong>Edit if Needed</strong> - Click "Use This Response" to add it to your message box, then customize as needed</li>
                   <li><strong>Send</strong> - Send the message to your customer</li>
                 </ol>
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded p-3 mt-3">
-                  <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
+                <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded p-3 mt-3">
+                  <p className="text-sm text-purple-800 dark:text-purple-200 mb-2">
                     <strong>Pro Tips:</strong>
                   </p>
-                  <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1 list-disc list-inside ml-2">
+                  <ul className="text-sm text-purple-700 dark:text-purple-300 space-y-1 list-disc list-inside ml-2">
                     <li>Add business policies in Settings to improve AI responses</li>
                     <li>Enable "AI Customer Insights" to automatically learn about customers</li>
                     <li>Use the Knowledge Base to teach AI about common questions</li>
@@ -450,10 +441,10 @@ export default function KnowledgeBasePage() {
             </details>
 
             {/* Guide 3: Managing Conversations */}
-            <details className="group bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-900/10 dark:to-teal-900/10 border border-green-200 dark:border-green-800 rounded-lg overflow-hidden">
-              <summary className="cursor-pointer p-4 font-semibold text-gray-900 dark:text-white hover:bg-green-100 dark:hover:bg-green-900/20 transition-colors flex items-center justify-between">
+            <details className="group bg-gradient-to-r from-purple-50 to-white dark:from-purple-900/10 dark:to-transparent border border-purple-200 dark:border-purple-800 rounded-lg overflow-hidden">
+              <summary className="cursor-pointer p-4 font-semibold text-gray-900 dark:text-white hover:bg-purple-100 dark:hover:bg-purple-900/20 transition-colors flex items-center justify-between">
                 <span className="flex items-center">
-                  <svg className="w-5 h-5 mr-2 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 mr-2 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                   </svg>
                   Managing Conversations
@@ -497,8 +488,8 @@ export default function KnowledgeBasePage() {
                   </div>
                 </div>
 
-                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded p-3 mt-3">
-                  <p className="text-sm text-green-800 dark:text-green-200">
+                <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded p-3 mt-3">
+                  <p className="text-sm text-purple-800 dark:text-purple-200">
                     <strong>Tip:</strong> Conversations update in real-time. You'll see new messages instantly without refreshing!
                   </p>
                 </div>
@@ -506,10 +497,10 @@ export default function KnowledgeBasePage() {
             </details>
 
             {/* Guide 4: Understanding Analytics */}
-            <details className="group bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/10 dark:to-amber-900/10 border border-orange-200 dark:border-orange-800 rounded-lg overflow-hidden">
-              <summary className="cursor-pointer p-4 font-semibold text-gray-900 dark:text-white hover:bg-orange-100 dark:hover:bg-orange-900/20 transition-colors flex items-center justify-between">
+            <details className="group bg-gradient-to-r from-purple-50 to-white dark:from-purple-900/10 dark:to-transparent border border-purple-200 dark:border-purple-800 rounded-lg overflow-hidden">
+              <summary className="cursor-pointer p-4 font-semibold text-gray-900 dark:text-white hover:bg-purple-100 dark:hover:bg-purple-900/20 transition-colors flex items-center justify-between">
                 <span className="flex items-center">
-                  <svg className="w-5 h-5 mr-2 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 mr-2 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                   Understanding Analytics
@@ -540,8 +531,8 @@ export default function KnowledgeBasePage() {
                   </div>
                 </div>
 
-                <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded p-3 mt-3">
-                  <p className="text-sm text-orange-800 dark:text-orange-200">
+                <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded p-3 mt-3">
+                  <p className="text-sm text-purple-800 dark:text-purple-200">
                     <strong>Goal:</strong> Aim for faster response times and higher resolution rates to improve customer satisfaction!
                   </p>
                 </div>
@@ -550,9 +541,9 @@ export default function KnowledgeBasePage() {
           </div>
 
           {/* Need More Help */}
-          <div className="mt-6 p-4 bg-gradient-to-br from-purple-100 via-indigo-50 to-blue-100 dark:from-indigo-900 dark:via-purple-900 dark:to-indigo-900 border border-indigo-200 dark:border-indigo-800 rounded-lg">
+          <div className="mt-6 p-4 bg-gradient-to-br from-purple-100 via-purple-50 to-white dark:from-purple-900 dark:via-purple-900 dark:to-purple-900 border border-purple-200 dark:border-purple-800 rounded-lg">
             <h3 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
-              <svg className="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 mr-2 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
               Need More Help?
@@ -562,7 +553,7 @@ export default function KnowledgeBasePage() {
             </p>
             <a
               href="/contact"
-              className="inline-flex items-center px-4 py-2 bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all text-sm font-medium"
+              className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all text-sm font-medium"
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
