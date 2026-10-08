@@ -4,6 +4,7 @@ import { supabaseServer } from '@/lib/supabase-server';
 import { generateAutoNotes } from '@/lib/ai/auto-notes';
 import { sendAutoReply } from '@/lib/ai/send-auto-reply';
 import { classifyNewMessage } from '@/lib/ai/classify';
+import { checkInboundAiBudget } from '@/lib/ai/inbound-budget';
 import { getSessionByToken, validateMessageContent } from '@/lib/chat-widget';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
@@ -118,7 +119,10 @@ export async function POST(request: NextRequest) {
       .eq('id', session.conversation_id);
 
     const conversationId = session.conversation_id;
+    const businessId = session.business_id;
     after(async () => {
+      const budget = await checkInboundAiBudget(businessId, conversationId);
+      if (!budget.allowed) return;
       await Promise.allSettled([
         generateAutoNotes(conversationId),
         sendAutoReply(conversationId),

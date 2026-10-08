@@ -160,7 +160,7 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
     return (
       <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg">
         <div className="flex items-center space-x-3">
-          <MessageSquare className="w-5 h-5 text-violet-500" />
+          <MessageSquare className="w-5 h-5 text-purple-500" />
           <span className="text-sm text-gray-500 dark:text-slate-400">Loading chat widget settings...</span>
         </div>
         <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
@@ -177,13 +177,13 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
       <div className="border border-gray-200 dark:border-slate-700 rounded-lg p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
-              <MessageSquare className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+            <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+              <MessageSquare className="w-5 h-5 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
                 <h3 className="font-medium text-gray-900 dark:text-white">Website Chat Widget</h3>
-                <span className="flex items-center gap-1 px-2 py-0.5 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-xs font-medium rounded-full">
+                <span className="flex items-center gap-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-medium rounded-full">
                   <Lock className="w-3 h-3" />
                   Pro
                 </span>
@@ -195,7 +195,7 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
           </div>
           <Link
             href="/pricing"
-            className="px-4 py-2 rounded-lg text-sm font-medium bg-violet-600 text-white hover:bg-violet-700 transition-colors"
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-purple-600 text-white hover:bg-purple-700 transition-colors"
           >
             Upgrade to Pro
           </Link>
@@ -209,8 +209,8 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
       {/* Header row */}
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
-            <MessageSquare className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+          <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+            <MessageSquare className="w-5 h-5 text-purple-600 dark:text-purple-400" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
@@ -236,7 +236,7 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
             settings.widget_enabled
               ? 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600'
-              : 'bg-violet-600 text-white hover:bg-violet-700'
+              : 'bg-purple-600 text-white hover:bg-purple-700'
           }`}
         >
           {toggling ? <Loader2 className="w-4 h-4 animate-spin" /> : settings.widget_enabled ? 'Disable' : 'Enable'}
@@ -259,7 +259,7 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
                 onChange={e => setSettings({ ...settings, widget_greeting: e.target.value })}
                 placeholder="Hi! How can we help you today?"
                 maxLength={200}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
             </div>
             <div>
@@ -276,7 +276,7 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="flex items-center space-x-1.5 px-3 py-2 bg-violet-600 text-white rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors disabled:opacity-50"
+                  className="flex items-center space-x-1.5 px-3 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50"
                 >
                   {saving ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -308,7 +308,7 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
                   disabled={savingMode}
                   className={`px-3 py-1 text-xs font-medium rounded-full transition-colors disabled:opacity-60 ${
                     settings.chat_auto_reply_mode === mode
-                      ? 'bg-violet-600 text-white'
+                      ? 'bg-purple-600 text-white'
                       : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600'
                   }`}
                 >
@@ -347,7 +347,7 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
                   href={`/widget-test.html?key=${settings.widget_key}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center space-x-1 text-xs font-medium text-violet-600 dark:text-violet-400 hover:underline"
+                  className="flex items-center space-x-1 text-xs font-medium text-purple-600 dark:text-purple-400 hover:underline"
                 >
                   <span>Preview your widget</span>
                   <ExternalLink className="w-3 h-3" />
@@ -390,7 +390,7 @@ export default function ChatWidgetSettings({ businessId, subscriptionTier }: Cha
                   onClick={() => setPlatform(p)}
                   className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
                     platform === p
-                      ? 'bg-violet-600 text-white'
+                      ? 'bg-purple-600 text-white'
                       : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600'
                   }`}
                 >

@@ -21,7 +21,7 @@ export default function CustomerSegmentation({ conversations }: CustomerSegmenta
   const customerMap = new Map<string, any>();
 
   conversations.forEach(convo => {
-    const customerId = convo.customer_email || convo.customer_instagram_id || convo.customer_phone;
+    const customerId = convo.customer_email || convo.customer_phone;
     if (!customerId) return;
 
     if (!customerMap.has(customerId)) {
@@ -89,8 +89,8 @@ export default function CustomerSegmentation({ conversations }: CustomerSegmenta
       {/* Top Customers */}
       <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/75 dark:border-slate-700/50 p-6">
         <div className="flex items-center space-x-2 mb-4">
-          <div className="p-2 bg-amber-100 dark:bg-transparent dark:border dark:border-slate-700 rounded-lg">
-            <Crown className="w-5 h-5 text-amber-600" />
+          <div className="p-2 bg-purple-100 dark:bg-transparent dark:border dark:border-slate-700 rounded-lg">
+            <Crown className="w-5 h-5 text-purple-600" />
           </div>
           <div>
             <h3 className="font-semibold text-gray-900 dark:text-white">Top Customers</h3>
@@ -105,9 +105,9 @@ export default function CustomerSegmentation({ conversations }: CustomerSegmenta
             topCustomers.map((customer, index) => (
               <div
                 key={customer.id}
-                className="flex items-center space-x-3 p-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg border border-amber-200 dark:border-amber-700/50 hover:shadow-md transition-shadow"
+                className="flex items-center space-x-3 p-3 bg-gradient-to-r from-purple-50 to-white dark:from-purple-900/20 dark:to-transparent rounded-lg border border-purple-200 dark:border-purple-700/50 hover:shadow-md transition-shadow"
               >
-                <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full flex items-center justify-center">
+                <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full flex items-center justify-center">
                   <span className="text-sm font-bold text-white">#{index + 1}</span>
                 </div>
                 <div className="flex-1 min-w-0">

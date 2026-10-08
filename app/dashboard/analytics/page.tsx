@@ -10,7 +10,6 @@ import {
   TrendingUp,
   TrendingDown,
   Mail,
-  Instagram,
   Zap,
   Users,
   CheckCircle,
@@ -74,8 +73,7 @@ interface AnalyticsData {
   // Channel Metrics
   channelBreakdown: {
     email: number;
-    instagram: number;
-    sms: number;
+    chat: number;
   };
 
   // AI Metrics
@@ -158,11 +156,11 @@ export default function AnalyticsPage() {
       const conversationGrowth = calculateGrowth(newConversationsThisPeriod, previousPeriodCount);
 
       // Calculate customer metrics
-      const uniqueCustomers = new Set(allConversations?.map(c => c.customer_email || c.customer_instagram_id || c.customer_phone) || []);
+      const uniqueCustomers = new Set(allConversations?.map(c => c.customer_email || c.customer_phone) || []);
       const totalCustomers = uniqueCustomers.size;
 
-      const currentCustomers = new Set(currentPeriodConvos?.map(c => c.customer_email || c.customer_instagram_id || c.customer_phone) || []);
-      const previousCustomers = new Set(previousPeriodConvos?.map(c => c.customer_email || c.customer_instagram_id || c.customer_phone) || []);
+      const currentCustomers = new Set(currentPeriodConvos?.map(c => c.customer_email || c.customer_phone) || []);
+      const previousCustomers = new Set(previousPeriodConvos?.map(c => c.customer_email || c.customer_phone) || []);
 
       const newCustomers = currentCustomers.size;
       const returningCustomers = Array.from(currentCustomers).filter(c => !currentCustomers.has(c) && uniqueCustomers.has(c)).length;
@@ -190,8 +188,7 @@ export default function AnalyticsPage() {
       // Calculate channel breakdown
       const channelBreakdown = {
         email: allConversations?.filter(c => c.channel === 'email').length || 0,
-        instagram: allConversations?.filter(c => c.channel === 'instagram').length || 0,
-        sms: allConversations?.filter(c => c.channel === 'sms').length || 0,
+        chat: allConversations?.filter(c => c.channel === 'chat').length || 0,
       };
 
       // Calculate AI metrics
@@ -373,7 +370,7 @@ export default function AnalyticsPage() {
                 key={range}
                 onClick={() => setDateRange(range)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${dateRange === range
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-purple-600 text-white'
                   : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                   }`}
               >
@@ -428,7 +425,7 @@ export default function AnalyticsPage() {
         {/* Customer Intelligence */}
         <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/65 dark:border-slate-700/50 p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-            <Users className="w-5 h-5 mr-2 text-indigo-600" />
+            <Users className="w-5 h-5 mr-2 text-purple-600" />
             Customer Intelligence
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -448,7 +445,7 @@ export default function AnalyticsPage() {
               label="Avg Customer Lifetime"
               value={`${analytics.avgCustomerLifetime} days`}
               icon={Calendar}
-              iconColor="text-indigo-600"
+              iconColor="text-purple-600"
             />
             <MiniStatCard
               label="Customer Growth"
@@ -462,7 +459,7 @@ export default function AnalyticsPage() {
         {/* Business Operations */}
         <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/65 dark:border-slate-700/50 p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-            <ShoppingCart className="w-5 h-5 mr-2 text-green-600" />
+            <ShoppingCart className="w-5 h-5 mr-2 text-purple-600 dark:text-purple-400" />
             Business Operations
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -476,7 +473,7 @@ export default function AnalyticsPage() {
               label="Avg Order Size"
               value={`${analytics.avgOrderValue} items`}
               icon={BarChart3}
-              iconColor="text-indigo-600"
+              iconColor="text-purple-600"
             />
             <MiniStatCard
               label="Order Growth"
@@ -496,7 +493,7 @@ export default function AnalyticsPage() {
         {/* Performance Metrics */}
         <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/65 dark:border-slate-700/50 p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-            <Activity className="w-5 h-5 mr-2 text-orange-600" />
+            <Activity className="w-5 h-5 mr-2 text-purple-600 dark:text-purple-400" />
             Performance & Efficiency
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -504,7 +501,7 @@ export default function AnalyticsPage() {
               label="Avg Response Time"
               value={analytics.avgResponseTime}
               icon={Clock}
-              iconColor="text-indigo-600"
+              iconColor="text-purple-600"
             />
             <MiniStatCard
               label="Avg Resolution Time"
@@ -522,7 +519,7 @@ export default function AnalyticsPage() {
               label="Peak Activity Hour"
               value={analytics.peakHour}
               icon={Activity}
-              iconColor="text-orange-600"
+              iconColor="text-purple-600 dark:text-purple-400"
             />
           </div>
         </div>
@@ -540,21 +537,14 @@ export default function AnalyticsPage() {
                 label="Email"
                 count={analytics.channelBreakdown.email}
                 total={analytics.totalConversations}
-                color="blue"
-              />
-              <ChannelBar
-                icon={Instagram}
-                label="Instagram"
-                count={analytics.channelBreakdown.instagram}
-                total={analytics.totalConversations}
-                color="pink"
+                color="purple"
               />
               <ChannelBar
                 icon={MessageSquare}
-                label="SMS"
-                count={analytics.channelBreakdown.sms}
+                label="Website Chat"
+                count={analytics.channelBreakdown.chat}
                 total={analytics.totalConversations}
-                color="green"
+                color="purpleLight"
               />
             </div>
           </div>
@@ -562,7 +552,7 @@ export default function AnalyticsPage() {
           {/* AI Performance */}
           <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/65 dark:border-slate-700/50 p-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-              <Zap className="w-5 h-5 mr-2 text-orange-600" />
+              <Zap className="w-5 h-5 mr-2 text-purple-600 dark:text-purple-400" />
               AI Performance
             </h2>
             <div className="space-y-6">
@@ -573,7 +563,7 @@ export default function AnalyticsPage() {
                 </div>
                 <div className="w-full bg-transparent border border-gray-300/75 dark:border-slate-700/50 rounded-full h-3">
                   <div
-                    className="h-3 rounded-full bg-gradient-to-r from-orange-500 to-amber-500"
+                    className="h-3 rounded-full bg-gradient-to-r from-purple-500 to-purple-700"
                     style={{ width: `${Math.min(analytics.aiUsageRate, 100)}%` }}
                   />
                 </div>
@@ -600,17 +590,17 @@ export default function AnalyticsPage() {
         {analytics.topProducts.length > 0 && (
           <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/75 p-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-              <Award className="w-5 h-5 mr-2 text-amber-600" />
+              <Award className="w-5 h-5 mr-2 text-purple-600 dark:text-purple-400" />
               Top Products
             </h2>
             <div className="space-y-3">
               {analytics.topProducts.map((product, index) => (
                 <div
                   key={product.product}
-                  className="flex items-center justify-between p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200"
+                  className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-white dark:from-purple-900/10 dark:to-transparent rounded-lg border border-purple-200 dark:border-purple-800"
                 >
                   <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full flex items-center justify-center">
                       <span className="text-sm font-bold text-white">#{index + 1}</span>
                     </div>
                     <div>
@@ -619,9 +609,9 @@ export default function AnalyticsPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="w-24 bg-amber-200 rounded-full h-2">
+                    <div className="w-24 bg-purple-200 dark:bg-purple-900/40 rounded-full h-2">
                       <div
-                        className="h-2 rounded-full bg-gradient-to-r from-amber-500 to-orange-500"
+                        className="h-2 rounded-full bg-gradient-to-r from-purple-500 to-purple-700"
                         style={{
                           width: `${(product.count / analytics.topProducts[0].count) * 100}%`,
                         }}
@@ -660,16 +650,16 @@ function MetricCard({
   color: 'blue' | 'green' | 'purple' | 'orange';
 }) {
   const colors = {
-    blue: 'from-indigo-500 to-indigo-600',
-    green: 'from-green-500 to-green-600',
+    blue: 'from-purple-500 to-purple-600',
+    green: 'from-purple-600 to-purple-700',
     purple: 'from-purple-500 to-purple-600',
-    orange: 'from-orange-500 to-orange-600',
+    orange: 'from-purple-700 to-purple-800',
   };
 
   return (
     <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-lg border border-gray-300/75 p-6 hover:shadow-lg transition-shadow">
       <div className="flex items-center justify-between mb-3">
-        <div className={`p-3 rounded-lg bg-gradient-to-br ${colors[color]} ${color === 'purple' ? 'dark:bg-gradient-to-br dark:from-indigo-600 dark:to-purple-600 dark:border-purple-500/30' : 'dark:bg-transparent'} dark:border dark:border-slate-700`}>
+        <div className={`p-3 rounded-lg bg-gradient-to-br ${colors[color]} ${color === 'purple' ? 'dark:bg-gradient-to-br dark:from-purple-600 dark:to-purple-600 dark:border-purple-500/30' : 'dark:bg-transparent'} dark:border dark:border-slate-700`}>
           <Icon className="w-6 h-6 text-white" />
         </div>
         {trend !== 0 && (
@@ -721,14 +711,13 @@ function ChannelBar({
   label: string;
   count: number;
   total: number;
-  color: 'blue' | 'pink' | 'green';
+  color: 'purple' | 'purpleLight';
 }) {
   const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
 
   const colors = {
-    blue: { bg: 'bg-indigo-500', text: 'text-indigo-600', light: 'bg-blue-100' },
-    pink: { bg: 'bg-pink-500', text: 'text-pink-600', light: 'bg-pink-100' },
-    green: { bg: 'bg-green-500', text: 'text-green-600', light: 'bg-green-100' },
+    purple: { bg: 'bg-purple-600', text: 'text-purple-600', light: 'bg-purple-100' },
+    purpleLight: { bg: 'bg-purple-400', text: 'text-purple-500', light: 'bg-purple-100' },
   };
 
   return (

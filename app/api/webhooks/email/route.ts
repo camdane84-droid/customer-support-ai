@@ -5,6 +5,7 @@ import { canCreateConversation, incrementConversationUsage } from '@/lib/usage/t
 import { generateAutoNotes } from '@/lib/ai/auto-notes';
 import { sendAutoReply } from '@/lib/ai/send-auto-reply';
 import { classifyNewMessage } from '@/lib/ai/classify';
+import { checkInboundAiBudget } from '@/lib/ai/inbound-budget';
 import {
   parseEnvelopeRecipients,
   findParseRecipient,
@@ -306,7 +307,10 @@ export async function POST(request: NextRequest) {
     if (suppressReason) {
       logger.info('Auto-reply suppressed for automated sender', { senderEmail, reason: suppressReason });
     }
+    const businessId = business.id;
     after(async () => {
+      const budget = await checkInboundAiBudget(businessId, savedConversationId);
+      if (!budget.allowed) return;
       await Promise.allSettled([
         generateAutoNotes(savedConversationId),
         ...(suppressReason ? [] : [sendAutoReply(savedConversationId)]),

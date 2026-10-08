@@ -35,49 +35,49 @@ export default function CyclingStat({ analytics }: CyclingStatProps) {
       label: 'First Response Time',
       value: analytics.avgResponseTime || 'N/A',
       subtitle: 'Average time to first reply',
-      color: 'from-indigo-500 to-cyan-500'
+      color: 'from-purple-500 to-purple-700'
     },
     {
       icon: Calendar,
       label: 'Busiest Hour',
       value: analytics.peakHour || 'N/A',
       subtitle: 'When most messages arrive',
-      color: 'from-purple-500 to-pink-500'
+      color: 'from-purple-500 to-purple-700'
     },
     {
       icon: MessageCircle,
       label: 'Messages Per Day',
       value: analytics.messagesPerDay || 0,
       subtitle: 'Daily message volume',
-      color: 'from-orange-500 to-red-500'
+      color: 'from-purple-600 to-purple-800'
     },
     {
       icon: Zap,
       label: 'AI Response Rate',
       value: `${analytics.aiUsageRate || 0}%`,
       subtitle: 'Messages using AI help',
-      color: 'from-amber-500 to-yellow-500'
+      color: 'from-purple-400 to-purple-600'
     },
     {
       icon: Star,
       label: 'Resolution Rate',
       value: `${analytics.resolutionRate || 0}%`,
       subtitle: 'Conversations closed successfully',
-      color: 'from-green-500 to-emerald-500'
+      color: 'from-purple-500 to-purple-700'
     },
     {
       icon: BarChart2,
       label: 'Avg Messages/Convo',
       value: analytics.avgMessagesPerConversation || 0,
       subtitle: 'Interaction depth',
-      color: 'from-indigo-500 to-blue-500'
+      color: 'from-purple-500 to-purple-700'
     },
     {
       icon: Activity,
       label: 'Response Coverage',
       value: `${analytics.businessResponseRate || 0}%`,
       subtitle: 'How often you reply',
-      color: 'from-teal-500 to-cyan-500'
+      color: 'from-purple-500 to-purple-700'
     }
   ];
 
@@ -99,7 +99,7 @@ export default function CyclingStat({ analytics }: CyclingStatProps) {
   const Icon = currentStat.icon;
 
   return (
-    <div className="relative bg-gradient-to-r from-purple-50 to-blue-50 dark:from-indigo-900/40 dark:to-purple-900/40 rounded-lg border-2 border-gray-300 dark:border-indigo-700/50 p-6 overflow-hidden shadow-xl dark:shadow-indigo-900/20">
+    <div className="relative bg-gradient-to-r from-purple-50 to-white dark:from-purple-900/40 dark:to-purple-900/40 rounded-lg border-2 border-gray-300 dark:border-purple-700/50 p-6 overflow-hidden shadow-xl dark:shadow-purple-900/20">
       {/* Animated background */}
       <div
         className={`absolute inset-0 bg-gradient-to-br ${currentStat.color} opacity-10 transition-all duration-1000`}

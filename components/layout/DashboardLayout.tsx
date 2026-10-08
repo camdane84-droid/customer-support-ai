@@ -114,7 +114,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
             onClick={closeMobileMenu}
             className="flex items-center space-x-2 group rounded-lg px-2 py-1.5 -mx-2 transition-colors duration-150 hover:bg-purple-50 dark:hover:bg-white"
           >
-            <div className="w-7 h-7 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-lg flex items-center justify-center shadow-sm group-hover:from-purple-600 group-hover:to-indigo-600 dark:group-hover:bg-purple-600">
+            <div className="w-7 h-7 bg-gradient-to-br from-purple-100 to-purple-100 dark:from-purple-600 dark:to-purple-600 rounded-lg flex items-center justify-center shadow-sm group-hover:from-purple-600 group-hover:to-purple-600 dark:group-hover:bg-purple-600">
               <MessageSquare className="w-4 h-4 text-purple-700 dark:text-white transition-colors duration-200 group-hover:text-white dark:group-hover:text-white" />
             </div>
             <span className="text-base font-semibold text-slate-900 dark:text-white transition-colors duration-200 group-hover:text-purple-600 dark:group-hover:text-purple-600">InboxForge</span>
@@ -160,7 +160,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
         <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 min-w-0">
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 bg-gradient-to-br from-purple-100 to-purple-100 dark:from-purple-600 dark:to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-xs font-medium text-purple-700 dark:text-white">
                   {user?.email?.charAt(0).toUpperCase() || 'U'}
                 </span>
@@ -204,7 +204,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
             href="/dashboard"
             className="flex items-center space-x-2 overflow-hidden group cursor-pointer rounded-lg px-2 py-1.5 -mx-2 transition-colors duration-150 hover:bg-purple-50 dark:hover:bg-white"
           >
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm group-hover:from-purple-600 group-hover:to-indigo-600 dark:group-hover:bg-purple-600">
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-100 to-purple-100 dark:from-purple-600 dark:to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm group-hover:from-purple-600 group-hover:to-purple-600 dark:group-hover:bg-purple-600">
               <MessageSquare className="w-4 h-4 text-purple-700 dark:text-white transition-colors duration-200 group-hover:text-white dark:group-hover:text-white" />
             </div>
             <span
@@ -267,7 +267,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
           <div className="p-2">
             <div className={`flex items-center ${sidebarExpanded ? 'justify-between' : 'justify-center'} px-2.5 py-2`}>
               <div className={`flex items-center space-x-2 min-w-0 ${sidebarExpanded ? 'overflow-hidden' : ''}`}>
-                <div className="w-7 h-7 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-7 h-7 bg-gradient-to-br from-purple-100 to-purple-100 dark:from-purple-600 dark:to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-xs font-medium text-purple-700 dark:text-white">
                     {user?.email?.charAt(0).toUpperCase() || 'U'}
                   </span>
@@ -345,7 +345,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
             href="/dashboard"
             className="flex items-center space-x-2 group rounded-lg px-2 py-1 transition-colors duration-150 hover:bg-purple-50 dark:hover:bg-white"
           >
-            <div className="w-6 h-6 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-indigo-600 dark:to-purple-600 rounded-md flex items-center justify-center shadow-sm group-hover:from-purple-600 group-hover:to-indigo-600 dark:group-hover:bg-purple-600">
+            <div className="w-6 h-6 bg-gradient-to-br from-purple-100 to-purple-100 dark:from-purple-600 dark:to-purple-600 rounded-md flex items-center justify-center shadow-sm group-hover:from-purple-600 group-hover:to-purple-600 dark:group-hover:bg-purple-600">
               <MessageSquare className="w-3.5 h-3.5 text-purple-700 dark:text-white transition-colors duration-200 group-hover:text-white dark:group-hover:text-white" />
             </div>
             <span className="text-base font-semibold text-slate-900 dark:text-white transition-colors duration-200 group-hover:text-purple-600 dark:group-hover:text-purple-600">InboxForge</span>

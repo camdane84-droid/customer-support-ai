@@ -101,7 +101,7 @@ export default function AISuggestion({
       {!suggestion && !loading && (
         <button
           onClick={generateSuggestion}
-          className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all shadow-sm"
+          className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-br from-purple-600 to-purple-600 text-white rounded-lg hover:from-purple-700 hover:to-purple-700 transition-all shadow-sm"
         >
           <Sparkles className="w-4 h-4" />
           <span>Generate AI Response</span>

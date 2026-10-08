@@ -401,7 +401,7 @@ export default function TeamPage() {
   function getRoleIcon(role: Role) {
     switch (role) {
       case 'owner': return <Crown className="w-4 h-4 text-yellow-600" />;
-      case 'admin': return <Shield className="w-4 h-4 text-blue-600" />;
+      case 'admin': return <Shield className="w-4 h-4 text-purple-600" />;
       case 'agent': return <Users className="w-4 h-4 text-green-600" />;
       case 'viewer': return <Eye className="w-4 h-4 text-slate-700 dark:text-slate-400" />;
     }
@@ -478,7 +478,7 @@ export default function TeamPage() {
         <div className="mb-6">
           <button
             onClick={() => setShowInviteModal(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
           >
             <Mail className="w-4 h-4" />
             Invite Team Member
@@ -493,7 +493,7 @@ export default function TeamPage() {
           <button
             onClick={() => fetchTeamData(true)}
             disabled={refreshing}
-            className="p-2 text-gray-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50"
+            className="p-2 text-gray-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50"
             title="Refresh team list"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
@@ -510,7 +510,7 @@ export default function TeamPage() {
             members.map((member) => (
               <div key={member.id} className="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-700/50">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900 dark:to-indigo-900 rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-100 dark:from-purple-900 dark:to-purple-900 rounded-full flex items-center justify-center">
                     <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
                       {member.email.charAt(0).toUpperCase()}
                     </span>
@@ -536,7 +536,7 @@ export default function TeamPage() {
                               <button
                                 type="button"
                                 onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
-                                className="px-3 py-1 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white flex items-center gap-2"
+                                className="px-3 py-1 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white flex items-center gap-2"
                               >
                                 <span className="capitalize">{newRole}</span>
                                 <ChevronDown className={`w-3 h-3 text-gray-400 dark:text-slate-500 transition-transform ${roleDropdownOpen ? 'rotate-180' : ''}`} />
@@ -558,7 +558,7 @@ export default function TeamPage() {
                                       onClick={() => { setNewRole(option.value); setRoleDropdownOpen(false); }}
                                       className={`w-full px-3 py-1.5 text-left text-sm transition-colors ${
                                         newRole === option.value
-                                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                                          ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
                                           : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-slate-600'
                                       }`}
                                     >
@@ -570,7 +570,7 @@ export default function TeamPage() {
                             <button
                               onClick={() => handleChangeRole(member.id, newRole)}
                               disabled={!canChangeRole(currentBusiness.member_role, member.role, newRole)}
-                              className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="px-3 py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               Save
                             </button>
@@ -587,7 +587,7 @@ export default function TeamPage() {
                               setEditingMemberId(member.id);
                               setNewRole(member.role);
                             }}
-                            className="group text-blue-600 hover:text-white p-2 hover:bg-blue-600 rounded-lg transition-all duration-200 hover:scale-110 hover:shadow-md active:scale-95"
+                            className="group text-purple-600 hover:text-white p-2 hover:bg-purple-600 rounded-lg transition-all duration-200 hover:scale-110 hover:shadow-md active:scale-95"
                             title="Change role"
                           >
                             <Edit3 className="w-4 h-4 transition-transform group-hover:scale-110" />
@@ -642,7 +642,7 @@ export default function TeamPage() {
                     {/* View Link Button */}
                     <button
                       onClick={() => setViewingInviteId(invitation.id)}
-                      className="group text-blue-600 hover:text-white p-2 hover:bg-blue-600 rounded-lg transition-all duration-200 hover:scale-110 hover:shadow-md active:scale-95"
+                      className="group text-purple-600 hover:text-white p-2 hover:bg-purple-600 rounded-lg transition-all duration-200 hover:scale-110 hover:shadow-md active:scale-95"
                       title="View invitation link"
                     >
                       <Link2 className="w-4 h-4 transition-transform group-hover:scale-110" />
@@ -764,7 +764,7 @@ export default function TeamPage() {
                           navigator.clipboard.writeText(inviteUrl);
                           setActionSuccess('Invitation link copied to clipboard!');
                         }}
-                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                        className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
                       >
                         <Copy className="w-4 h-4" />
                         Copy
@@ -807,7 +807,7 @@ export default function TeamPage() {
                   <textarea
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white resize-none"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white resize-none"
                     placeholder="colleague@example.com, teammate@example.com"
                     rows={3}
                   />
@@ -820,7 +820,7 @@ export default function TeamPage() {
                   <button
                     type="button"
                     onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white flex items-center justify-between"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white flex items-center justify-between"
                   >
                     <div className="flex items-center gap-2">
                       {getRoleIcon(inviteRole)}
@@ -854,7 +854,7 @@ export default function TeamPage() {
                         onClick={() => { setInviteRole('admin'); setShowRoleDropdown(false); }}
                         className="w-full px-3 py-2 flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-slate-600 text-left text-gray-900 dark:text-white"
                       >
-                        <Shield className="w-4 h-4 text-blue-600" />
+                        <Shield className="w-4 h-4 text-purple-600" />
                         <span>Admin (Manage team)</span>
                       </button>
                       {currentBusiness.member_role === 'owner' && (
@@ -881,7 +881,7 @@ export default function TeamPage() {
                   <button
                     onClick={handleGenerateLink}
                     disabled={inviting}
-                    className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                    className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                   >
                     {inviting ? (
                       <>
@@ -898,7 +898,7 @@ export default function TeamPage() {
                   <button
                     onClick={handleInvite}
                     disabled={inviting || !inviteEmail}
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                    className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                   >
                     {inviting ? (
                       <>
@@ -957,7 +957,7 @@ export default function TeamPage() {
                   setActionSuccess('Invitation link copied to clipboard!');
                   setViewingInviteId(null);
                 }}
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
               >
                 <Link2 className="w-4 h-4" />
                 Copy Link

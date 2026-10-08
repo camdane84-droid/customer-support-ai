@@ -539,7 +539,7 @@ export default function MessageThread({ conversation, businessId, onConversation
             {/* Clickable Avatar for Profile */}
             <button
               onClick={() => setShowProfileModal(true)}
-              className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center flex-shrink-0 hover:shadow-lg transition-shadow cursor-pointer"
+              className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-500 flex items-center justify-center flex-shrink-0 hover:shadow-lg transition-shadow cursor-pointer"
               title="View customer profile"
             >
               <span className="text-white font-semibold text-sm">
@@ -553,7 +553,7 @@ export default function MessageThread({ conversation, businessId, onConversation
                 {/* Notes Button with Expand Animation */}
                 <button
                   onClick={() => setShowNotesModal(true)}
-                  className="group relative overflow-hidden p-1.5 text-gray-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all duration-300 ease-in-out hover:pr-20"
+                  className="group relative overflow-hidden p-1.5 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-300 ease-in-out hover:pr-20"
                 >
                   <div className="flex items-center space-x-2">
                     <StickyNote className="w-4 h-4 transition-transform duration-300" />
@@ -568,12 +568,12 @@ export default function MessageThread({ conversation, businessId, onConversation
                   ? conversation.customer_email || 'Website visitor'
                   : conversation.customer_email || conversation.customer_instagram_id || 'No contact info'}
                 {conversation.channel === 'email' && conversation.channel_address && (
-                  <span className="ml-2 text-indigo-500 dark:text-indigo-400">
+                  <span className="ml-2 text-purple-500 dark:text-purple-400">
                     via {conversation.channel_address}
                   </span>
                 )}
                 {conversation.channel === 'chat' && (
-                  <span className="ml-2 text-violet-500 dark:text-violet-400">
+                  <span className="ml-2 text-purple-500 dark:text-purple-400">
                     via website chat
                   </span>
                 )}
@@ -594,7 +594,7 @@ export default function MessageThread({ conversation, businessId, onConversation
                 {/* Archive Button with Expand Animation */}
                 <button
                   onClick={() => setShowArchiveModal(true)}
-                  className="group relative overflow-hidden p-2 text-gray-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg transition-all duration-300 ease-in-out hover:pr-20"
+                  className="group relative overflow-hidden p-2 text-gray-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-slate-700 rounded-lg transition-all duration-300 ease-in-out hover:pr-20"
                 >
                   <div className="flex items-center space-x-2">
                     <Archive className="w-5 h-5 transition-transform duration-300" />
@@ -622,7 +622,7 @@ export default function MessageThread({ conversation, businessId, onConversation
               <button
                 onClick={handleReturnToInbox}
                 disabled={returning}
-                className="group relative overflow-hidden p-2 text-gray-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg transition-all duration-300 ease-in-out hover:pr-32"
+                className="group relative overflow-hidden p-2 text-gray-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-slate-700 rounded-lg transition-all duration-300 ease-in-out hover:pr-32"
               >
                 <div className="flex items-center space-x-2">
                   <RotateCcw className="w-5 h-5 transition-transform duration-300" />
@@ -692,7 +692,7 @@ export default function MessageThread({ conversation, businessId, onConversation
                       max-w-xs lg:max-w-md px-4 py-3 rounded-lg shadow-sm
                       ${isCustomer
                         ? 'bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-900 dark:text-white'
-                        : 'bg-indigo-500 text-white'
+                        : 'bg-purple-500 text-white'
                       }
                       ${shouldAnimate ? 'animate-message-in' : ''}
                     `}
@@ -701,7 +701,7 @@ export default function MessageThread({ conversation, businessId, onConversation
                       {senderDisplayName}
                     </p>
                     <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
-                    <div className={`flex items-center justify-between mt-2 ${isCustomer ? 'text-gray-500' : 'text-blue-100'}`}>
+                    <div className={`flex items-center justify-between mt-2 ${isCustomer ? 'text-gray-500' : 'text-purple-100'}`}>
                       <p className="text-xs">
                         {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
                       </p>
@@ -716,7 +716,7 @@ export default function MessageThread({ conversation, businessId, onConversation
                       <button
                         onClick={() => handleRetryMessage(message.id)}
                         disabled={retryingMessageId === message.id}
-                        className="mt-2 text-xs text-blue-200 hover:text-white underline disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                        className="mt-2 text-xs text-purple-200 hover:text-white underline disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
                       >
                         {retryingMessageId === message.id ? (
                           <>
@@ -745,7 +745,7 @@ export default function MessageThread({ conversation, businessId, onConversation
                   <div
                     className={`
                       max-w-xs lg:max-w-md px-4 py-3 rounded-lg shadow-sm
-                      bg-indigo-500 text-white
+                      bg-purple-500 text-white
                       ${shouldAnimate ? 'animate-message-in' : ''}
                     `}
                   >
@@ -753,7 +753,7 @@ export default function MessageThread({ conversation, businessId, onConversation
                       You
                     </p>
                     <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
-                    <div className="flex items-center justify-between mt-2 text-blue-100">
+                    <div className="flex items-center justify-between mt-2 text-purple-100">
                       <p className="text-xs">
                         Just now
                       </p>
@@ -776,7 +776,7 @@ export default function MessageThread({ conversation, businessId, onConversation
                           });
                           setReplyText(message.content);
                         }}
-                        className="mt-2 text-xs text-blue-200 hover:text-white underline flex items-center space-x-1"
+                        className="mt-2 text-xs text-purple-200 hover:text-white underline flex items-center space-x-1"
                       >
                         <span>Retry</span>
                       </button>
@@ -827,13 +827,13 @@ export default function MessageThread({ conversation, businessId, onConversation
               }}
               placeholder={canSendMessages ? "Type your reply... (Press Enter to send, Shift+Enter for new line)" : "You don't have permission to send messages"}
               rows={3}
-              className="flex-1 px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-purple-500 focus:border-transparent resize-none text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-400 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-500 focus:border-transparent resize-none text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-400 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={sending || !canSendMessages}
             />
             <button
               type="submit"
               disabled={!replyText.trim() || sending || !canSendMessages}
-              className="px-6 py-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center space-x-2 h-fit"
+              className="px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center space-x-2 h-fit"
             >
               {sending ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -878,8 +878,8 @@ export default function MessageThread({ conversation, businessId, onConversation
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-slate-700 flex items-center justify-center">
-                <Archive className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+              <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-slate-700 flex items-center justify-center">
+                <Archive className="w-6 h-6 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Archive Conversation</h3>
@@ -902,7 +902,7 @@ export default function MessageThread({ conversation, businessId, onConversation
               <button
                 onClick={handleArchiveConversation}
                 disabled={archiving}
-                className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center justify-center space-x-2"
+                className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 flex items-center justify-center space-x-2"
               >
                 {archiving ? (
                   <>

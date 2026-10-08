@@ -45,16 +45,16 @@ export default function MessageThreadSkeleton() {
 
         {/* Business message */}
         <div className="flex justify-end">
-          <div className="max-w-xs lg:max-w-md px-4 py-3 rounded-lg bg-indigo-400/30 dark:bg-indigo-900/40 w-72">
-            <div className="h-3 bg-indigo-300/50 dark:bg-indigo-700/50 rounded w-12 mb-2" />
+          <div className="max-w-xs lg:max-w-md px-4 py-3 rounded-lg bg-purple-400/30 dark:bg-purple-900/40 w-72">
+            <div className="h-3 bg-purple-300/50 dark:bg-purple-700/50 rounded w-12 mb-2" />
             <div className="space-y-2">
-              <div className="h-3 bg-indigo-300/50 dark:bg-indigo-700/50 rounded w-full" />
-              <div className="h-3 bg-indigo-300/50 dark:bg-indigo-700/50 rounded w-5/6" />
-              <div className="h-3 bg-indigo-300/50 dark:bg-indigo-700/50 rounded w-2/3" />
+              <div className="h-3 bg-purple-300/50 dark:bg-purple-700/50 rounded w-full" />
+              <div className="h-3 bg-purple-300/50 dark:bg-purple-700/50 rounded w-5/6" />
+              <div className="h-3 bg-purple-300/50 dark:bg-purple-700/50 rounded w-2/3" />
             </div>
             <div className="flex items-center justify-between mt-2">
-              <div className="h-2 bg-indigo-300/50 dark:bg-indigo-700/50 rounded w-16" />
-              <div className="h-2 bg-indigo-300/50 dark:bg-indigo-700/50 rounded w-10" />
+              <div className="h-2 bg-purple-300/50 dark:bg-purple-700/50 rounded w-16" />
+              <div className="h-2 bg-purple-300/50 dark:bg-purple-700/50 rounded w-10" />
             </div>
           </div>
         </div>
@@ -72,15 +72,15 @@ export default function MessageThreadSkeleton() {
 
         {/* Business message */}
         <div className="flex justify-end">
-          <div className="max-w-xs lg:max-w-md px-4 py-3 rounded-lg bg-indigo-400/30 dark:bg-indigo-900/40 w-60">
-            <div className="h-3 bg-indigo-300/50 dark:bg-indigo-700/50 rounded w-12 mb-2" />
+          <div className="max-w-xs lg:max-w-md px-4 py-3 rounded-lg bg-purple-400/30 dark:bg-purple-900/40 w-60">
+            <div className="h-3 bg-purple-300/50 dark:bg-purple-700/50 rounded w-12 mb-2" />
             <div className="space-y-2">
-              <div className="h-3 bg-indigo-300/50 dark:bg-indigo-700/50 rounded w-full" />
-              <div className="h-3 bg-indigo-300/50 dark:bg-indigo-700/50 rounded w-4/5" />
+              <div className="h-3 bg-purple-300/50 dark:bg-purple-700/50 rounded w-full" />
+              <div className="h-3 bg-purple-300/50 dark:bg-purple-700/50 rounded w-4/5" />
             </div>
             <div className="flex items-center justify-between mt-2">
-              <div className="h-2 bg-indigo-300/50 dark:bg-indigo-700/50 rounded w-16" />
-              <div className="h-2 bg-indigo-300/50 dark:bg-indigo-700/50 rounded w-10" />
+              <div className="h-2 bg-purple-300/50 dark:bg-purple-700/50 rounded w-16" />
+              <div className="h-2 bg-purple-300/50 dark:bg-purple-700/50 rounded w-10" />
             </div>
           </div>
         </div>

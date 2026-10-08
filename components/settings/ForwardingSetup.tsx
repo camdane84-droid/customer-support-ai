@@ -51,7 +51,7 @@ export default function ForwardingSetup({
         className="w-full flex items-center justify-between text-left"
       >
         <div className="flex items-center space-x-2">
-          <Inbox className="w-4 h-4 text-indigo-500" />
+          <Inbox className="w-4 h-4 text-purple-500" />
           <span className="text-sm font-medium text-gray-900 dark:text-white">
             Email forwarding
           </span>
@@ -85,12 +85,12 @@ export default function ForwardingSetup({
 
           {/* The forwarding address */}
           <div className="flex items-center space-x-2">
-            <code className="flex-1 px-3 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg text-sm text-indigo-600 dark:text-indigo-400 overflow-x-auto whitespace-nowrap">
+            <code className="flex-1 px-3 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg text-sm text-purple-600 dark:text-purple-400 overflow-x-auto whitespace-nowrap">
               {forwardingAddress}
             </code>
             <button
               onClick={handleCopy}
-              className="p-2 border border-gray-200 dark:border-slate-700 rounded-lg text-gray-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-300 transition-colors"
+              className="p-2 border border-gray-200 dark:border-slate-700 rounded-lg text-gray-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 hover:border-purple-300 transition-colors"
               title="Copy forwarding address"
             >
               {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
@@ -138,7 +138,7 @@ export default function ForwardingSetup({
                     onClick={() => setProvider(p)}
                     className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
                       provider === p
-                        ? 'bg-indigo-600 text-white'
+                        ? 'bg-purple-600 text-white'
                         : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600'
                     }`}
                   >

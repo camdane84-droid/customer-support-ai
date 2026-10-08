@@ -17,7 +17,7 @@ export default function MessageStatusBadge({ status, errorMessage }: MessageStat
 
     case 'sent':
       return (
-        <div className="flex items-center space-x-1 text-indigo-500 dark:text-indigo-400">
+        <div className="flex items-center space-x-1 text-purple-500 dark:text-purple-400">
           <Check className="w-3 h-3" />
           <span className="text-xs">Sent</span>
         </div>
